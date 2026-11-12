@@ -357,7 +357,7 @@ body.scanmode{background:#000}
 .scx{position:absolute;left:14px;top:calc(12px + env(safe-area-inset-top));width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:24px;line-height:36px;text-align:center;text-decoration:none;backdrop-filter:blur(10px)}
 .traybtn{position:absolute;right:14px;top:calc(12px + env(safe-area-inset-top));border:0;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;font:600 13px inherit;font-family:inherit;padding:9px 14px;backdrop-filter:blur(10px)}
 .traybtn b{font-weight:800}
-.pill{position:absolute;left:50%;top:calc(16px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(0,0,0,.5);color:#fff;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;backdrop-filter:blur(10px);white-space:nowrap;margin-top:46px}
+.pill{position:absolute;left:50%;top:calc(16px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(0,0,0,.5);color:#fff;font-size:12.5px;font-weight:700;padding:9px 12px;border-radius:999px;backdrop-filter:blur(10px);white-space:nowrap;max-width:44%;overflow:hidden;text-overflow:ellipsis}
 .pill.ok{background:var(--har)}.pill.hide{display:none}
 .camoff{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;color:#fff;padding:24px;background:#000;z-index:2}
 .camoff span{font-size:14px;color:#b9bec8;max-width:260px}.camoff.hide{display:none}
@@ -421,6 +421,37 @@ body.scanmode{background:#000}
 .psearch.hide{display:none}
 .vt{display:inline-block;vertical-align:2px;font-size:9.5px;font-weight:800;letter-spacing:.04em;color:#fff;background:var(--ink);border-radius:4px;padding:1px 5px;margin-left:2px}
 .cand .vt{margin:0}
+
+/* Scanner v3 */
+.tools2{position:absolute;right:14px;top:calc(58px + env(safe-area-inset-top));display:flex;flex-direction:column;gap:8px;z-index:3}
+.tb{display:flex;align-items:center;gap:6px;justify-content:center;min-width:40px;height:40px;padding:0 10px;border:0;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;backdrop-filter:blur(10px);font:700 12px inherit;font-family:inherit}
+.tb svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tb span{display:none}#modebtn span{display:inline}
+.tb.on{background:#fff;color:#000}.tb.on svg{stroke:#000}
+.tb.hide{display:none}
+#sndbtn .x{display:none}#sndbtn.off .x{display:inline}#sndbtn.off .w{display:none}
+.rb{flex-direction:column;gap:0;width:54px;height:54px}.rb span{font-size:9.5px;font-weight:700;color:#fff;margin-top:1px}
+.rb svg{width:20px;height:20px}
+.guide i{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}
+.guide i b{display:none;border:1px dashed rgba(255,255,255,.45);margin:2px;border-radius:6px;transition:background .2s}
+.pagemode .guide i{height:80%;max-width:94%}
+.pagemode .guide i b{display:block;pointer-events:auto;cursor:pointer}
+.guide i b.ok{background:rgba(22,163,74,.38);border:2px solid #16a34a}
+.guide i b.near{background:rgba(255,255,255,.12);border-style:solid}
+.guide i b.bad{background:rgba(215,38,46,.22)}
+.pageadd{position:absolute;left:50%;transform:translateX(-50%);bottom:170px;border:0;border-radius:999px;background:var(--har);color:#fff;font:800 15px inherit;font-family:inherit;padding:12px 22px;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:4}
+.pageadd.hide{display:none}
+.vars em{flex:none;align-self:center;font-style:normal;font-size:10px;font-weight:800;border-radius:999px;padding:4px 8px}
+.schit small em{font-style:normal;font-size:9.5px;font-weight:800;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:1px}
+em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--ink2)}
+.vars{display:flex;gap:4px;margin-top:4px;overflow-x:auto;scrollbar-width:none}.vars::-webkit-scrollbar{display:none}
+.vars button{flex:none;font:700 11px inherit;font-family:inherit;border:0;border-radius:999px;padding:4px 9px;background:var(--bg);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+.vars button.on{background:var(--ink);color:var(--card);box-shadow:none}
+.vars button.alt{font-weight:600;color:var(--mute)}
+.schit .val small{font-size:10px;color:var(--mute);font-weight:600}
+.dc i.nw{left:-4px;right:auto;background:var(--har)}.dc i.ed{top:auto;bottom:16px;background:var(--ink)}
+.dc.hv img{opacity:.75}
+.nwt{color:var(--har)}
 @media (min-width:960px){body.scanmode main{margin-left:var(--sb)}body.scanmode header{display:flex}.cam{height:100vh}.tray{left:auto;right:24px;bottom:24px;width:380px;border-radius:20px}}
 </style>
 </head>
