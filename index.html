@@ -343,6 +343,40 @@ details.more a,.lnote a{color:var(--ink);text-underline-offset:2px}
   .shead h1{font-size:32px}
   .kpis{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
 }
+
+/* Scanner */
+.tabbar a:nth-child(4) svg,.tabbar a[data-v=scan] svg{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tabbar a[data-v=lista] svg{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.tabbar a[data-v=lista] svg circle{fill:currentColor}
+.scan{display:grid;grid-template-columns:1fr;gap:16px}
+.cam{position:relative;background:#0b0c0f;border-radius:18px;overflow:hidden;aspect-ratio:3/4;max-height:72vh}
+.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.guide{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.guide i{display:block;height:78%;aspect-ratio:63/88;border-radius:14px;box-shadow:0 0 0 100vmax rgba(0,0,0,.45);outline:2px solid rgba(255,255,255,.9);outline-offset:0}
+.pill{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:rgba(15,17,21,.75);color:#fff;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;backdrop-filter:blur(8px);white-space:nowrap}
+.pill.ok{background:var(--har)}.pill.hide{display:none}
+.camoff{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;color:#fff;padding:24px;background:#0b0c0f}
+.camoff span{font-size:13px;color:#b9bec8;max-width:260px}
+.camoff.hide{display:none}
+.trb.big{font-size:15px;padding:10px 18px;background:#fff;color:#0f1115;margin-top:8px;cursor:pointer}
+.schit{display:grid;grid-template-columns:96px 1fr;gap:14px;background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px;align-items:start}
+.schit img{width:96px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.schit small{display:block;font-size:12px;color:var(--mute);font-weight:600}
+.schit b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em;margin:2px 0 6px}
+.schit .val{display:inline-block;font-size:16px;font-weight:800;color:var(--acc)}
+.schit.empty{display:block;color:var(--mute);font-size:13px;padding:18px}
+.alts{font-size:12px;color:var(--mute);margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.alts button{font:600 12px inherit;font-family:inherit;border:0;border-radius:999px;padding:4px 10px;background:var(--bg);color:var(--ink);cursor:pointer;box-shadow:inset 0 0 0 1px var(--line)}
+.scbtns{display:flex;gap:8px;margin:10px 0}
+.scbtns .trb{margin:0;cursor:pointer;background:var(--card);font-family:inherit;border:0}
+.tray{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px}
+.trayhd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}.trayhd span{font-size:12.5px;color:var(--mute);font-weight:600}
+.ti{display:grid;grid-template-columns:32px 1fr auto auto 24px;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.ti img{width:32px;border-radius:3px}.ti b{display:block;font-size:13.5px}.ti small{font-size:11.5px;color:var(--mute)}
+.ti .q{font-size:12px;font-weight:700;color:var(--mute)}.ti .r{font-size:13px;font-weight:700}
+.ti button{border:0;background:none;color:var(--mute);font-size:18px;cursor:pointer;padding:0}
+.savebtn{width:100%;margin-top:10px;border:0;border-radius:12px;padding:12px;font:700 14px inherit;font-family:inherit;background:var(--ink);color:var(--card);cursor:pointer}
+.savebtn:disabled{opacity:.35;cursor:default}
+@media (min-width:960px){.scan{grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);align-items:start}.cam{max-height:calc(100vh - 140px)}}
 </style>
 </head>
 <body>
@@ -376,6 +410,7 @@ details.more a,.lnote a{color:var(--ink);text-underline-offset:2px}
   <a href="#samling" data-v="samling"><svg viewBox="0 0 24 24"><path d="M4 5h4v14H4zM10 5h4v14h-4zM16.5 5.5l3.8 1-3.6 13.5-3.8-1z"/></svg><span>Samling</span></a>
   <a href="#pokedex" data-v="pokedex"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="3"/><circle cx="10" cy="8" r="2.4" fill="var(--bg2)"/><rect x="8" y="13" width="8" height="5" rx="1.2" fill="var(--bg2)"/></svg><span>Pokédex</span></a>
   <a href="#base" data-v="set"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg><span>Set</span></a>
+  <a href="#scan" data-v="scan"><svg viewBox="0 0 24 24"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><rect x="9" y="7.5" width="6" height="9" rx="1.2"/></svg><span>Skanna</span></a>
   <a href="#lista" data-v="lista"><svg viewBox="0 0 24 24"><path d="M3 4h2.2l2.3 10.5h10.3L20 7H7"/><circle cx="9" cy="19" r="1.7"/><circle cx="17" cy="19" r="1.7"/></svg><span>Köpa</span></a>
 </nav>
 
@@ -546,7 +581,9 @@ const SETMAP={base1:'base',base2:'jungle',base3:'fossil',base5:'rocket'};
 const SEN={'Base':'Wizards of the Coast · Base','Gym':'Wizards of the Coast · Gym','Neo':'Wizards of the Coast · Neo','Other':'Övrigt','E-Card':'e-Card','EX':'EX','NP':'Nintendo-promos','POP':'POP','Diamond & Pearl':'Diamond & Pearl','Platinum':'Platinum','HeartGold & SoulSilver':'HeartGold & SoulSilver','Black & White':'Black & White','XY':'XY','Sun & Moon':'Sun & Moon','Sword & Shield':'Sword & Shield','Scarlet & Violet':'Scarlet & Violet','Mega Evolution':'Mega Evolution'};
 function ownOf(sid){
   if(SETMAP[sid]){return DATA.cards.filter(c=>c.s===SETMAP[sid]&&has(c)).map(c=>({n:String(c.n),nm:c.nm,q:1,r:c.r}));}
-  return DB.own.filter(o=>o.s===sid);
+  const L=DB.own.filter(o=>o.s===sid).map(o=>Object.assign({},o));
+  try{for(const id in EXTRA){if(id.startsWith(sid+'-')){const n=id.slice(sid.length+1),e=L.find(o=>o.n===n);if(e)e.q+=EXTRA[id];else{const c=(DB.cards[sid]||[]).find(c=>c[0]===n);L.push({s:sid,n,nm:c?c[1]:n,ra:c?c[2]:'',q:EXTRA[id],r:0})}}}}catch(e){}
+  return L;
 }
 function setStat(x){
   const o=ownOf(x.id);const u=new Set(o.map(c=>c.n)).size;
@@ -616,6 +653,8 @@ function openLib(k){
 
 function render(){
   const v=(location.hash||'#pokedex').slice(1);
+  if(v!=='scan')scStop();
+  if(v==='scan'){['hidesw','colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='scan'));const m=document.getElementById('main');m.classList.remove('pm');m.innerHTML=renderScan();scStart();return;}
   if(v==='samling'||v.startsWith('set-')){['hidesw','colsw','infobtn'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');renderLib(v);return;}
   document.getElementById('prog').classList.remove('hide');document.querySelector('.legend').classList.remove('hide');document.getElementById('filters').classList.remove('hide');document.getElementById('pfilters').classList.remove('hide');
   const view=SETS[v]||v==='lista'?v:'pokedex';
@@ -676,5 +715,7 @@ window.addEventListener('resize',()=>document.documentElement.style.setProperty(
 
 Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.json())]).then(([d,b])=>{DATA=d;DB=b;render()}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
 </script>
+<script src="scancore.js"></script>
+<script src="scan.js"></script>
 </body>
 </html>
