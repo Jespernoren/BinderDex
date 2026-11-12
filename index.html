@@ -245,6 +245,100 @@ main{padding:10px 10px 20px}
   .lib-wrap,.libgrid{max-width:none}
   #modal .sheet{max-width:440px;margin:0 auto}
 }
+
+/* ===== Binderdex brand: neutralt + en accent. Korten står för färgen. ===== */
+:root{--bg:#F6F6F7;--bg2:#F6F6F7;--card:#FFFFFF;--ink:#0F1115;--ink2:#3A3F4A;--mute:#6B7280;--line:#E8E9EC;--sak:#D4D7DD;
+  --acc:#D7262E;--acc-soft:#FCEBEC;--har:#16A34A;--vag:#2563EB;--fra:#9CA3AF;--warn:#6B7280;
+  --base:var(--mute);--jungle:var(--mute);--fossil:var(--mute);--rocket:var(--mute);
+  --r:14px;--sh:0 1px 2px rgba(15,17,21,.04),0 0 0 1px rgba(15,17,21,.05);--sh2:0 8px 24px rgba(15,17,21,.10),0 0 0 1px rgba(15,17,21,.05)}
+@media (prefers-color-scheme:dark){:root{--bg:#0E0F12;--bg2:#0E0F12;--card:#16181D;--ink:#F3F4F6;--ink2:#C9CDD4;--mute:#8B93A1;--line:#24272E;--sak:#30343C;--acc-soft:#3A1416;--sh:0 0 0 1px rgba(255,255,255,.06);--sh2:0 8px 24px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.08)}}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,sans-serif;font-feature-settings:"tnum" 1,"cv11" 1;letter-spacing:-.01em}
+.chip{font-weight:600;font-size:12.5px;padding:6px 12px;color:var(--ink2)}
+.chip.on{background:var(--ink);color:var(--card)}
+.pdot{display:none}
+.chip[data-p="1"]::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--acc);margin-right:6px;vertical-align:1px}
+/* Rubrik + KPI */
+.shead{display:flex;align-items:center;gap:12px;margin:4px 0 16px}
+.shead img{width:36px;height:36px;object-fit:contain}
+.shead small{display:block;font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+.shead h1{margin:2px 0 0;font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+.kpi{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px 16px}
+.kpi small{display:block;font-size:12px;font-weight:600;color:var(--mute)}
+.kpi b{display:block;font-size:24px;font-weight:800;letter-spacing:-.03em;margin-top:4px;line-height:1.1}
+.kpi b em{font-style:normal;font-size:14px;color:var(--mute);font-weight:700;letter-spacing:0}
+.kpi span{display:block;font-size:12px;color:var(--mute);margin-top:4px}
+.kpi.acc b{color:var(--acc)}
+details.more{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:0 16px;margin-bottom:16px}
+details.more summary{cursor:pointer;font-size:13px;font-weight:700;padding:12px 0;color:var(--ink2);list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::after{content:"＋";float:right;color:var(--mute)}
+details.more[open] summary::after{content:"－"}
+details.more p{font-size:13.5px;line-height:1.55;color:var(--ink2);margin:0 0 12px;max-width:70ch}
+details.more dl{display:grid;grid-template-columns:120px 1fr;gap:8px 16px;font-size:13px;margin:0 0 16px}
+details.more dt{color:var(--mute)}details.more dd{margin:0;font-weight:600}
+details.more a,.lnote a{color:var(--ink);text-underline-offset:2px}
+.flab{font-size:12px;color:var(--mute);align-self:center;margin-right:4px;font-weight:600}
+.lnote{font-size:12.5px;color:var(--mute);margin:0 0 16px}
+/* Progress (Pokédex) */
+.prog2{box-shadow:var(--sh);border-radius:18px}
+.pt{background:var(--bg);transition:background .15s}
+.pt:hover{background:var(--line)}
+.pt b{color:var(--ink2)}
+.pt .bar i,.bar i,.prog .mini i{background:var(--ink)!important}
+.prog2 .hero em,.pt small em{color:var(--vag)}
+.ring{background:conic-gradient(var(--acc) calc(var(--p)*1%),var(--line) 0)}
+/* Rader och kort */
+.row,.gcard,.lib-row{box-shadow:var(--sh);border:0}
+.colhead{color:var(--mute);font-size:11px;letter-spacing:.08em}
+.colhead div{color:var(--mute)!important}
+.lab .oth{color:var(--mute);font-weight:500}
+.tc{transition:transform .15s ease}
+.tc:hover{transform:translateY(-2px)}
+.tc img{box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.tc .pr{background:var(--ink2)!important;color:#fff}
+.tc .pr.p1{background:var(--acc)!important}
+.tc .nr{background:rgba(15,17,21,.75)}
+.gcard{transition:box-shadow .15s,transform .15s}
+.gcard:hover{box-shadow:var(--sh2);transform:translateY(-2px)}
+.gcard .cap small{color:var(--mute)}
+.wv{background:none;color:var(--mute);box-shadow:inset 0 0 0 1px var(--line);font-weight:700;letter-spacing:.04em}
+.lc .q{background:var(--ink)}
+/* Samling */
+.libgrid{display:grid;grid-template-columns:1fr;gap:8px}
+.libgrid .lib-row{margin:0;transition:box-shadow .15s,transform .15s}
+.libgrid .lib-row:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
+.lib-se{letter-spacing:.08em}
+/* Köpa */
+.lst{background:none;border:0;box-shadow:none;margin:0 0 24px;padding:0}
+.lhd{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.lhd>div{flex:1}.lhd b{display:block;font-size:17px;font-weight:800;letter-spacing:-.02em}
+.lhd small{display:block;font-size:12.5px;color:var(--mute);margin-top:2px}
+.lhd .lsum{text-align:right;font-size:12px;color:var(--mute)}.lhd .lsum b{font-size:15px;color:var(--ink)}
+.pt-badge{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--ink);color:var(--card);font-weight:800;font-size:14px;flex:none}
+.pt-badge.p1{background:var(--acc);color:#fff}
+.pt-badge.p4,.pt-badge.p5{background:var(--line);color:var(--ink2)}
+.litems{display:grid;grid-template-columns:1fr;gap:8px}
+.li{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:0;padding:10px 14px;grid-template-columns:48px 1fr auto;gap:14px}
+.li .tc{max-width:48px}
+.lmid b{display:block;font-size:14.5px;font-weight:700}
+.lmid small{display:block;font-size:12px;color:var(--mute);margin:1px 0 6px}
+.tag{display:inline-block;font-size:11px;font-weight:600;color:var(--ink2);background:var(--bg);border-radius:6px;padding:2px 7px}
+.tag.acc{background:var(--acc-soft);color:var(--acc)}
+.li .kr{text-align:right}.li .kr b{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em}
+.li .kr small{display:block;font-size:11.5px;color:var(--mute);font-weight:500}
+.trb{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;color:var(--ink);text-decoration:none;padding:4px 10px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);transition:background .15s}
+.trb:hover{background:var(--bg)}
+.sheet a.tr{background:var(--ink);color:var(--card)}
+.btns button[data-s=m].on{background:var(--ink2)}
+@media (max-width:959px){.kpis{grid-template-columns:repeat(3,1fr);gap:6px}.kpi{padding:10px 12px}.kpi b{font-size:17px}.kpi small,.kpi span{font-size:11px}.shead h1{font-size:24px}.shead{margin-bottom:12px}}
+@media (min-width:960px){
+  header{background:var(--card)}
+  .libgrid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+  .litems{grid-template-columns:1fr 1fr}
+  .shead h1{font-size:32px}
+  .kpis{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+}
 </style>
 </head>
 <body>
@@ -293,7 +387,7 @@ const key=c=>c.s+'-'+c.n;
 const st=c=>OV[key(c)]||c.st;
 const has=c=>['h','e1'].includes(st(c));
 let filter='all',pf=0,colmode='set',hideDone=false;
-const PCOLS=[['P1',c=>pr(c)===1,'#1f9d55'],['P2',c=>pr(c)===2,'#2e8b57'],['P3',c=>pr(c)===3,'#2f6fdf'],['P4',c=>pr(c)===4,'#e07b00'],['P5',c=>pr(c)===5,'#7a7a7a'],['✅ Klar',c=>!pr(c),'var(--har)']];
+const PCOLS=[['P1',c=>pr(c)===1,'var(--acc)'],['P2',c=>pr(c)===2,'var(--mute)'],['P3',c=>pr(c)===3,'var(--mute)'],['P4',c=>pr(c)===4,'var(--mute)'],['P5',c=>pr(c)===5,'var(--mute)'],['Klar',c=>!pr(c),'var(--mute)']];
 const pr=c=>(has(c)||st(c)==='v')?0:P[key(c)];
 const pp=c=>!pf||pr(c)===pf;
 
@@ -339,6 +433,8 @@ function prio(){
     P[k]=c.s==='rocket'?5:e<=15?1:e<=40?2:e<=250?3:4;
   }
 }
+const kr=n=>'~'+Math.round(n).toLocaleString('sv-SE')+' kr';
+function kpis(a){return `<div class="kpis">${a.map(([l,v,s,acc])=>`<div class="kpi${acc?' acc':''}"><small>${l}</small><b>${v}</b>${s?`<span>${s}</span>`:''}</div>`).join('')}</div>`}
 function renderList(){
   const items=DATA.cards.filter(c=>P[key(c)]&&!has(c)&&st(c)!=='v');
   let h='';
@@ -347,14 +443,17 @@ function renderList(){
     const L=items.filter(c=>P[key(c)]===t).sort((a,b)=>(E[key(a)]-E[key(b)])||(ORD.indexOf(a.s)-ORD.indexOf(b.s)));
     if(!L.length)continue;
     const sum=L.reduce((a,c)=>a+c.r,0);
-    h+=`<div class="lst"><h2><span><span class="pr p${t}" style="position:static;padding:2px 5px;margin-right:6px">P${t}</span>${TIERS[t][0]}</span><small>${L.length} kort · ~${sum.toLocaleString('sv-SE')} kr</small></h2><div class="why">${TIERS[t][1]} Max = riktpris + 30 %, minst 10 kr.</div>`;
+    h+=`<section class="lst"><div class="lhd"><span class="pt-badge p${t}">P${t}</span><div><b>${TIERS[t][0]}</b><small>${TIERS[t][1]}</small></div><span class="lsum">${L.length} kort<br><b>${kr(sum)}</b></span></div><div class="litems">`;
     for(const c of L){
       const q=encodeURIComponent(`${c.nm.replace(/ [♂♀]/,'')} ${c.n}/${SETS[c.s].tot}`);
-      h+=`<div class="li">${thumb(c)}<div><b>${c.nm}</b><small><span style="color:${WHY[W[key(c)]][1]};font-weight:700">${WHY[W[key(c)]][0]}</span> · ${SETS[c.s].name} ${c.n}/${SETS[c.s].tot} · <a href="https://www.tradera.com/search?q=${q}" target="_blank" rel="noopener">Tradera</a></small></div><div class="kr">max ${mx(c)} kr<small>riktpris ${c.r}</small></div></div>`;
+      h+=`<div class="li">${thumb(c)}<div class="lmid"><b>${c.nm}</b><small>${SETS[c.s].name.replace('Team ','')} ${c.n}/${SETS[c.s].tot}</small><span class="tag${W[key(c)]===3?' acc':''}">${WHY[W[key(c)]][0]}</span></div><div class="kr"><b>${mx(c)} kr</b><small>max · rikt ${c.r}</small><a class="trb" href="https://www.tradera.com/search?q=${q}" target="_blank" rel="noopener">Tradera ↗</a></div></div>`;
     }
-    h+='</div>';
+    h+='</div></section>';
   }
-  return h;
+  const all=items.filter(c=>!pf||P[key(c)]===pf),p1=items.filter(c=>P[key(c)]===1);
+  return `<div class="shead"><div><small>Inköpslista</small><h1>Köpa</h1></div></div>
+  ${kpis([['Kort att köpa',all.length,pf?`P${pf}`:'alla prio'],['P1 köp direkt',p1.length,kr(p1.reduce((a,c)=>a+c.r,0)),1],['Riktpris totalt',kr(all.reduce((a,c)=>a+c.r,0)),'']])}
+  <div class="lnote">Max = riktpris + 30 %, minst 10 kr. Klicka på ett kort för att ändra status.</div>`+h;
 }
 
 function stats(){
@@ -365,7 +464,7 @@ function stats(){
   const val=DATA.cards.filter(has).reduce((a,c)=>a+c.r,0);
   const bjf=DATA.cards.filter(c=>c.s!=='rocket'),bh=bjf.filter(has).length;
   const tile=s=>{const cs=C(s),hv=cs.filter(has).length,v=cs.filter(c=>st(c)==='v').length,t=SETS[s].tot,p=hv/t;
-    return `<a class="pt" data-go="${s}" style="--c:var(--${s})"><b>${s==='base'?'Base':SETS[s].name.replace('Team ','')}</b><span class="pp">${pc(p)}%</span><span class="bar"><i style="width:${p*100}%"></i></span><small>${hv}/${t}${v?` <em>+${v}</em>`:''}</small></a>`};
+    return `<a class="pt" data-go="${s}"><b>${s==='base'?'Base':SETS[s].name.replace('Team ','')}</b><span class="pp">${pc(p)}%</span><span class="bar"><i style="width:${p*100}%"></i></span><small>${hv}/${t}${v?` <em>+${v}</em>`:''}</small></a>`};
   document.getElementById('prog').innerHTML=`<div class="prog2">
     <div class="hero"><div><small>Gen 1 · arter</small><b>${g1}<span>/151</span></b>${g1v?`<em>+${g1v} på väg</em>`:''}</div>
       <div class="ring" style="--p:${g1/151*100}"><span>${pc(g1/151)}%</span></div></div>
@@ -391,14 +490,14 @@ function renderDex(){
   for(const d of DATA.dex){
     const cs=DATA.cards.filter(c=>c.d===d.d);
     const anyHave=cs.some(has), anyComing=cs.some(c=>st(c)==='v');
-    const dot=anyHave?'var(--har)':anyComing?'var(--vag)':d.o.length?'var(--warn)':'#d23b3b';
+    const dot=anyHave?'var(--har)':anyComing?'var(--vag)':d.o.length?'var(--sak)':'var(--acc)';
     if(filter==='nogen1'&&(anyHave||d.o.length||cs.some(c=>st(c)==='v')))continue;
     if((filter==='miss'||filter==='incoming'||pf)&&!cs.some(pass))continue;
     if(hideDone&&cs.length&&cs.every(c=>has(c)||st(c)==='v')){hidden++;continue;}
     h+=`<div class="row"><div class="lab"><span class="dot" style="background:${dot}"></span><span class="no">#${String(d.d).padStart(3,'0')}</span><span class="nm">${d.nm}</span>${!anyHave&&d.o.length?`<span class="oth">Har i: ${d.o.slice(0,2).join(', ')}</span>`:''}</div>`;
     for(const col of cols){
       const sc=cs.filter(c=>col[1](c)&&(!pf||pass(c))).sort((a,b)=>ORD.indexOf(a.s)-ORD.indexOf(b.s)||a.n-b.n);
-      h+=sc.length?`<div class="cell${colmode==='prio'&&col[0].startsWith('✅')?' done':''}">${sc.map(c=>thumb(c)).join('')}</div>`:'<div class="cell none">–</div>';
+      h+=sc.length?`<div class="cell${colmode==='prio'&&col[0]==='Klar'?' done':''}">${sc.map(c=>thumb(c)).join('')}</div>`:'<div class="cell none">–</div>';
     }
     h+='</div>';
   }
@@ -430,20 +529,10 @@ function renderSet(s){
   const I=SINFO[s],h=all.filter(has).length,v=all.filter(c=>st(c)==='v').length;
   const tot=all.reduce((a,c)=>a+c.r,0),own=all.filter(has).reduce((a,c)=>a+c.r,0),miss=all.filter(c=>!has(c)&&st(c)!=='v').reduce((a,c)=>a+c.r,0);
   const top=[...all].sort((a,b)=>b.r-a.r).slice(0,3);
-  return `<div class="prog" style="margin:0 0 10px">
-    <h3 style="color:var(--${s});font-size:16px">${SETS[s].name}</h3>
-    <div style="font-size:12.5px;line-height:1.45;margin-bottom:8px">${I.txt}</div>
-    <table>
-      <tr><td>Släppt</td><td>${I.rel}</td></tr>
-      <tr><td>Antal kort</td><td>${SETS[s].tot}${s==='rocket'?' + 1 hemligt':''} · ${I.holo} holo</td></tr>
-      <tr><td>Setsymbol</td><td>${I.sym}</td></tr>
-      <tr><td>Du har</td><td>${h} st (${(h/all.length*100).toFixed(0)} %)${v?` · +${v} på väg`:''}</td></tr>
-      <tr><td>Värde hela setet</td><td>~${tot.toLocaleString('sv-SE')} kr</td></tr>
-      <tr><td>Ditt värde / kvar att köpa</td><td>${own.toLocaleString('sv-SE')} kr / ${miss.toLocaleString('sv-SE')} kr</td></tr>
-      <tr><td>Läs mer</td><td><a href="https://pokesymbols.com/tcg/sets/${I.ps}" target="_blank" rel="noopener">PokeSymbols</a> · <a href="https://bulbapedia.bulbagarden.net/wiki/${I.bp}" target="_blank" rel="noopener">Bulbapedia</a></td></tr>
-      <tr><td>Dyrast</td><td>${top.map(c=>`${c.nm} ${c.r.toLocaleString('sv-SE')} kr`).join(' · ')}</td></tr>
-    </table></div>
-    <div class="filters" id="sorts" style="margin-bottom:10px"><span style="font-size:12px;color:var(--mute);align-self:center;margin-right:2px">Sortera:</span>${SORTS.map(([k,l])=>`<span class="chip${sortBy===k?' on':''}" data-sort="${k}">${l}</span>`).join('')}</div>
+  return `<div class="shead"><div><small>${I.yr} · ${SETS[s].tot}${s==='rocket'?'+1':''} kort · ${I.holo} holo</small><h1>${SETS[s].name}</h1></div></div>
+    ${kpis([['Du har',`${h}<em>/${all.length}</em>`,`${Math.round(h/all.length*100)} %${v?` · +${v} på väg`:''}`,1],['Ditt värde',kr(own),''],['Kvar att köpa',kr(miss),`${all.length-h-v} kort`],['Hela setet',kr(tot),'']])}
+    <details class="more"><summary>Mer om setet</summary><p>${I.txt}</p><dl><dt>Släppt</dt><dd>${I.rel}</dd><dt>Setsymbol</dt><dd>${I.sym}</dd><dt>Dyrast</dt><dd>${top.map(c=>`${c.nm} ${c.r.toLocaleString('sv-SE')} kr`).join(' · ')}</dd><dt>Läs mer</dt><dd><a href="https://pokesymbols.com/tcg/sets/${I.ps}" target="_blank" rel="noopener">PokeSymbols</a> · <a href="https://bulbapedia.bulbagarden.net/wiki/${I.bp}" target="_blank" rel="noopener">Bulbapedia</a></dd></dl></details>
+    <div class="filters" id="sorts" style="margin-bottom:10px"><span class="flab">Sortera</span>${SORTS.map(([k,l])=>`<span class="chip${sortBy===k?' on':''}" data-sort="${k}">${l}</span>`).join('')}</div>
     <div class="grid">${cs.map(gcard).join('')}</div>`;
 }
 
@@ -467,19 +556,18 @@ function renderLib(v){
   if(v.startsWith('set-')){m.innerHTML=libSet(v.slice(4));if(v.slice(4) in SETMAP)return;loadImgs(v.slice(4));return;}
   const st=DB.sets.map(x=>({x,s:setStat(x)}));
   const tot=st.reduce((a,b)=>a+b.s.q,0),uniq=st.reduce((a,b)=>a+b.s.u,0),ns=st.filter(a=>a.s.q).length,val=st.reduce((a,b)=>a+b.s.val,0);
-  let h=`<div class="prog" style="margin:0 0 6px"><h3>Hela samlingen 📚</h3><table>
-   <tr><td>Kort totalt</td><td>${tot}</td></tr><tr><td>Unika kort</td><td>${uniq}</td></tr>
-   <tr><td>Set med kort</td><td>${ns} av ${DB.sets.length-2}</td></tr><tr><td>Värde (riktpris)</td><td>~${val.toLocaleString('sv-SE')} kr</td></tr></table>
-   <div class="foot">Våg 1: Wizards-eran (Base, Gym, Neo) har fullständiga kortlistor <span class="wv">FULL</span>. Övriga set visar dina kort.</div></div>
+  let h=`<div class="shead"><div><small>Alla serier och set</small><h1>Samlingen</h1></div></div>
+   ${kpis([['Kort totalt',tot.toLocaleString('sv-SE'),`${uniq} unika`],['Set med kort',`${ns}<em>/${DB.sets.length-2}</em>`,''],['Värde',kr(val),'riktpris',1]])}
    <div class="filters" style="margin:8px 0"><span class="chip${libOnlyMine?' on':''}" data-lib="mine">Bara set jag har kort i</span><span class="chip${!libOnlyMine?' on':''}" data-lib="all">Alla ${DB.sets.length-2} set</span></div>`;
   for(const se of DB.series){
     const rows=st.filter(a=>a.x.se===se&&(!libOnlyMine||a.s.q||a.x.w));
     if(!rows.length)continue;
-    h+=`<div class="lib-se"><span>${SEN[se]||se}</span><span>${rows.filter(a=>a.s.q).length} set</span></div>`;
+    h+=`<div class="lib-se"><span>${SEN[se]||se}</span><span>${rows.filter(a=>a.s.q).length} set</span></div><div class="libgrid">`;
     for(const {x,s} of rows){
       const t=x.t||s.u,p=t?Math.min(100,s.u/t*100):0;
       h+=`<a class="lib-row" href="#set-${x.id}">${x.sy?`<img src="${x.sy}" alt="">`:'<span></span>'}<div><b>${x.nm}</b>${x.w?'<span class="wv">FULL</span>':''}<small>${x.d.slice(0,4)} · ${x.t||'–'} kort</small><div class="bar"><i style="width:${p}%"></i></div></div><div class="ct">${s.u}/${x.t||'–'}<small>${s.q>s.u?s.q+' st':''}</small></div></a>`;
     }
+    h+='</div>';
   }
   m.innerHTML=h;
 }
@@ -495,13 +583,10 @@ function libSet(sid){
   list.sort(F[libSort]);
   const so=[['nr','Nummer'],['namn','Namn'],['har','Har först'],['saknas','Saknas först'],['dyr','Dyrast av mina']];
   let h=`<a href="#samling" style="font-size:13px;font-weight:700;color:var(--mute);text-decoration:none">‹ Alla set</a>
-  <div class="prog" style="margin:6px 0 10px"><h3 style="display:flex;gap:8px;align-items:center">${x.sy?`<img src="${x.sy}" style="width:22px;height:22px">`:''}${x.nm}</h3><table>
-   <tr><td>Serie</td><td>${SEN[x.se]||x.se}</td></tr><tr><td>Släppt</td><td>${x.d}</td></tr>
-   <tr><td>Antal kort</td><td>${x.t||'–'}${x.ta>x.t?` (+${x.ta-x.t} hemliga)`:''}</td></tr>
-   <tr><td>Du har</td><td>${s.u} unika${x.t?` (${Math.round(s.u/x.t*100)} %)`:''} · ${s.q} st</td></tr>
-   <tr><td>Värde på dina</td><td>~${s.val.toLocaleString('sv-SE')} kr</td></tr></table>
-   ${full?'':'<div class="foot">Hela kortlistan för det här setet kommer i en senare våg. Här visas dina kort.</div>'}</div>
-  <div class="filters" style="margin-bottom:10px"><span style="font-size:12px;color:var(--mute);align-self:center">Sortera:</span>${so.map(([k,l])=>`<span class="chip${libSort===k?' on':''}" data-lsort="${k}">${l}</span>`).join('')}</div>
+  <div class="shead">${x.sy?`<img src="${x.sy}" alt="">`:''}<div><small>${SEN[x.se]||x.se} · ${x.d.slice(0,4)}</small><h1>${x.nm}</h1></div></div>
+  ${kpis([['Du har',`${s.u}<em>/${x.t||'–'}</em>`,x.t?Math.round(s.u/x.t*100)+' %':'',1],['Antal kort',s.q,''],['Värde',kr(s.val),'']])}
+  ${full?'':'<div class="lnote">Hela kortlistan för det här setet kommer i en senare våg. Här visas dina kort.</div>'}
+  <div class="filters" style="margin-bottom:10px"><span class="flab">Sortera</span>${so.map(([k,l])=>`<span class="chip${libSort===k?' on':''}" data-lsort="${k}">${l}</span>`).join('')}</div>
   <div class="grid">${list.map(c=>{const id=sid+'-'+c.n;return `<div class="gcard"><div class="lc${c.mine.length?'':' no'}" data-lid="${sid}|${c.n}"><div class="ph" data-img="${id}">${c.n}<br>${c.nm}</div>${c.mine.length?`<span class="q">${c.mine.reduce((a,b)=>a+b.q,0)>1?c.mine.reduce((a,b)=>a+b.q,0)+'×':'✓'}</span>`:''}</div><div class="cap">${c.nm}<small>${c.n}${x.t?'/'+x.t:''}${c.ra?' · '+c.ra:''}${c.mine.length?' · '+c.mine.map(m=>m.v).filter(Boolean).join(', '):''}</small></div></div>`}).join('')}</div>`;
   return h;
 }
