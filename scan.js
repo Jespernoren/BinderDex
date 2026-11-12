@@ -30,30 +30,35 @@ async function scImg(id){
 }
 // Bästa träff, med kort i samma bild (nytryck) räknade som samma
 function scBest(f){
-  const m=SCAN.match(f,SC.idx,8),b=m[0];
+  const m=SCAN.match(f,SC.idx,14),b=m[0];
   const same=new Set([b[1],...(SC.grp[b[1]]||[])]);
   const other=m.find(x=>!same.has(x[1]));
   // Nytryck: välj i första hand setet du samlar på (Base, Jungle, Fossil, Rocket)
   const pref=['base1','base2','base3','base5'],grp=[...same];
   const pick=grp.find(i=>pref.includes(i.split('-')[0]))||b[1];
-  return {id:pick,s:b[0],gap:other?other[0]-b[0]:99,alts:grp.filter(i=>i!==pick),back:SCAN.score(f,SC.back)};
+  const top=[],seen=new Set();
+  for(const [sc,id] of m){if(seen.has(id))continue;const g=[id,...(SC.grp[id]||[])];g.forEach(x=>seen.add(x));top.push({id:g.find(i=>pref.includes(i.split('-')[0]))||id,s:sc});if(top.length===3)break}
+  return {id:pick,s:b[0],gap:other?other[0]-b[0]:99,alts:grp.filter(i=>i!==pick),back:SCAN.score(f,SC.back),top};
   return {id:b[1],s:b[0],gap:other?other[0]-b[0]:99,alts:SC.grp[b[1]]||[],back:SCAN.score(f,SC.back)};
 }
 
 function renderScan(){
-  return `<div class="shead"><div><small>Håll kortet i ramen</small><h1>Skanna</h1></div></div>
-  <div class="scan">
+  return `<div class="scan">
     <div class="cam" id="cam"><video id="scv" playsinline muted autoplay></video><div class="guide"><i></i></div>
+      <a class="scx" href="#pokedex" aria-label="Stäng">×</a>
+      <button class="traybtn" id="traybtn"><b id="traycount">0</b> skannade<span id="traysum"></span></button>
       <div class="pill" id="scpill">Startar kameran…</div>
       <div class="camoff hide" id="camoff"><b>Kameran går inte att starta här</b><span>Ta ett foto av kortet i stället. Låt kortet fylla bilden.</span>
         <label class="trb big">📷 Ta foto<input type="file" accept="image/*" capture="environment" id="scfile" hidden></label></div>
+      <div class="scbar">
+        <label class="rb" aria-label="Ta foto"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><input type="file" accept="image/*" capture="environment" id="scfile2" hidden></label>
+        <div id="schit" class="schit empty"><span>Rikta kameran mot ett kort</span></div>
+        <button class="rb" id="scai" aria-label="Fråga Claude"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></button>
+      </div>
     </div>
-    <div class="scside">
-      <div id="schit" class="schit empty"><span>Ingen träff än. Rikta kameran mot ett kort.</span></div>
-      <div class="scbtns"><label class="trb">Foto<input type="file" accept="image/*" capture="environment" id="scfile2" hidden></label><button class="trb" id="scai">Fråga Claude</button></div>
-      <div class="tray"><div class="trayhd"><b>Skannade</b><span id="traysum"></span></div><div id="traylist"></div>
-        <button class="savebtn" id="scsave" disabled>Spara i samlingen</button></div>
-    </div>
+    <div class="tray" id="pick"></div>
+    <div class="tray" id="tray"><div class="trayhd"><b>Skannade</b><button id="trayclose" aria-label="Stäng">×</button></div><div id="traylist"></div>
+      <button class="savebtn" id="scsave" disabled>Spara i samlingen</button></div>
   </div>`;
 }
 function scPill(t,cls){const p=document.getElementById('scpill');if(p){p.textContent=t;p.className='pill'+(cls?' '+cls:'')}}
@@ -63,7 +68,7 @@ async function scStart(){
   bindScanUI();
   const v=document.getElementById('scv');
   try{
-    SC.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
+    SC.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920}},audio:false});
     v.srcObject=SC.stream;await v.play();
     scPill('Håll kortet i ramen');
     SC.timer=setInterval(scTick,260);
@@ -93,28 +98,71 @@ function scTick(){
   if(b.s>30){scPill('Söker…');SC.streak=0;SC.last=null;return}
   if(SC.last===b.id)SC.streak++;else{SC.last=b.id;SC.streak=1}
   const sure=(b.s<16&&b.gap>4)||(b.s<26&&b.gap>3&&SC.streak>=2);
-  if(sure){SC.lock=b.id;SC.streak=0;scFound(b,'kamera')}
-  else scPill('Nästan… håll still');
+  if(sure){SC.lock=b.id;SC.streak=0;SC.unsure=0;scFound(b,'kamera')}
+  else{scPill('Nästan… håll still');SC.unsure=(SC.unsure||0)+1;if(SC.unsure===5){SC.lock=b.id;SC.unsure=0;scUnsure(b.top)}}
 }
 async function scFound(b,src){
   try{navigator.vibrate&&navigator.vibrate(35)}catch(e){}
   scPill('Hittade!','ok');
-  const it=scInfo(b.id);it.alts=b.alts;it.q=1;it.img=await scImg(b.id);
+  const it=scInfo(b.id);it.alts=b.alts;it.q=1;it.top=b.top||[];it.img=await scImg(b.id);
   const prev=SC.tray.find(t=>t.id===it.id);if(prev)prev.q++;else SC.tray.unshift(it);
   scShowHit(prev||it);scTray();
 }
 async function scShowHit(it){
   const el=document.getElementById('schit');if(!el)return;
-  const alts=await Promise.all((it.alts||[]).map(async a=>scInfo(a)));
+  const alts=(it.alts||[]).map(a=>scInfo(a));
   el.className='schit';
-  el.innerHTML=`${it.img?`<img src="${it.img}" alt="">`:''}<div><small>${it.set} · ${it.n}${it.tot?'/'+it.tot:''}</small><b>${it.nm||'Okänt namn'}</b>
-   <span class="val">${it.r!=null?`~${it.r.toLocaleString('sv-SE')} kr`:'Pris saknas'}</span>
-   ${alts.length?`<div class="alts">Samma bild finns i: ${alts.map(a=>`<button data-swap="${it.id}|${a.id}">${a.set}</button>`).join('')}</div>`:''}</div>`;
+  el.innerHTML=`${it.img?`<img src="${it.img}" alt="">`:''}<div class="hm"><small>${it.set} · ${it.n}${it.tot?'/'+it.tot:''}</small><b>${it.nm||'Okänt namn'}</b>
+   ${alts.length?`<div class="alts">${alts.map(a=>`<button data-swap="${it.id}|${a.id}">${a.set.replace('Legendary Collection','Legendary C.')}</button>`).join('')}</div>`:''}</div>
+   <span class="val">${it.r!=null?`${it.r.toLocaleString('sv-SE')} kr`:'–'}<button class="wrong" data-wrong="${it.id}">Fel kort?</button></span>`;
+}
+// Osäker: visa tre bästa direkt i raden
+async function scUnsure(top){
+  const el=document.getElementById('schit');if(!el)return;
+  scPill('Osäker – välj rätt kort');
+  const L=await Promise.all(top.map(async t=>Object.assign(scInfo(t.id),{img:await scImg(t.id)})));
+  el.className='schit pick3';
+  el.innerHTML=L.map(c=>`<button data-choose="${c.id}">${c.img?`<img src="${c.img}" alt="">`:''}<span>${c.nm}</span><small>${c.set.replace('Legendary Collection','Legendary C.')} ${c.n}</small></button>`).join('')+`<button data-wrong="" class="more">Sök<br>annat</button>`;
+}
+// Fel kort: välj bland toppen, sök eller hoppa över
+async function scPick(fromId){
+  const it=SC.tray.find(t=>t.id===fromId);
+  const top=(it&&it.top||[]).filter(t=>t.id!==fromId);
+  const L=await Promise.all(top.map(async t=>Object.assign(scInfo(t.id),{img:await scImg(t.id)})));
+  const p=document.getElementById('pick');
+  p.dataset.from=fromId||'';
+  p.innerHTML=`<div class="trayhd"><b>Vilket kort är det?</b><button data-pclose aria-label="Stäng">×</button></div>
+   ${L.length?`<div class="pk3">${L.map(c=>`<button data-choose="${c.id}">${c.img?`<img src="${c.img}" alt="">`:''}<span>${c.nm}</span><small>${c.set} ${c.n}</small></button>`).join('')}</div>`:''}
+   <input id="pq" type="search" placeholder="Sök namn, t.ex. Charizard" autocomplete="off">
+   <div id="pres"></div>
+   ${fromId?`<button class="skip" data-skip="${fromId}">Hoppa över kortet</button>`:''}`;
+  p.classList.add('open');
+  const q=document.getElementById('pq');q.oninput=()=>scSearch(q.value);
+}
+function scAll(){
+  if(SC.all)return SC.all;const A=[];const seen=new Set();
+  for(const c of DATA.cards){const id={base:'base1',jungle:'base2',fossil:'base3',rocket:'base5'}[c.s]+'-'+c.n;A.push([id,c.nm]);seen.add(id)}
+  for(const sid in DB.cards)for(const c of DB.cards[sid]){const id=sid+'-'+c[0];if(!seen.has(id)){A.push([id,c[1]]);seen.add(id)}}
+  for(const o of DB.own){const id=o.s+'-'+o.n;if(!seen.has(id)){A.push([id,o.nm]);seen.add(id)}}
+  return SC.all=A;
+}
+function scSearch(q){
+  q=q.trim().toLowerCase();const R=document.getElementById('pres');if(!R)return;
+  if(q.length<2){R.innerHTML='';return}
+  const hits=scAll().filter(([id,nm])=>nm.toLowerCase().includes(q)).slice(0,40).map(([id])=>scInfo(id));
+  R.innerHTML=hits.map(c=>`<button class="pr2" data-choose="${c.id}"><b>${c.nm}</b><small>${c.set} · ${c.n}${c.tot?'/'+c.tot:''}</small><span>${c.r!=null?c.r+' kr':''}</span></button>`).join('')||'<div class="lnote">Inga träffar.</div>';
+}
+async function scChoose(id){
+  const p=document.getElementById('pick'),from=p.classList.contains('open')?p.dataset.from:'';
+  if(from)SC.tray=SC.tray.filter(t=>t.id!==from);
+  const it=scInfo(id);it.q=1;it.alts=SC.grp[id]||[];it.top=[];it.img=await scImg(id);
+  const prev=SC.tray.find(t=>t.id===id);if(prev)prev.q++;else SC.tray.unshift(it);
+  p.classList.remove('open');scShowHit(prev||it);scTray();scPill('Tillagt','ok');
 }
 function scTray(){
   const L=document.getElementById('traylist');if(!L)return;
   const sum=SC.tray.reduce((a,t)=>a+(t.r||0)*t.q,0),n=SC.tray.reduce((a,t)=>a+t.q,0);
-  document.getElementById('traysum').textContent=n?`${n} kort · ~${sum.toLocaleString('sv-SE')} kr`:'';
+  document.getElementById('traycount').textContent=n;document.getElementById('traysum').textContent=n?` · ${sum.toLocaleString('sv-SE')} kr`:'';
   L.innerHTML=SC.tray.map(t=>`<div class="ti">${t.img?`<img src="${t.img}" alt="">`:'<span></span>'}<div><b>${t.nm}</b><small>${t.set} ${t.n}</small></div><span class="q">${t.q>1?t.q+'×':''}</span><span class="r">${t.r!=null?t.r+' kr':'–'}</span><button data-rm="${t.id}" aria-label="Ta bort">×</button></div>`).join('')||'<div class="lnote" style="margin:8px 0">Korten du skannar hamnar här.</div>';
   document.getElementById('scsave').disabled=!SC.tray.length;
 }
@@ -126,7 +174,7 @@ function scSave(){
   }
   try{localStorage.setItem('pk151ov',JSON.stringify(OV));localStorage.setItem('bdx_extra',JSON.stringify(EXTRA))}catch(e){}
   const n=SC.tray.length;SC.tray=[];scTray();
-  const el=document.getElementById('schit');el.className='schit empty';el.innerHTML=`<span>✅ ${n} kort sparade i samlingen.</span>`;
+  const el=document.getElementById('schit');el.className='schit empty';el.innerHTML=`<span>✅ ${n} kort sparade</span>`;document.getElementById('tray').classList.remove('open');
 }
 // Foto: prova flera utsnitt och välj bästa
 async function scPhoto(file){
@@ -156,7 +204,7 @@ async function scAsk(){
   let sample=null;try{sample=window.claude&&await window.claude.use('sample')}catch(e){}
   if(!sample){const el=document.getElementById('schit');el.className='schit empty';el.innerHTML='<span>Claude-tolkning fungerar i den publicerade appen.</span>';return}
   const blob=await scBlob();if(!blob)return;
-  btn.disabled=true;btn.textContent='Claude tittar…';
+  btn.disabled=true;btn.classList.add('busy');scPill('Claude tittar…');
   try{
     const res=await sample.json(`Identify this Pokémon trading card from the photo. Read the card name, the collector number printed at the bottom (like "4/102"), and the expansion set (use the set symbol and number total). Reply only with JSON: {"name":string,"number":string,"total":number|null,"set":string,"confidence":"high"|"medium"|"low"}.`,{images:[blob],modelTier:'default'});
     const r=typeof res==='string'?JSON.parse(res):res;
@@ -171,7 +219,7 @@ async function scAsk(){
       scShowHit(prev||it);scTray();scPill('Claude hittade kortet','ok');
     }else{const el=document.getElementById('schit');el.className='schit empty';el.innerHTML=`<span>Claude läste: ${r.name||'?'} · ${r.number||'?'} · ${r.set||'?'}, men setet finns inte i vårt index än.</span>`}
   }catch(e){const el=document.getElementById('schit');el.className='schit empty';el.innerHTML='<span>Claude kunde inte läsa kortet just nu. Prova igen.</span>'}
-  btn.disabled=false;btn.textContent='Fråga Claude';
+  btn.disabled=false;btn.classList.remove('busy');
 }
 function bindScanUI(){
   const m=document.getElementById('main');
@@ -179,7 +227,13 @@ function bindScanUI(){
     const rm=e.target.closest('[data-rm]');if(rm){SC.tray=SC.tray.filter(t=>t.id!==rm.dataset.rm);scTray();return}
     const sw=e.target.closest('[data-swap]');if(sw){const [from,to]=sw.dataset.swap.split('|');const t=SC.tray.find(t=>t.id===from);if(t){const ni=scInfo(to);Object.assign(t,ni,{alts:[from,...(SC.grp[to]||[]).filter(a=>a!==from&&a!==to)]});scImg(to).then(u=>{t.img=u;scShowHit(t);scTray()})}return}
     if(e.target.id==='scsave'){scSave();return}
-    if(e.target.id==='scai'){scAsk();return}
+    const ch=e.target.closest('[data-choose]');if(ch){scChoose(ch.dataset.choose);return}
+    const wr=e.target.closest('[data-wrong]');if(wr){scPick(wr.dataset.wrong);return}
+    const sk=e.target.closest('[data-skip]');if(sk){SC.tray=SC.tray.filter(t=>t.id!==sk.dataset.skip);scTray();document.getElementById('pick').classList.remove('open');const el=document.getElementById('schit');el.className='schit empty';el.innerHTML='<span>Hoppade över kortet</span>';return}
+    if(e.target.closest('[data-pclose]')){document.getElementById('pick').classList.remove('open');return}
+    if(e.target.closest('#traybtn')){document.getElementById('tray').classList.add('open');return}
+    if(e.target.id==='trayclose'){document.getElementById('tray').classList.remove('open');return}
+    if(e.target.closest('#scai')){scAsk();return}
   };
   ['scfile','scfile2'].forEach(i=>{const el=document.getElementById(i);if(el)el.onchange=()=>scPhoto(el.files[0])});
 }
