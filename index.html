@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Binderdex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f5f2;--card:#fff;--ink:#1d1d1f;--mute:#77756f;--line:#e6e3dc;
+  --har:#1f9d55;--vag:#2f6fdf;--fra:#8a4fd8;--sak:#c9c6bf;--warn:#d98a10;
+  --base:#c0392b;--rocket:#5b3fa0;--jungle:#2e8b57;--fossil:#8a6d3b;
+}
+@media (prefers-color-scheme:dark){:root{--bg:#141414;--card:#1e1e1e;--ink:#f2f2f2;--mute:#9a9893;--line:#2c2c2c;--sak:#3a3a3a}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 12px 8px}
+h1{font-size:17px;margin:0 0 8px;font-weight:800;letter-spacing:-.2px}
+.prog{margin:10px 8px 0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 10px 6px}
+.prog h3{margin:0 0 6px;font-size:13px;font-weight:800;letter-spacing:.2px}
+.prog table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+.prog th{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--mute);font-weight:700;text-align:right;padding:4px 4px;border-bottom:1.5px solid var(--ink)}
+.prog th:first-child,.prog td:first-child{text-align:left}
+.prog td{padding:7px 4px;text-align:right;border-bottom:1px solid var(--line);font-weight:600}
+.prog td:first-child{font-weight:800}
+.prog tr.tot td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:800}
+.prog tr.sep td{border-bottom:0;padding:2px}
+.prog .pc{font-weight:800}
+.prog .mini{display:block;height:4px;background:var(--line);border-radius:3px;margin-top:3px;overflow:hidden}
+.prog .mini i{display:block;height:100%;background:var(--har)}
+.prog .vag{color:var(--vag);font-size:11px;font-weight:700}
+.prog .foot{font-size:10.5px;color:var(--mute);margin-top:6px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 7px}
+.stat b{display:block;font-size:13.5px}
+.stat span{font-size:9.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.bar{height:4px;background:var(--line);border-radius:3px;margin-top:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--har)}
+nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:6px}
+nav::-webkit-scrollbar{display:none}
+nav a,.chip{flex:none;font-size:13px;font-weight:600;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;cursor:pointer}
+nav a.on,.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.chip{font-size:12px;padding:5px 10px}
+.pdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:0}
+.chip.sw{border-style:dashed}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--mute);padding:8px 12px 0}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+main{padding:8px 8px 60px}
+.colhead{display:grid;grid-template-columns:66px repeat(var(--nc,4),1fr);gap:4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mute);padding:4px 2px;position:sticky;top:var(--hh,150px);background:var(--bg);z-index:10}
+.colhead div{text-align:center}.colhead div:first-child{text-align:left;padding-left:4px}.colhead div:nth-child(2){color:var(--base)}.colhead div:nth-child(3){color:var(--jungle)}.colhead div:nth-child(4){color:var(--fossil)}.colhead div:nth-child(5){color:var(--rocket)}
+.row{display:grid;grid-template-columns:66px repeat(var(--nc,4),1fr);gap:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 4px;margin-bottom:6px;align-items:center}
+.lab{padding-left:4px;min-width:0}
+.lab .no{font-size:11px;color:var(--mute);font-weight:600}
+.lab .nm{font-size:12px;font-weight:700;line-height:1.15;word-break:break-word}
+.lab .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.lab .oth{font-size:9.5px;color:var(--warn);margin-top:2px;line-height:1.2}
+.cell{display:flex;gap:3px;justify-content:center;min-height:60px;align-items:center}
+.cell.done .tc{opacity:.4}
+.pm .tc.m img,.pm .tc.f img{filter:none;opacity:1}
+.pm .tc.m,.pm .tc.f{outline:none}
+.pm .tc.m .rkv,.pm .tc.f .rkv{color:var(--ink)}
+.pm .cell.done .tc{opacity:.55}.pm .cell.done .tc img{filter:grayscale(1) brightness(.45)}
+.cell.none{color:var(--line);font-size:18px}
+.tc{position:relative;flex:1 1 0;max-width:58px;cursor:pointer;border-radius:5px}
+.tc img{width:100%;display:block;border-radius:4px;aspect-ratio:200/279;object-fit:cover;background:var(--line)}
+.tc.m img,.tc.f img{filter:grayscale(1);opacity:.3}
+.tc.m,.tc.f{outline:1.5px dashed var(--sak);outline-offset:1px}
+.tc .nr{position:absolute;left:2px;top:2px;background:rgba(0,0,0,.72);color:#fff;font-size:9px;font-weight:700;padding:1px 3px;border-radius:3px}
+.tc .bd{position:absolute;right:2px;bottom:18px;font-size:8.5px;font-weight:800;color:#fff;padding:1px 3px;border-radius:3px}
+.tc.h .bd{background:var(--har)}.tc.e1 .bd{background:var(--har)}.tc.v .bd{background:var(--vag)}.tc.f .bd{background:var(--fra)}
+.tc .rkv{display:block;text-align:center;font-size:9.5px;font-weight:700;color:var(--ink);margin-top:2px;white-space:nowrap}.tc.m .rkv,.tc.f .rkv{color:var(--mute)}.tc .rk{position:absolute;left:0;right:0;bottom:-1px;text-align:center;font-size:9px;font-weight:700;color:var(--ink);text-shadow:0 0 3px var(--card)}
+.tc.m .rk{bottom:30%;font-size:10px}
+.tc .pr{position:absolute;right:2px;top:2px;font-size:8.5px;font-weight:800;color:#fff;padding:1px 3px;border-radius:3px}
+.p1{background:#1f9d55}.p2{background:#2e8b57}.p3{background:#2f6fdf}.p4{background:#e07b00}.p5{background:#7a7a7a}
+.lst{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.lst h2{margin:0;padding:10px 12px;font-size:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.lst h2 small{font-weight:600;color:var(--mute);font-size:11.5px}
+.lst .why{font-size:11.5px;color:var(--mute);padding:6px 12px 2px}
+.li{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:7px 12px;border-top:1px solid var(--line)}
+.li:first-of-type{border-top:0}
+.li .tc{max-width:40px}.li .tc .rkv,.li .tc .pr{display:none}
+.li b{font-size:13.5px}.li small{display:block;color:var(--mute);font-size:11.5px}
+.li .kr{font-weight:800;font-size:13.5px;text-align:right}.li .kr small{font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
+.gcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:5px}
+.gcard .tc{max-width:none}
+.gcard .cap{font-size:11.5px;font-weight:600;margin-top:4px;line-height:1.2}
+.gcard .cap small{display:block;color:var(--mute);font-weight:500}
+h2{font-size:14px;margin:18px 4px 8px}
+.hide{display:none!important}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:flex-end;justify-content:center}
+#modal.open{display:flex}
+.sheet{background:var(--card);width:100%;max-width:480px;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+.sheet img{width:62%;display:block;margin:0 auto 10px;border-radius:10px}
+.sheet h3{margin:0;font-size:18px;text-align:center}
+.sheet .sub{text-align:center;color:var(--mute);font-size:13px;margin:3px 0 12px}
+.btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.btns button{font:600 12px Inter,sans-serif;padding:9px 4px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.btns button.on{color:#fff;border-color:transparent}
+.btns button[data-s=h].on{background:var(--har)}.btns button[data-s=v].on{background:var(--vag)}.btns button[data-s=f].on{background:var(--fra)}.btns button[data-s=m].on{background:#888}
+.sheet a.tr{display:block;text-align:center;font-weight:700;font-size:14px;padding:11px;border-radius:12px;background:#ffd23f;color:#1d1d1f;text-decoration:none}
+.sheet .close{display:block;width:100%;margin-top:8px;padding:10px;border:0;background:none;color:var(--mute);font:600 14px Inter,sans-serif}
+.note{font-size:11.5px;color:var(--mute);text-align:center;margin:6px 0 10px}
+.lib-se{margin:14px 2px 6px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--mute);display:flex;justify-content:space-between}
+.lib-row{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:9px 11px;margin-bottom:6px;color:var(--ink);text-decoration:none}
+.lib-row img{width:26px;height:26px;object-fit:contain}
+.lib-row b{font-size:14px}.lib-row small{display:block;color:var(--mute);font-size:11.5px}
+.lib-row .ct{text-align:right;font-weight:800;font-size:13px;min-width:70px}.lib-row .ct small{font-weight:600}
+.lib-row .bar{margin-top:4px}
+.wv{font-size:9.5px;font-weight:800;background:var(--vag);color:#fff;border-radius:4px;padding:1px 4px;margin-left:6px;vertical-align:1px}
+.lc{position:relative;cursor:pointer}
+.lc .ph{aspect-ratio:200/279;border-radius:5px;background:var(--line);display:flex;align-items:center;justify-content:center;text-align:center;font-size:10.5px;color:var(--mute);padding:4px}
+.lc img{width:100%;border-radius:5px;display:block;aspect-ratio:200/279;object-fit:cover}
+.lc.no img{filter:grayscale(1);opacity:.3}
+.lc .q{position:absolute;right:3px;top:3px;background:var(--har);color:#fff;font-size:9px;font-weight:800;padding:1px 4px;border-radius:3px}
+</style>
+</head>
+<body>
+<header id="hdr">
+  <h1>Binderdex <span style="font-weight:600;color:var(--mute);font-size:13px">din Pokémon-samling</span></h1>
+  <nav id="nav">
+    <a href="#samling" data-v="samling">📚 Samling</a>
+    <a href="#pokedex" data-v="pokedex">Pokédex 151</a>
+    <a href="#base" data-v="base">Base Set</a>
+    <a href="#jungle" data-v="jungle">Jungle</a>
+    <a href="#fossil" data-v="fossil">Fossil</a>
+    <a href="#rocket" data-v="rocket">Team Rocket</a>
+    <a href="#lista" data-v="lista">🛒 Inköpslista</a>
+  </nav>
+  <div class="filters" id="filters">
+    <span class="chip on" data-f="all">Alla</span>
+    <span class="chip" data-f="miss">Saknas</span>
+    <span class="chip" data-f="incoming">På väg / förfrågan</span>
+    <span class="chip" data-f="nogen1">Saknar arten helt</span>
+  </div>
+  <div class="filters" id="pfilters" style="margin-top:6px">
+    <span class="chip on" data-p="0">Alla prio</span>
+    <span class="chip" data-p="1"><b class="pdot p1"></b>P1</span>
+    <span class="chip" data-p="2"><b class="pdot p2"></b>P2</span>
+    <span class="chip" data-p="3"><b class="pdot p3"></b>P3</span>
+    <span class="chip" data-p="4"><b class="pdot p4"></b>P4</span>
+    <span class="chip" data-p="5"><b class="pdot p5"></b>P5</span>
+    <span class="chip sw" id="hidesw" data-h="1">Dölj klara rader</span>
+    <span class="chip sw" id="colsw" data-c="1">Visa kolumner som prio</span>
+  </div>
+</header>
+<div class="legend">
+  <span><i style="background:var(--har)"></i>Har</span>
+  <span><i style="background:var(--vag)"></i>På väg</span>
+  <span><i style="background:var(--fra)"></i>Förfrågan (räknas som saknas)</span>
+  <span><i style="background:var(--sak)"></i>Saknas (gråtonad)</span>
+  <span>P1–P5 = inköpsprio (P1 först) · kr = riktpris</span>
+</div>
+<section id="prog"></section>
+<main id="main"></main>
+
+<div id="modal"><div class="sheet" id="sheet"></div></div>
+
+<script>
+const SETS={base:{code:'base1',name:'Base Set',tot:102},jungle:{code:'base2',name:'Jungle',tot:64},fossil:{code:'base3',name:'Fossil',tot:62},rocket:{code:'base5',name:'Team Rocket',tot:82}};
+const STL={h:'Har',e1:'Har (1st Ed)',v:'På väg',f:'Förfrågan',m:'Saknas'};
+const BD={h:'✓',e1:'1st',v:'VÄG',f:'?'};
+let DATA,OV={};
+try{OV=JSON.parse(localStorage.getItem('pk151ov')||'{}')}catch(e){OV={}}
+const key=c=>c.s+'-'+c.n;
+const st=c=>OV[key(c)]||c.st;
+const has=c=>['h','e1'].includes(st(c));
+let filter='all',pf=0,colmode='set',hideDone=false;
+const PCOLS=[['P1',c=>pr(c)===1,'#1f9d55'],['P2',c=>pr(c)===2,'#2e8b57'],['P3',c=>pr(c)===3,'#2f6fdf'],['P4',c=>pr(c)===4,'#e07b00'],['P5',c=>pr(c)===5,'#7a7a7a'],['✅ Klar',c=>!pr(c),'var(--har)']];
+const pr=c=>(has(c)||st(c)==='v')?0:P[key(c)];
+const pp=c=>!pf||pr(c)===pf;
+
+function thumb(c,big){
+  const s=st(c),cls=(s==='e1'?'e1':s);
+  return `<div class="tc ${cls}" data-k="${key(c)}">
+    <img loading="lazy" src="img/${SETS[c.s].code}-${c.n}.webp" alt="${c.nm} ${c.n}/${SETS[c.s].tot}">
+    <span class="nr">${c.n}</span>${P[key(c)]&&!has(c)&&st(c)!=='v'?`<span class="pr p${P[key(c)]}">P${P[key(c)]}</span>`:''}
+    ${(s!=='m'&&s!=='f')?`<span class="bd">${BD[s]}</span>`:''}
+    <span class="rkv">${c.r} kr</span>
+  </div>`;
+}
+
+
+const ORD=['base','jungle','fossil','rocket'];
+const TIERS={1:['Köp direkt','Billigt och viktigt. Ta dem när de dyker upp.'],2:['Billigt','Bra att ta med i samfrakt.'],3:['Mellanpris','Köp när priset ligger på eller under riktpris. Hit hör Gengar och Venusaur.'],4:['Dyrt','De riktigt dyra Base-, Jungle- och Fossil-korten. Vänta på fynd.'],5:['Team Rocket','Rocket-setet görs sist, när allt annat är klart.']};
+const WHY={3:['Saknas i Gen 1','#d23b3b'],2:['Ersätter platshållare','#e07b00'],1:['Fyller set','#2e8b57'],0.5:['Rocket-set','#5b3fa0']};
+const TOO=100;
+const mx=c=>Math.max(Math.round(c.r*1.3),10);
+let P={},W={},E={};
+function prio(){
+  P={};W={};E={};
+  const owned=c=>has(c)||st(c)==='v';
+  for(const d of DATA.dex){
+    const cs=DATA.cards.filter(c=>c.d===d.d);
+    if(cs.some(c=>c.s!=='rocket'&&owned(c)))continue;
+    const cands=cs.filter(c=>c.s!=='rocket'&&!owned(c));
+    let t=null;
+    for(const s of ['base','jungle','fossil']){
+      const o=cands.filter(c=>c.s===s).sort((a,b)=>a.r-b.r);
+      if(!o.length)continue;
+      const ch=o[0];
+      const cheaperLater=cands.some(c=>ORD.indexOf(c.s)>ORD.indexOf(s)&&c.r<ch.r*0.5);
+      if(ch.r<=TOO||!cheaperLater){t=ch;break}
+    }
+    if(!t)continue;
+    W[key(t)]=(!cs.some(owned)&&!d.o.length)?3:2;
+  }
+  for(const c of DATA.cards){
+    if(owned(c))continue;
+    const k=key(c),w=W[k]||(c.s==='rocket'?0.5:1);W[k]=w;
+    const e=Math.max(c.r,5)/w;E[k]=e;
+    P[k]=c.s==='rocket'?5:e<=15?1:e<=40?2:e<=250?3:4;
+  }
+}
+function renderList(){
+  const items=DATA.cards.filter(c=>P[key(c)]&&!has(c)&&st(c)!=='v');
+  let h='';
+  for(const t of [1,2,3,4,5]){
+    if(pf&&t!==pf)continue;
+    const L=items.filter(c=>P[key(c)]===t).sort((a,b)=>(E[key(a)]-E[key(b)])||(ORD.indexOf(a.s)-ORD.indexOf(b.s)));
+    if(!L.length)continue;
+    const sum=L.reduce((a,c)=>a+c.r,0);
+    h+=`<div class="lst"><h2><span><span class="pr p${t}" style="position:static;padding:2px 5px;margin-right:6px">P${t}</span>${TIERS[t][0]}</span><small>${L.length} kort · ~${sum.toLocaleString('sv-SE')} kr</small></h2><div class="why">${TIERS[t][1]} Max = riktpris + 30 %, minst 10 kr.</div>`;
+    for(const c of L){
+      const q=encodeURIComponent(`${c.nm.replace(/ [♂♀]/,'')} ${c.n}/${SETS[c.s].tot}`);
+      h+=`<div class="li">${thumb(c)}<div><b>${c.nm}</b><small><span style="color:${WHY[W[key(c)]][1]};font-weight:700">${WHY[W[key(c)]][0]}</span> · ${SETS[c.s].name} ${c.n}/${SETS[c.s].tot} · <a href="https://www.tradera.com/search?q=${q}" target="_blank" rel="noopener">Tradera</a></small></div><div class="kr">max ${mx(c)} kr<small>riktpris ${c.r}</small></div></div>`;
+    }
+    h+='</div>';
+  }
+  return h;
+}
+
+function stats(){
+  const row=(lab,cs,tot,cls='')=>{
+    const h=cs.filter(has).length,v=cs.filter(c=>st(c)==='v').length,val=cs.filter(has).reduce((a,c)=>a+c.r,0);
+    const p=h/tot*100;
+    return `<tr class="${cls}"><td>${lab}</td><td>${h}</td><td>${tot}</td><td class="pc">${p.toFixed(2).replace('.',',')}%<span class="mini"><i style="width:${p}%"></i></span></td><td>${v?`<span class="vag">+${v}</span>`:'–'}</td><td>${val.toLocaleString('sv-SE')}</td></tr>`;
+  };
+  const C=s=>DATA.cards.filter(c=>c.s===s);
+  const bjf=DATA.cards.filter(c=>c.s!=='rocket');
+  const g1=DATA.dex.filter(d=>d.o.length||DATA.cards.some(c=>c.d===d.d&&has(c))).length;
+  const g1v=DATA.dex.filter(d=>!d.o.length&&!DATA.cards.some(c=>c.d===d.d&&has(c))&&DATA.cards.some(c=>c.d===d.d&&st(c)==='v')).length;
+  document.getElementById('prog').innerHTML=`<div class="prog"><h3>Vår progress 📈</h3><table>
+    <tr><th></th><th>Har</th><th>I set</th><th>% klart</th><th>På väg</th><th>Värde kr</th></tr>
+    ${row('Base',C('base'),102)}${row('Jungle',C('jungle'),64)}${row('Fossil',C('fossil'),62)}
+    ${row('Totalt',bjf,228,'tot')}
+    <tr class="sep"><td colspan="6"></td></tr>
+    ${row('Team Rocket',C('rocket'),82)}
+    <tr><td>Gen 1 (arter)</td><td>${g1}</td><td>151</td><td class="pc">${(g1/151*100).toFixed(2).replace('.',',')}%<span class="mini"><i style="width:${g1/151*100}%"></i></span></td><td>${g1v?`<span class="vag">+${g1v}</span>`:'–'}</td><td></td></tr>
+  </table><div class="foot">Uppdateras direkt när du ändrar status på ett kort. Värde = riktpris för korten du har.</div></div>`;
+}
+
+function pass(c){
+  if(!pp(c))return false;
+  const s=st(c);
+  if(filter==='miss')return s==='m';
+  if(filter==='incoming')return s==='v'||s==='f';
+  return true;
+}
+
+function renderDex(){
+  const cols=colmode==='prio'?PCOLS:Object.keys(SETS).map(s=>[s==='base'?'Base':SETS[s].name.replace('Team ',''),c=>c.s===s,`var(--${s})`]);
+  document.getElementById('main').style.setProperty('--nc',cols.length);
+  let hidden=0;
+  let h=`<div class="colhead">${['#'].concat(cols.map(c=>c[0])).map((l,i)=>`<div style="${i?`color:${cols[i-1][2]}`:''}">${l}</div>`).join('')}</div>`;
+  for(const d of DATA.dex){
+    const cs=DATA.cards.filter(c=>c.d===d.d);
+    const anyHave=cs.some(has), anyComing=cs.some(c=>st(c)==='v');
+    const dot=anyHave?'var(--har)':anyComing?'var(--vag)':d.o.length?'var(--warn)':'#d23b3b';
+    if(filter==='nogen1'&&(anyHave||d.o.length||cs.some(c=>st(c)==='v')))continue;
+    if((filter==='miss'||filter==='incoming'||pf)&&!cs.some(pass))continue;
+    if(hideDone&&cs.length&&cs.every(c=>has(c)||st(c)==='v')){hidden++;continue;}
+    h+=`<div class="row"><div class="lab"><div class="no">#${String(d.d).padStart(3,'0')}</div><div class="nm"><span class="dot" style="background:${dot}"></span>${d.nm}</div>${!anyHave&&d.o.length?`<div class="oth">Bara: ${d.o.slice(0,2).join(', ')}</div>`:''}</div>`;
+    for(const col of cols){
+      const sc=cs.filter(c=>col[1](c)&&(!pf||pass(c))).sort((a,b)=>ORD.indexOf(a.s)-ORD.indexOf(b.s)||a.n-b.n);
+      h+=sc.length?`<div class="cell${colmode==='prio'&&col[0].startsWith('✅')?' done':''}">${sc.map(c=>thumb(c)).join('')}</div>`:'<div class="cell none">–</div>';
+    }
+    h+='</div>';
+  }
+  if(hidden)h+=`<div class="note">${hidden} klara rader är dolda.</div>`;
+  h+='<h2>Trainers & energi</h2>';
+  for(const s in SETS){
+    const ts=DATA.cards.filter(c=>c.s===s&&c.t&&pass(c));
+    if(!ts.length)continue;
+    h+=`<h2 style="color:var(--${s});font-size:13px">${SETS[s].name}</h2><div class="grid">${ts.map(gcard).join('')}</div>`;
+  }
+  return h;
+}
+function gcard(c){return `<div class="gcard">${thumb(c)}<div class="cap">${c.nm}<small>${c.n}/${SETS[c.s].tot} · ${STL[st(c)]}${pr(c)?` · P${pr(c)}`:''}</small></div></div>`}
+const SINFO={
+ base:{ps:'base',bp:'Base_Set_(TCG)',rel:'9 januari 1999',yr:1999,sym:'Ingen symbol',holo:16,txt:'Det första engelska setet från Wizards of the Coast. Innehåller startarna, Charizard, Blastoise och Venusaur som holo. Finns i 1st Edition, Shadowless och Unlimited.'},
+ jungle:{ps:'jungle',bp:'Jungle_(TCG)',rel:'16 juni 1999',yr:1999,sym:'Blomma',holo:16,txt:'Andra setet. De flesta holo-Pokémon finns även som non-holo, så setet har 64 kort men bara 48 olika Pokémon och trainers.'},
+ fossil:{ps:'fossil',bp:'Fossil_(TCG)',rel:'10 oktober 1999',yr:1999,sym:'Fossil/klo',holo:15,txt:'Tredje setet med fossil-Pokémon och de legendariska fåglarna. Holo-korten finns även som non-holo.'},
+ rocket:{ps:'team-rocket',bp:'Team_Rocket_(TCG)',rel:'24 april 2000',yr:2000,sym:'R',holo:17,txt:'Första setet med Dark Pokémon. 82 kort plus det hemliga kortet Dark Raichu (83/82).'}
+};
+let sortBy='nr';
+const SORTS=[['nr','Nummer'],['dyr','Dyrast'],['bill','Billigast'],['namn','Namn'],['saknas','Saknas först'],['prio','Prio']];
+function renderSet(s){
+  const all=DATA.cards.filter(c=>c.s===s);
+  const cs=all.filter(pass);
+  const f={nr:(a,b)=>a.n-b.n,dyr:(a,b)=>b.r-a.r,bill:(a,b)=>a.r-b.r,namn:(a,b)=>a.nm.localeCompare(b.nm,'sv'),
+    saknas:(a,b)=>(has(a)-has(b))||a.n-b.n,prio:(a,b)=>((pr(a)||9)-(pr(b)||9))||(E[key(a)]||0)-(E[key(b)]||0)||a.n-b.n}[sortBy];
+  cs.sort(f);
+  const I=SINFO[s],h=all.filter(has).length,v=all.filter(c=>st(c)==='v').length;
+  const tot=all.reduce((a,c)=>a+c.r,0),own=all.filter(has).reduce((a,c)=>a+c.r,0),miss=all.filter(c=>!has(c)&&st(c)!=='v').reduce((a,c)=>a+c.r,0);
+  const top=[...all].sort((a,b)=>b.r-a.r).slice(0,3);
+  return `<div class="prog" style="margin:0 0 10px">
+    <h3 style="color:var(--${s});font-size:16px">${SETS[s].name}</h3>
+    <div style="font-size:12.5px;line-height:1.45;margin-bottom:8px">${I.txt}</div>
+    <table>
+      <tr><td>Släppt</td><td>${I.rel}</td></tr>
+      <tr><td>Antal kort</td><td>${SETS[s].tot}${s==='rocket'?' + 1 hemligt':''} · ${I.holo} holo</td></tr>
+      <tr><td>Setsymbol</td><td>${I.sym}</td></tr>
+      <tr><td>Du har</td><td>${h} st (${(h/all.length*100).toFixed(0)} %)${v?` · +${v} på väg`:''}</td></tr>
+      <tr><td>Värde hela setet</td><td>~${tot.toLocaleString('sv-SE')} kr</td></tr>
+      <tr><td>Ditt värde / kvar att köpa</td><td>${own.toLocaleString('sv-SE')} kr / ${miss.toLocaleString('sv-SE')} kr</td></tr>
+      <tr><td>Läs mer</td><td><a href="https://pokesymbols.com/tcg/sets/${I.ps}" target="_blank" rel="noopener">PokeSymbols</a> · <a href="https://bulbapedia.bulbagarden.net/wiki/${I.bp}" target="_blank" rel="noopener">Bulbapedia</a></td></tr>
+      <tr><td>Dyrast</td><td>${top.map(c=>`${c.nm} ${c.r.toLocaleString('sv-SE')} kr`).join(' · ')}</td></tr>
+    </table></div>
+    <div class="filters" id="sorts" style="margin-bottom:10px"><span style="font-size:12px;color:var(--mute);align-self:center;margin-right:2px">Sortera:</span>${SORTS.map(([k,l])=>`<span class="chip${sortBy===k?' on':''}" data-sort="${k}">${l}</span>`).join('')}</div>
+    <div class="grid">${cs.map(gcard).join('')}</div>`;
+}
+
+
+let DB=null,SIMG={},OIMG=null,libSort='nr',libOnlyMine=true;
+const SETMAP={base1:'base',base2:'jungle',base3:'fossil',base5:'rocket'};
+const SEN={'Base':'Wizards of the Coast · Base','Gym':'Wizards of the Coast · Gym','Neo':'Wizards of the Coast · Neo','Other':'Övrigt','E-Card':'e-Card','EX':'EX','NP':'Nintendo-promos','POP':'POP','Diamond & Pearl':'Diamond & Pearl','Platinum':'Platinum','HeartGold & SoulSilver':'HeartGold & SoulSilver','Black & White':'Black & White','XY':'XY','Sun & Moon':'Sun & Moon','Sword & Shield':'Sword & Shield','Scarlet & Violet':'Scarlet & Violet','Mega Evolution':'Mega Evolution'};
+function ownOf(sid){
+  if(SETMAP[sid]){return DATA.cards.filter(c=>c.s===SETMAP[sid]&&has(c)).map(c=>({n:String(c.n),nm:c.nm,q:1,r:c.r}));}
+  return DB.own.filter(o=>o.s===sid);
+}
+function setStat(x){
+  const o=ownOf(x.id);const u=new Set(o.map(c=>c.n)).size;
+  return {u,q:o.reduce((a,c)=>a+c.q,0),val:o.reduce((a,c)=>a+c.r*c.q,0)};
+}
+function renderLib(v){
+  prio();
+  ['prog','filters','pfilters'].forEach(i=>document.getElementById(i).classList.add('hide'));
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='samling'));
+  const m=document.getElementById('main');m.classList.remove('pm');
+  if(v.startsWith('set-')){m.innerHTML=libSet(v.slice(4));if(v.slice(4) in SETMAP)return;loadImgs(v.slice(4));return;}
+  const st=DB.sets.map(x=>({x,s:setStat(x)}));
+  const tot=st.reduce((a,b)=>a+b.s.q,0),uniq=st.reduce((a,b)=>a+b.s.u,0),ns=st.filter(a=>a.s.q).length,val=st.reduce((a,b)=>a+b.s.val,0);
+  let h=`<div class="prog" style="margin:0 0 6px"><h3>Hela samlingen 📚</h3><table>
+   <tr><td>Kort totalt</td><td>${tot}</td></tr><tr><td>Unika kort</td><td>${uniq}</td></tr>
+   <tr><td>Set med kort</td><td>${ns} av ${DB.sets.length-2}</td></tr><tr><td>Värde (riktpris)</td><td>~${val.toLocaleString('sv-SE')} kr</td></tr></table>
+   <div class="foot">Våg 1: Wizards-eran (Base, Gym, Neo) har fullständiga kortlistor <span class="wv">FULL</span>. Övriga set visar dina kort.</div></div>
+   <div class="filters" style="margin:8px 0"><span class="chip${libOnlyMine?' on':''}" data-lib="mine">Bara set jag har kort i</span><span class="chip${!libOnlyMine?' on':''}" data-lib="all">Alla ${DB.sets.length-2} set</span></div>`;
+  for(const se of DB.series){
+    const rows=st.filter(a=>a.x.se===se&&(!libOnlyMine||a.s.q||a.x.w));
+    if(!rows.length)continue;
+    h+=`<div class="lib-se"><span>${SEN[se]||se}</span><span>${rows.filter(a=>a.s.q).length} set</span></div>`;
+    for(const {x,s} of rows){
+      const t=x.t||s.u,p=t?Math.min(100,s.u/t*100):0;
+      h+=`<a class="lib-row" href="#set-${x.id}">${x.sy?`<img src="${x.sy}" alt="">`:'<span></span>'}<div><b>${x.nm}</b>${x.w?'<span class="wv">FULL</span>':''}<small>${x.d.slice(0,4)} · ${x.t||'–'} kort</small><div class="bar"><i style="width:${p}%"></i></div></div><div class="ct">${s.u}/${x.t||'–'}<small>${s.q>s.u?s.q+' st':''}</small></div></a>`;
+    }
+  }
+  m.innerHTML=h;
+}
+function libSet(sid){
+  if(SETMAP[sid]){return renderSet(SETMAP[sid]);}
+  const x=DB.sets.find(a=>a.id===sid);if(!x)return'<p>Okänt set</p>';
+  const o=ownOf(sid),s=setStat(x),full=DB.cards[sid];
+  let list;
+  if(full){list=full.map(([n,nm,ra,dx])=>{const mine=o.filter(c=>c.n===n);return{n,nm,ra,dx,mine}});}
+  else{const g={};o.forEach(c=>{(g[c.n]=g[c.n]||{n:c.n,nm:c.nm,ra:c.ra,mine:[]}).mine.push(c)});list=Object.values(g);}
+  const num=a=>parseInt(a.n)||9999;
+  const F={nr:(a,b)=>num(a)-num(b)||a.n.localeCompare(b.n),namn:(a,b)=>a.nm.localeCompare(b.nm,'sv'),har:(a,b)=>(b.mine.length>0)-(a.mine.length>0)||num(a)-num(b),saknas:(a,b)=>(a.mine.length>0)-(b.mine.length>0)||num(a)-num(b),dyr:(a,b)=>Math.max(0,...b.mine.map(c=>c.r))-Math.max(0,...a.mine.map(c=>c.r))};
+  list.sort(F[libSort]);
+  const so=[['nr','Nummer'],['namn','Namn'],['har','Har först'],['saknas','Saknas först'],['dyr','Dyrast av mina']];
+  let h=`<a href="#samling" style="font-size:13px;font-weight:700;color:var(--mute);text-decoration:none">‹ Alla set</a>
+  <div class="prog" style="margin:6px 0 10px"><h3 style="display:flex;gap:8px;align-items:center">${x.sy?`<img src="${x.sy}" style="width:22px;height:22px">`:''}${x.nm}</h3><table>
+   <tr><td>Serie</td><td>${SEN[x.se]||x.se}</td></tr><tr><td>Släppt</td><td>${x.d}</td></tr>
+   <tr><td>Antal kort</td><td>${x.t||'–'}${x.ta>x.t?` (+${x.ta-x.t} hemliga)`:''}</td></tr>
+   <tr><td>Du har</td><td>${s.u} unika${x.t?` (${Math.round(s.u/x.t*100)} %)`:''} · ${s.q} st</td></tr>
+   <tr><td>Värde på dina</td><td>~${s.val.toLocaleString('sv-SE')} kr</td></tr></table>
+   ${full?'':'<div class="foot">Hela kortlistan för det här setet kommer i en senare våg. Här visas dina kort.</div>'}</div>
+  <div class="filters" style="margin-bottom:10px"><span style="font-size:12px;color:var(--mute);align-self:center">Sortera:</span>${so.map(([k,l])=>`<span class="chip${libSort===k?' on':''}" data-lsort="${k}">${l}</span>`).join('')}</div>
+  <div class="grid">${list.map(c=>{const id=sid+'-'+c.n;return `<div class="gcard"><div class="lc${c.mine.length?'':' no'}" data-lid="${sid}|${c.n}"><div class="ph" data-img="${id}">${c.n}<br>${c.nm}</div>${c.mine.length?`<span class="q">${c.mine.reduce((a,b)=>a+b.q,0)>1?c.mine.reduce((a,b)=>a+b.q,0)+'×':'✓'}</span>`:''}</div><div class="cap">${c.nm}<small>${c.n}${x.t?'/'+x.t:''}${c.ra?' · '+c.ra:''}${c.mine.length?' · '+c.mine.map(m=>m.v).filter(Boolean).join(', '):''}</small></div></div>`}).join('')}</div>`;
+  return h;
+}
+async function loadImgs(sid){
+  let src={};
+  try{
+    if(DB.cards[sid]){SIMG[sid]=SIMG[sid]||await fetch('simg/'+sid+'.json').then(r=>r.json());for(const k in SIMG[sid])src[sid+'-'+k]=SIMG[sid][k];}
+    else{OIMG=OIMG||await fetch('oimg.json').then(r=>r.json());src=OIMG;}
+  }catch(e){}
+  document.querySelectorAll('.ph[data-img]').forEach(p=>{const u=src[p.dataset.img];if(u){const i=document.createElement('img');i.loading='lazy';i.src=u;i.alt='';p.replaceWith(i)}});
+}
+function openLib(k){
+  const [sid,n]=k.split('|');const x=DB.sets.find(a=>a.id===sid);
+  const full=(DB.cards[sid]||[]).find(c=>c[0]===n);const mine=ownOf(sid).filter(c=>c.n===n);
+  const nm=full?full[1]:(mine[0]||{}).nm||'';const ra=full?full[2]:(mine[0]||{}).ra||'';
+  const img=document.querySelector(`[data-lid="${k}"] img`);
+  const q=encodeURIComponent(`${nm} ${n}${x.t?'/'+x.t:''} ${x.nm}`);
+  document.getElementById('sheet').innerHTML=`${img?`<img src="${img.src}" alt="">`:''}<h3>${nm}</h3><div class="sub">${x.nm} · ${n}${x.t?'/'+x.t:''}${ra?' · '+ra:''}${full&&full[3]?' · Pokédex #'+full[3]:''}</div>
+   <div class="note">${mine.length?'Du har: '+mine.map(m=>`${m.q}× ${m.v||''}${m.r?` (~${m.r} kr)`:''}`).join(', '):'Du har inte det här kortet.'}</div>
+   <a class="tr" href="https://www.tradera.com/search?q=${q}" target="_blank" rel="noopener">Sök på Tradera</a><button class="close">Stäng</button>`;
+  document.getElementById('modal').classList.add('open');document.querySelector('#sheet .close').onclick=close_;
+}
+
+function render(){
+  const v=(location.hash||'#pokedex').slice(1);
+  if(v==='samling'||v.startsWith('set-')){renderLib(v);return;}
+  document.getElementById('prog').classList.remove('hide');document.getElementById('filters').classList.remove('hide');document.getElementById('pfilters').classList.remove('hide');
+  const view=SETS[v]||v==='lista'?v:'pokedex';
+  prio();
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===view));
+  document.querySelector('[data-f=nogen1]').classList.toggle('hide',view!=='pokedex');
+  if(view!=='pokedex'&&filter==='nogen1')filter='all';
+  document.querySelectorAll('#filters .chip').forEach(x=>x.classList.toggle('on',x.dataset.f===filter));
+  document.querySelectorAll('#pfilters .chip[data-p]').forEach(x=>x.classList.toggle('on',+x.dataset.p===pf));
+  const hs=document.getElementById('hidesw');hs.classList.toggle('hide',view!=='pokedex');hs.classList.toggle('on',hideDone);
+  const sw=document.getElementById('colsw');sw.classList.toggle('hide',view!=='pokedex');sw.textContent=colmode==='set'?'Visa kolumner som prio':'Visa kolumner som set';sw.classList.toggle('on',colmode==='prio');
+  document.getElementById('main').classList.toggle('pm',(view==='pokedex'&&colmode==='prio')||view==='lista');
+  document.getElementById('main').innerHTML=view==='pokedex'?renderDex():view==='lista'?renderList():renderSet(view);
+  document.getElementById('filters').classList.toggle('hide',view==='lista');
+  stats();
+  document.documentElement.style.setProperty('--hh',document.getElementById('hdr').offsetHeight+'px');
+}
+
+function open_(k){
+  const c=DATA.cards.find(x=>key(x)===k);if(!c)return;
+  const s=st(c),q=encodeURIComponent(`${c.nm.replace(/ [♂♀]/,'')} ${c.n}/${SETS[c.s].tot}`);
+  document.getElementById('sheet').innerHTML=`
+    <img src="img/${SETS[c.s].code}-${c.n}.webp" alt="${c.nm}">
+    <h3>${c.nm}</h3>
+    <div class="sub">${SETS[c.s].name} · ${c.n}/${SETS[c.s].tot}${c.d?` · Pokédex #${c.d}`:''}<br>Riktpris ~${c.r} kr · max ${mx(c)} kr</div>
+    <div class="btns">${['h','v','f','m'].map(x=>`<button data-s="${x}" class="${(s===x||(x==='h'&&s==='e1'))?'on':''}">${STL[x]}</button>`).join('')}</div>
+    <div class="note">${s==='e1'?'Du har en 1st Edition-version. ':''}Ändrar du status sparas det bara i den här webbläsaren.</div>
+    <a class="tr" href="https://www.tradera.com/search?q=${q}" target="_blank" rel="noopener">Sök på Tradera</a>
+    <button class="close">Stäng</button>`;
+  document.getElementById('modal').classList.add('open');
+  document.querySelectorAll('#sheet .btns button').forEach(b=>b.onclick=()=>{
+    const ns=b.dataset.s;
+    if(ns===c.st||(ns==='h'&&c.st==='e1'))delete OV[k];else OV[k]=ns;
+    try{localStorage.setItem('pk151ov',JSON.stringify(OV))}catch(e){}
+    close_();render();
+  });
+  document.querySelector('#sheet .close').onclick=close_;
+}
+function close_(){document.getElementById('modal').classList.remove('open')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')close_()});
+document.getElementById('main').addEventListener('click',e=>{const lb=e.target.closest('[data-lib]');if(lb){libOnlyMine=lb.dataset.lib==='mine';render();return;}const ls=e.target.closest('[data-lsort]');if(ls){libSort=ls.dataset.lsort;render();return;}const lc=e.target.closest('[data-lid]');if(lc){openLib(lc.dataset.lid);return;}const so=e.target.closest('[data-sort]');if(so){sortBy=so.dataset.sort;render();return;}if(e.target.closest('a'))return;const t=e.target.closest('.tc');if(t)open_(t.dataset.k)});
+document.getElementById('pfilters').addEventListener('click',e=>{const t=e.target.closest('.chip');if(!t)return;if(t.dataset.c){colmode=colmode==='set'?'prio':'set';try{localStorage.setItem('pk151col',colmode)}catch(x){}}else if(t.dataset.h){hideDone=!hideDone;try{localStorage.setItem('pk151hide',hideDone?'1':'')}catch(x){}}else pf=+t.dataset.p;render()});
+try{hideDone=!!localStorage.getItem('pk151hide')}catch(x){}
+try{colmode=localStorage.getItem('pk151col')||'set'}catch(x){}
+document.getElementById('filters').addEventListener('click',e=>{const t=e.target.closest('.chip');if(!t)return;filter=t.dataset.f;render()});
+window.addEventListener('hashchange',render);
+window.addEventListener('resize',()=>document.documentElement.style.setProperty('--hh',document.getElementById('hdr').offsetHeight+'px'));
+
+Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.json())]).then(([d,b])=>{DATA=d;DB=b;render()}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
+</script>
+</body>
+</html>
