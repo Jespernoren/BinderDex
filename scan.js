@@ -6,7 +6,7 @@ let EXTRA={};try{EXTRA=JSON.parse(localStorage.getItem('bdx_extra')||'{}')}catch
 async function scLoadIdx(){
   if(SC.idx)return;
   const raw=await fetch('scanidx.json').then(r=>r.json());
-  SC.grp=raw._grp||{};SC.back=SCAN.unpack(raw._back);SC.idx={};
+  SC.grp=raw._grp||{};SC.ra=raw._ra||{};SC.back=SCAN.unpack(raw._back);SC.idx={};
   for(const k in raw)if(k[0]!=='_')SC.idx[k]=SCAN.unpack(raw[k]);
 }
 function scInfo(id){
@@ -16,7 +16,8 @@ function scInfo(id){
   if(CODE2S[sid]){const c=DATA.cards.find(c=>c.s===CODE2S[sid]&&String(c.n)===n);if(c){nm=c.nm;r=c.r}}
   if(!nm&&DB.cards[sid]){const c=DB.cards[sid].find(c=>c[0]===n);if(c)nm=c[1]}
   const o=DB.own.find(o=>o.s===sid&&o.n===n);if(o){nm=nm||o.nm;if(r==null)r=o.r}
-  return {id,sid,n,nm,r,set:x.nm,tot:x.t};
+  const ra=(SC.ra||{})[id]||'';
+  return {id,sid,n,nm,r,set:x.nm,tot:x.t,yr:(x.d||'').slice(0,4),ra,tag:['HOLO','PROMO','SHINING','SECRET','ULTRA','VMAX','HOLO EX','HOLO GX','HOLO V','LV.X','SHINY','PRISM','AMAZING','ILLUSTRATION','SPECIAL ILLU','HYPER','DOUBLE RARE','ACE SPEC'].includes(ra)?ra:''};
 }
 async function scImg(id){
   const sid=id.slice(0,id.indexOf('-')),n=id.slice(id.indexOf('-')+1);
@@ -35,9 +36,11 @@ function scBest(f){
   const other=m.find(x=>!same.has(x[1]));
   // Nytryck: välj i första hand setet du samlar på (Base, Jungle, Fossil, Rocket)
   const pref=['base1','base2','base3','base5'],grp=[...same];
-  const pick=grp.find(i=>pref.includes(i.split('-')[0]))||b[1];
+  const sc=i=>SCAN.score(f,SC.idx[i]);
+  const pg=grp.filter(i=>pref.includes(i.split('-')[0])).sort((a,c)=>sc(a)-sc(c));
+  const pick=pg[0]||b[1];
   const top=[],seen=new Set();
-  for(const [sc,id] of m){if(seen.has(id))continue;const g=[id,...(SC.grp[id]||[])];g.forEach(x=>seen.add(x));top.push({id:g.find(i=>pref.includes(i.split('-')[0]))||id,s:sc});if(top.length===3)break}
+  for(const [sc,id] of m){if(seen.has(id))continue;const g=[id,...(SC.grp[id]||[])];g.forEach(x=>seen.add(x));top.push({id:g.find(i=>pref.includes(i.split('-')[0]))||id,s:sc});if(top.length===8)break}
   return {id:pick,s:b[0],gap:other?other[0]-b[0]:99,alts:grp.filter(i=>i!==pick),back:SCAN.score(f,SC.back),top};
   return {id:b[1],s:b[0],gap:other?other[0]-b[0]:99,alts:SC.grp[b[1]]||[],back:SCAN.score(f,SC.back)};
 }
@@ -50,6 +53,7 @@ function renderScan(){
       <div class="pill" id="scpill">Startar kameran…</div>
       <div class="camoff hide" id="camoff"><b>Kameran går inte att starta här</b><span>Ta ett foto av kortet i stället. Låt kortet fylla bilden.</span>
         <label class="trb big">📷 Ta foto<input type="file" accept="image/*" capture="environment" id="scfile" hidden></label></div>
+      <div class="deck" id="deck"></div>
       <div class="scbar">
         <label class="rb" aria-label="Ta foto"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><input type="file" accept="image/*" capture="environment" id="scfile2" hidden></label>
         <div id="schit" class="schit empty"><span>Rikta kameran mot ett kort</span></div>
@@ -112,32 +116,28 @@ async function scShowHit(it){
   const el=document.getElementById('schit');if(!el)return;
   const alts=(it.alts||[]).map(a=>scInfo(a));
   el.className='schit';
-  el.innerHTML=`${it.img?`<img src="${it.img}" alt="">`:''}<div class="hm"><small>${it.set} · ${it.n}${it.tot?'/'+it.tot:''}</small><b>${it.nm||'Okänt namn'}</b>
-   ${alts.length?`<div class="alts">${alts.map(a=>`<button data-swap="${it.id}|${a.id}">${a.set.replace('Legendary Collection','Legendary C.')}</button>`).join('')}</div>`:''}</div>
+  el.innerHTML=`${it.img?`<img src="${it.img}" alt="">`:''}<div class="hm"><small>${it.set} · ${it.n}${it.tot?'/'+it.tot:''}</small><b>${it.nm||'Okänt namn'}${it.tag?` <span class="vt">${it.tag}</span>`:''}</b>
+   ${alts.length?`<div class="alts">${alts.map(a=>`<button data-swap="${it.id}|${a.id}">${a.set.replace('Legendary Collection','Legendary C.')}${a.sid===it.sid?' '+a.n:''}${a.tag?' · '+a.tag:''}</button>`).join('')}</div>`:''}</div>
    <span class="val">${it.r!=null?`${it.r.toLocaleString('sv-SE')} kr`:'–'}<button class="wrong" data-wrong="${it.id}">Fel kort?</button></span>`;
 }
 // Osäker: visa tre bästa direkt i raden
 async function scUnsure(top){
-  const el=document.getElementById('schit');if(!el)return;
   scPill('Osäker – välj rätt kort');
-  const L=await Promise.all(top.map(async t=>Object.assign(scInfo(t.id),{img:await scImg(t.id)})));
-  el.className='schit pick3';
-  el.innerHTML=L.map(c=>`<button data-choose="${c.id}">${c.img?`<img src="${c.img}" alt="">`:''}<span>${c.nm}</span><small>${c.set.replace('Legendary Collection','Legendary C.')} ${c.n}</small></button>`).join('')+`<button data-wrong="" class="more">Sök<br>annat</button>`;
+  const el=document.getElementById('schit');if(el){el.className='schit empty';el.innerHTML='<span>Vilket kort är det?</span>'}
+  scPick('',top);
 }
 // Fel kort: välj bland toppen, sök eller hoppa över
-async function scPick(fromId){
-  const it=SC.tray.find(t=>t.id===fromId);
-  const top=(it&&it.top||[]).filter(t=>t.id!==fromId);
-  const L=await Promise.all(top.map(async t=>Object.assign(scInfo(t.id),{img:await scImg(t.id)})));
-  const p=document.getElementById('pick');
-  p.dataset.from=fromId||'';
-  p.innerHTML=`<div class="trayhd"><b>Vilket kort är det?</b><button data-pclose aria-label="Stäng">×</button></div>
-   ${L.length?`<div class="pk3">${L.map(c=>`<button data-choose="${c.id}">${c.img?`<img src="${c.img}" alt="">`:''}<span>${c.nm}</span><small>${c.set} ${c.n}</small></button>`).join('')}</div>`:''}
-   <input id="pq" type="search" placeholder="Sök namn, t.ex. Charizard" autocomplete="off">
-   <div id="pres"></div>
-   ${fromId?`<button class="skip" data-skip="${fromId}">Hoppa över kortet</button>`:''}`;
+async function scPick(fromId,topIn){
+  const it=fromId?SC.tray.find(t=>t.id===fromId):null;
+  const top=(topIn||(it&&it.top)||[]).filter(t=>t.id!==fromId);
+  const p=document.getElementById('pick');p.dataset.from=fromId||'';
+  const tiles=top.map(t=>{const c=scInfo(t.id);return `<button class="cand" data-choose="${c.id}"><span class="ci" data-cimg="${c.id}"></span><b>${c.nm||'?'}</b>${c.tag?`<span class="vt">${c.tag}</span>`:''}<small>${c.set} · ${c.yr}<br>${c.n}${c.tot?'/'+c.tot:''}</small>${c.r!=null?`<em>${c.r} kr</em>`:''}</button>`}).join('');
+  p.innerHTML=`<div class="trayhd"><b>${fromId?'Fel kort? Välj rätt':'Vilket kort är det?'}</b><button data-pclose aria-label="Stäng">×</button></div>
+   <div class="carousel">${tiles}<div class="cand last"><b>Inget stämmer?</b><button class="lb" data-psearch>🔍 Sök</button><button class="lb" data-skip="${fromId||''}">Hoppa över</button></div></div>
+   <div class="psearch hide" id="psearch"><input id="pq" type="search" placeholder="Sök namn, t.ex. Charizard" autocomplete="off"><div id="pres"></div></div>`;
   p.classList.add('open');
   const q=document.getElementById('pq');q.oninput=()=>scSearch(q.value);
+  for(const t of top){scImg(t.id).then(u=>{const e=p.querySelector(`[data-cimg="${t.id}"]`);if(e&&u)e.innerHTML=`<img src="${u}" alt="">`})}
 }
 function scAll(){
   if(SC.all)return SC.all;const A=[];const seen=new Set();
@@ -150,16 +150,18 @@ function scSearch(q){
   q=q.trim().toLowerCase();const R=document.getElementById('pres');if(!R)return;
   if(q.length<2){R.innerHTML='';return}
   const hits=scAll().filter(([id,nm])=>nm.toLowerCase().includes(q)).slice(0,40).map(([id])=>scInfo(id));
-  R.innerHTML=hits.map(c=>`<button class="pr2" data-choose="${c.id}"><b>${c.nm}</b><small>${c.set} · ${c.n}${c.tot?'/'+c.tot:''}</small><span>${c.r!=null?c.r+' kr':''}</span></button>`).join('')||'<div class="lnote">Inga träffar.</div>';
+  R.innerHTML=hits.map(c=>`<button class="pr2" data-choose="${c.id}"><b>${c.nm}${c.tag?` <span class="vt">${c.tag}</span>`:''}</b><small>${c.set} · ${c.yr} · ${c.n}${c.tot?'/'+c.tot:''}</small><span>${c.r!=null?c.r+' kr':''}</span></button>`).join('')||'<div class="lnote">Inga träffar.</div>';
 }
 async function scChoose(id){
   const p=document.getElementById('pick'),from=p.classList.contains('open')?p.dataset.from:'';
   if(from)SC.tray=SC.tray.filter(t=>t.id!==from);
   const it=scInfo(id);it.q=1;it.alts=SC.grp[id]||[];it.top=[];it.img=await scImg(id);
   const prev=SC.tray.find(t=>t.id===id);if(prev)prev.q++;else SC.tray.unshift(it);
-  p.classList.remove('open');scShowHit(prev||it);scTray();scPill('Tillagt','ok');
+  p.classList.remove('open');scShowHit(prev||it);scTray();scPill('Tillagt','ok');SC.lock=id;
 }
 function scTray(){
+  const D=document.getElementById('deck');
+  if(D){D.innerHTML=SC.tray.map(t=>`<div class="dc" data-wrong="${t.id}">${t.img?`<img src="${t.img}" alt="">`:`<span class="ph2">${t.nm}</span>`}${t.q>1?`<i>${t.q}×</i>`:''}<small>${t.r!=null?t.r+' kr':'–'}</small></div>`).join('')+(SC.tray.length?`<button class="dc save" id="scsave2">Spara<br>${SC.tray.reduce((a,t)=>a+t.q,0)} st</button>`:'');D.classList.toggle('on',SC.tray.length>0)}
   const L=document.getElementById('traylist');if(!L)return;
   const sum=SC.tray.reduce((a,t)=>a+(t.r||0)*t.q,0),n=SC.tray.reduce((a,t)=>a+t.q,0);
   document.getElementById('traycount').textContent=n;document.getElementById('traysum').textContent=n?` · ${sum.toLocaleString('sv-SE')} kr`:'';
@@ -229,6 +231,8 @@ function bindScanUI(){
     if(e.target.id==='scsave'){scSave();return}
     const ch=e.target.closest('[data-choose]');if(ch){scChoose(ch.dataset.choose);return}
     const wr=e.target.closest('[data-wrong]');if(wr){scPick(wr.dataset.wrong);return}
+    if(e.target.closest('[data-psearch]')){const ps=document.getElementById('psearch');ps.classList.remove('hide');document.getElementById('pq').focus();return}
+    if(e.target.id==='scsave2'||e.target.closest('#scsave2')){scSave();return}
     const sk=e.target.closest('[data-skip]');if(sk){SC.tray=SC.tray.filter(t=>t.id!==sk.dataset.skip);scTray();document.getElementById('pick').classList.remove('open');const el=document.getElementById('schit');el.className='schit empty';el.innerHTML='<span>Hoppade över kortet</span>';return}
     if(e.target.closest('[data-pclose]')){document.getElementById('pick').classList.remove('open');return}
     if(e.target.closest('#traybtn')){document.getElementById('tray').classList.add('open');return}
