@@ -105,7 +105,7 @@ function renderScan(){
       <a class="scx" href="#pokedex" aria-label="Stäng">×</a>
       <button class="traybtn" id="traybtn"><b id="traycount">0</b> skannade<span id="traysum"></span></button>
       <div class="tools2">
-        <button class="tb" id="modebtn" aria-label="Byt läge">${ICON.page}<span>Pärmsida</span></button>
+        <button class="tb" id="modebtn" aria-label="Byt läge">${ICON.page}<span>Flera</span></button>
         <button class="tb hide" id="torchbtn" aria-label="Ficklampa">${ICON.torch}</button>
         <button class="tb${SC.sound?'':' off'}" id="sndbtn" aria-label="Ljud">${ICON.snd}</button>
       </div>
@@ -116,7 +116,7 @@ function renderScan(){
       <div class="deck" id="deck"></div>
       <div class="scbar">
         <label class="rb" aria-label="Ta foto">${ICON.cam}<span>Foto</span><input type="file" accept="image/*" capture="environment" id="scfile2" hidden></label>
-        <div id="schit" class="schit empty"><span>Rikta kameran mot ett kort</span></div>
+        <div id="schit" class="schit empty"><span>Rikta kameran mot ett eller flera kort</span></div>
         <button class="rb" id="scai" aria-label="Fråga Claude">${ICON.ai}<span>Claude</span></button>
       </div>
     </div>
@@ -151,7 +151,7 @@ async function scStart(){
     v.srcObject=SC.stream;await v.play();
     SC.track=SC.stream.getVideoTracks()[0];
     try{const c=SC.track.getCapabilities&&SC.track.getCapabilities();if(c&&c.torch)document.getElementById('torchbtn').classList.remove('hide')}catch(e){}
-    scPill(SC.mode==='page'?'Fyll ramen med pärmsidan':'Håll kortet i ramen');
+    scPill('Rikta mot ett eller flera kort');
     SC.timer=setInterval(()=>SC.mode==='page'?pageTick():scTick(),SC.mode==='page'?550:260);
   }catch(e){
     document.getElementById('camoff').classList.remove('hide');scPill('','hide');
@@ -163,10 +163,10 @@ function setMode(m){
   SC.mode=m;SC.lock=null;SC.streak=0;SC.page=null;
   const cam=document.getElementById('cam');if(!cam)return;
   cam.classList.toggle('pagemode',m==='page');
-  const b=document.getElementById('modebtn');b.innerHTML=m==='page'?ICON.one+'<span>Ett kort</span>':ICON.page+'<span>Pärmsida</span>';
+  const b=document.getElementById('modebtn');b.innerHTML=m==='page'?ICON.one+'<span>Ett kort</span>':ICON.page+'<span>Flera</span>';
   document.getElementById('pageadd').classList.add('hide');
   document.querySelectorAll('#gbox b').forEach(x=>x.className='');
-  if(SC.stream)scPill(m==='page'?'Fyll ramen med pärmsidan':'Håll kortet i ramen');
+  if(SC.stream)scPill(m==='page'?'Fyll ramen med korten':'Rikta mot ett eller flera kort');
   restartLoop();
 }
 function guideRect(v){
@@ -178,10 +178,17 @@ function guideRect(v){
 function scTick(){
   const v=document.getElementById('scv');if(!v||!v.videoWidth)return;
   const r=guideRect(v);if(!r)return;
+  // Ser kameran flera kort? Byt till flerläge av sig själv
+  SC.tick=(SC.tick||0)+1;
+  if(SC.tick%3===0&&!SC.lock&&!document.getElementById('pick').classList.contains('open')){
+    const [x,y,w,h]=r,k=1.12,pr=[x-w*(k-1)/2,y-h*(k-1)/2,w*k,h*k];
+    const n=pageScan(v,pr,v.videoWidth,v.videoHeight).filter(c=>c.ok).length;
+    if(n>=2){SC.auto=true;setMode('page');scPill('Flera kort – flerläge');return}
+  }
   const b=bestAt(v,r,v.videoWidth,v.videoHeight);SC.lastF=b.f;
   if(SC.lock){
     const d=Math.min(...[SC.lock,...(SC.grp[SC.lock]||[])].map(i=>SC.idx[i]?SCAN.score(b.f,SC.idx[i]):99));
-    if(d>34||b.s>34){SC.lock=null;scPill('Håll kortet i ramen')}
+    if(d>34||b.s>34){SC.lock=null;scPill('Rikta mot ett eller flera kort')}
     return;
   }
   if(document.getElementById('pick').classList.contains('open'))return;
@@ -203,6 +210,7 @@ function pageTick(){
   const res=pageScan(v,r,v.videoWidth,v.videoHeight);
   // stabilt två gånger i rad per fack
   const prev=SC.page||[];
+  if(SC.auto){const n=res.filter(x=>x.ok).length;SC.low=n<=1?(SC.low||0)+1:0;if(SC.low>=4){SC.auto=false;SC.low=0;setMode('one');return}}
   res.forEach((x,i)=>{x.stable=x.ok&&prev[i]&&prev[i].ok&&prev[i].b.id===x.b.id});
   SC.page=res;showPage(res);
 }
@@ -211,7 +219,7 @@ function showPage(res){
   res.forEach((x,i)=>{bs[i].className=x.stable||x.photo?'ok':x.ok?'near':x.empty?'':'bad'});
   const n=res.filter(x=>x.stable||x.photo).length,btn=document.getElementById('pageadd');
   if(n){btn.classList.remove('hide');btn.textContent=`Lägg till ${n} kort`}else btn.classList.add('hide');
-  scPill(n?`${n} av 9 hittade`:'Fyll ramen med pärmsidan',n?'ok':'');
+  scPill(n?`${n} kort hittade`:'Fyll ramen med korten',n?'ok':'');
 }
 async function pageAdd(){
   const res=(SC.page||[]).filter(x=>x.stable||x.photo);if(!res.length)return;
@@ -364,7 +372,7 @@ function bindScanUI(){
     if(q('#traybtn')){document.getElementById('tray').classList.add('open');return}
     if(e.target.id==='trayclose'){document.getElementById('tray').classList.remove('open');return}
     if(q('#scai')){scAsk();return}
-    if(q('#modebtn')){setMode(SC.mode==='page'?'one':'page');return}
+    if(q('#modebtn')){SC.auto=false;setMode(SC.mode==='page'?'one':'page');return}
     if(q('#pageadd')){pageAdd();return}
     if(t=q('#gbox b')){const i=[...t.parentNode.children].indexOf(t),c=SC.page&&SC.page[i];if(c){scPick(null,c.b.top,c.b.f)}return}
     if(q('#sndbtn')){SC.sound=!SC.sound;q('#sndbtn').classList.toggle('off',!SC.sound);try{localStorage.setItem('bdx_snd',SC.sound?'1':'0')}catch(x){}if(SC.sound){unlockAudio();shutter()}return}
