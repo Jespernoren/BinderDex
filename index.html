@@ -452,6 +452,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 .dc i.nw{left:-4px;right:auto;background:var(--har)}.dc i.ed{top:auto;bottom:16px;background:var(--ink)}
 .dc.hv img{opacity:.75}
 .nwt{color:var(--har)}
+.schit.saved span{color:var(--ink);font-weight:600;line-height:1.5}
 @media (min-width:960px){body.scanmode main{margin-left:var(--sb)}body.scanmode header{display:flex}.cam{height:100vh}.tray{left:auto;right:24px;bottom:24px;width:380px;border-radius:20px}}
 </style>
 </head>
@@ -550,6 +551,14 @@ function prio(){
 }
 const kr=n=>'~'+Math.round(n).toLocaleString('sv-SE')+' kr';
 function kpis(a){return `<div class="kpis">${a.map(([l,v,s,acc])=>`<div class="kpi${acc?' acc':''}"><small>${l}</small><b>${v}</b>${s?`<span>${s}</span>`:''}</div>`).join('')}</div>`}
+function renderTrade(){
+  let T=[];try{T=JSON.parse(localStorage.getItem('bdx_trade')||'[]')}catch(e){}
+  const sum=T.reduce((a,t)=>a+(t.r||0),0);
+  return `<div class="shead"><div><small>Dubbletter att byta bort</small><h1>Byten</h1></div></div>
+  <div class="filters" style="margin-bottom:12px"><a class="chip" href="#lista">Att köpa</a><a class="chip on" href="#byten">Byteshög</a></div>
+  ${kpis([['Kort i högen',T.length,''],['Bytesvärde',kr(sum),'riktpris',1]])}
+  ${T.length?`<div class="litems">${T.map((t,i)=>`<div class="li"><div class="tc h"><img loading="lazy" data-tid="${t.id}" alt=""></div><div class="lmid"><b>${t.nm}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''} · ${t.cond}</small></div><div class="kr"><b>${t.r!=null?t.r+' kr':'–'}</b><button class="trb" data-trm="${i}">Ta bort</button></div></div>`).join('')}</div>`:'<div class="lnote">Högen är tom. Dubbletter du skannar hamnar här när du sparar.</div>'}`;
+}
 function renderList(){
   const items=DATA.cards.filter(c=>P[key(c)]&&!has(c)&&st(c)!=='v');
   let h='';
@@ -567,6 +576,7 @@ function renderList(){
   }
   const all=items.filter(c=>!pf||P[key(c)]===pf),p1=items.filter(c=>P[key(c)]===1);
   return `<div class="shead"><div><small>Inköpslista</small><h1>Köpa</h1></div></div>
+  <div class="filters" style="margin-bottom:12px"><a class="chip on" href="#lista">Att köpa</a><a class="chip" href="#byten">Byteshög</a></div>
   ${kpis([['Kort att köpa',all.length,pf?`P${pf}`:'alla prio'],['P1 köp direkt',p1.length,kr(p1.reduce((a,c)=>a+c.r,0)),1],['Riktpris totalt',kr(all.reduce((a,c)=>a+c.r,0)),'']])}
   <div class="lnote">Max = riktpris + 30 %, minst 10 kr. Klicka på ett kort för att ändra status.</div>`+h;
 }
@@ -732,6 +742,7 @@ function render(){
   if(v!=='scan')scStop();
   document.body.classList.toggle('scanmode',v==='scan');
   if(v==='scan'){['hidesw','colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='scan'));const m=document.getElementById('main');m.classList.remove('pm');m.innerHTML=renderScan();scStart();return;}
+  if(v==='byten'){['hidesw','colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='lista'));const m=document.getElementById('main');m.classList.remove('pm');m.innerHTML=renderTrade();m.querySelectorAll('[data-tid]').forEach(i=>scImg(i.dataset.tid).then(u=>{if(u)i.src=u}));m.onclick=e=>{const b=e.target.closest('[data-trm]');if(b){let T=JSON.parse(localStorage.getItem('bdx_trade')||'[]');T.splice(+b.dataset.trm,1);localStorage.setItem('bdx_trade',JSON.stringify(T));render()}};return;}
   if(v==='samling'||v.startsWith('set-')){['hidesw','colsw','infobtn'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');renderLib(v);return;}
   document.getElementById('prog').classList.remove('hide');document.querySelector('.legend').classList.remove('hide');document.getElementById('filters').classList.remove('hide');document.getElementById('pfilters').classList.remove('hide');
   const view=SETS[v]||v==='lista'?v:'pokedex';

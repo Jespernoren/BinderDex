@@ -34,7 +34,8 @@ function scInfo(id){
     has:owned(id),
     wotc:/^(base|gym|neo)/.test(sid)};
 }
-const price=t=>t.ed&&t.r1?t.r1:t.r;
+const CF={NM:1,LP:.85,MP:.65,HP:.45};
+const price=t=>{const p=t.ed&&t.r1?t.r1:t.r;return p==null?null:Math.max(1,Math.round(p*(CF[t.cond]||1)))};
 async function scImg(id){
   id=base(id);const sid=id.slice(0,id.indexOf('-')),n=id.slice(id.indexOf('-')+1);
   if(CODE2S[sid])return `img/${id}.webp`;
@@ -252,17 +253,37 @@ function scTray(){
   if(D){D.innerHTML=SC.tray.map(t=>`<div class="dc${t.has?' hv':''}" data-wrong="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:`<span class="ph2">${t.nm}</span>`}${t.has?'':'<i class="nw">NY</i>'}${t.ed?'<i class="ed">1st</i>':''}<small>${price(t)!=null?price(t)+' kr':'–'}</small></div>`).join('')+(SC.tray.length?`<button class="dc save" id="scsave2">Spara<br>${n} st</button>`:'');D.classList.toggle('on',SC.tray.length>0)}
   document.getElementById('traycount').textContent=n;document.getElementById('traysum').textContent=n?` · ${sum.toLocaleString('sv-SE')} kr${nw?` · ${nw} nya`:''}`:'';
   const L=document.getElementById('traylist');if(!L)return;
-  L.innerHTML=SC.tray.map(t=>`<div class="ti">${t.img?`<img src="${t.img}" alt="">`:'<span></span>'}<div><b>${t.nm}${t.tag?` <span class="vt">${t.tag}</span>`:''}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''}${t.sl?' · Shadowless':''} · ${t.cond} · ${t.has?'har redan':'<b class="nwt">ny</b>'}</small></div><span class="r">${price(t)!=null?price(t)+' kr':'–'}</span><button data-rm="${t.uid}" aria-label="Ta bort">×</button></div>`).join('')||'<div class="lnote" style="margin:8px 0">Korten du skannar hamnar här.</div>';
+  L.innerHTML=SC.tray.map(t=>`<div class="ti">${t.img?`<img src="${t.img}" alt="">`:'<span></span>'}<div><b>${t.nm}${t.tag?` <span class="vt">${t.tag}</span>`:''}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''}${t.sl?' · Shadowless':''} · ${t.cond} · ${t.has?'dubblett → byten':'<b class="nwt">ny</b>'}</small></div><span class="r">${price(t)!=null?price(t)+' kr':'–'}</span><button data-rm="${t.uid}" aria-label="Ta bort">×</button></div>`).join('')||'<div class="lnote" style="margin:8px 0">Korten du skannar hamnar här.</div>';
   document.getElementById('scsave').disabled=!SC.tray.length;
 }
+let TRADE=[];try{TRADE=JSON.parse(localStorage.getItem('bdx_trade')||'[]')}catch(e){}
+function gen1Have(){return new Set(DATA.dex.filter(d=>d.o.length||DATA.cards.some(c=>c.d===d.d&&has(c))).map(d=>d.d))}
 function scSave(){
+  const before=gen1Have(),setsBefore={};for(const s in SETS)setsBefore[s]=DATA.cards.filter(c=>c.s===s&&has(c)).length;
+  let nNew=0,nTrade=0,tradeKr=0;
   for(const t of SC.tray){
-    const s=CODE2S[t.sid];
-    if(s){OV[s+'-'+t.n]=t.ed?'e1':'h'}else{EXTRA[t.id]=(EXTRA[t.id]||0)+t.q}
     (VARS[t.id]=VARS[t.id]||[]).push({ed:t.ed?1:0,sl:t.sl?1:0,c:t.cond,t:Date.now()});
+    if(t.has){ // dubblett -> byteshög
+      for(let i=0;i<t.q;i++)TRADE.unshift({id:t.id,nm:t.nm,set:t.set,n:t.n,ed:t.ed?1:0,cond:t.cond,r:price(t),t:Date.now()});
+      nTrade+=t.q;tradeKr+=(price(t)||0)*t.q;continue;
+    }
+    nNew++;
+    const s=CODE2S[t.sid];
+    if(s){OV[s+'-'+t.n]=t.ed?'e1':'h';if(t.q>1)for(let i=1;i<t.q;i++)TRADE.unshift({id:t.id,nm:t.nm,set:t.set,n:t.n,ed:t.ed?1:0,cond:t.cond,r:price(t),t:Date.now()})}
+    else{EXTRA[t.id]=(EXTRA[t.id]||0)+t.q}
   }
-  ls('pk151ov',OV);ls('bdx_extra',EXTRA);ls('bdx_var',VARS);
-  const n=SC.tray.length;SC.tray=[];scTray();scEmpty(`✅ ${n} kort sparade`);document.getElementById('tray').classList.remove('open');
+  ls('pk151ov',OV);ls('bdx_extra',EXTRA);ls('bdx_var',VARS);ls('bdx_trade',TRADE);
+  // vad fylldes?
+  const after=gen1Have(),gained=DATA.dex.filter(d=>after.has(d.d)&&!before.has(d.d)).map(d=>d.nm);
+  const setMsg=[];for(const s in SETS){const n=DATA.cards.filter(c=>c.s===s&&has(c)).length-setsBefore[s];if(n>0)setMsg.push(`+${n} i ${SETS[s].name.replace('Team ','')}`)}
+  SC.tray=[];scTray();document.getElementById('tray').classList.remove('open');
+  const lines=[];
+  if(gained.length)lines.push(`🎉 ${gained.slice(0,3).join(', ')}${gained.length>3?` och ${gained.length-3} till`:''} fyllde ${gained.length>1?'luckor':'en lucka'} i Gen 1!`);
+  if(setMsg.length)lines.push(setMsg.join(' · '));
+  if(nNew&&!gained.length&&!setMsg.length)lines.push(`✅ ${nNew} nya kort sparade`);
+  if(nTrade)lines.push(`🔁 ${nTrade} dubbletter till byteshögen (~${tradeKr.toLocaleString('sv-SE')} kr)`);
+  const el=document.getElementById('schit');el.className='schit empty saved';el.innerHTML=`<span>${lines.join('<br>')||'Sparat'}</span>`;
+  if(gained.length)scPill(`🎉 ${gained.length} ny${gained.length>1?'a':''} i Gen 1`,'ok');
 }
 // Lär av rättningar: spara bilden som extra referens för rätt kort
 function learn(id,fp){
