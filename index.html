@@ -238,9 +238,13 @@ main{padding:10px 10px 20px}
   .prog2 .sum{grid-column:1/-1;margin:0}
   main{max-width:1240px;padding:16px 24px 40px;box-sizing:border-box}
   .colhead{top:0}
-  .tc{max-width:70px}
-  .dexgrid{display:grid;grid-template-columns:1fr 1fr;column-gap:14px}
-  .colhead.c2{display:grid}
+  .tc{max-width:58px}
+  .dexgrid{display:block}
+  .colhead,.row{grid-template-columns:200px repeat(var(--nc,4),1fr)}
+  .colhead::before{content:"";}
+  .row{align-items:center;padding:6px 10px;margin-bottom:4px}
+  .lab{grid-column:auto;padding:0 0 0 6px;flex-wrap:wrap;row-gap:2px}
+  .lab .oth{margin:0;flex-basis:100%;padding-left:14px}
   .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
   .lib-wrap,.libgrid{max-width:none}
   #modal .sheet{max-width:440px;margin:0 auto}
