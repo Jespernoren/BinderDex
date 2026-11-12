@@ -204,6 +204,47 @@ main{padding:10px 10px 20px}
 .cell{min-height:0}
 .cell.none{min-height:40px;opacity:.6}
 .tc{max-width:54px}
+
+/* Lugnare kort: nummer och pris bara där de behövs */
+.tc.h .nr,.tc.e1 .nr,.tc.v .nr{display:none}
+.tc.h .rkv,.tc.e1 .rkv,.tc.v .rkv{display:none}
+.tc:hover .nr{display:block}
+.cell.none{font-size:14px;opacity:.35}
+.colhead.c2{display:none}
+/* Desktop: sidomeny + bredare innehåll */
+@media (min-width:960px){
+  :root{--sb:248px}
+  body{padding-bottom:0}
+  header{position:fixed;top:0;left:0;bottom:0;width:var(--sb);box-sizing:border-box;overflow-y:auto;border-bottom:0;border-right:1px solid var(--line);padding:18px 16px;display:flex;flex-direction:column;gap:4px;background:var(--card);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .brand{flex-wrap:wrap;margin-bottom:10px}
+  .brand .logo{width:48px;height:48px}
+  .tools{order:3;width:100%;margin:10px 0 0;justify-content:flex-start}
+  header .tabbar{position:static;flex-direction:column;background:none;backdrop-filter:none;-webkit-backdrop-filter:none;border:0;box-shadow:none;padding:0;margin:4px 0 14px;gap:2px}
+  header .tabbar a{flex-direction:row;justify-content:flex-start;gap:12px;font-size:14px;padding:9px 12px;border-radius:10px!important;color:var(--ink)}
+  header .tabbar a.on{background:color-mix(in srgb,var(--acc) 10%,transparent)!important;color:var(--acc)}
+  header .tabbar svg{width:20px;height:20px}
+  .frow{flex-wrap:wrap;overflow:visible;margin:0;padding:0}
+  .vsep{display:none}
+  #pfilters{display:contents}
+  .seg{flex-direction:column}
+  .seg a{text-align:left;padding:8px 12px}
+  .legend{padding:10px 0 0;flex-direction:column;gap:6px}
+  .legend.show{display:flex}
+  #prog,.legend+section,main{margin-left:var(--sb)}
+  #prog{max-width:1240px;padding:18px 24px 0;box-sizing:border-box}
+  .prog2{margin:0;display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;padding:18px 22px}
+  .prog2 .hero{gap:18px;justify-content:flex-start}
+  .prog2 .tiles{margin:0}
+  .prog2 .sum{grid-column:1/-1;margin:0}
+  main{max-width:1240px;padding:16px 24px 40px;box-sizing:border-box}
+  .colhead{top:0}
+  .tc{max-width:70px}
+  .dexgrid{display:grid;grid-template-columns:1fr 1fr;column-gap:14px}
+  .colhead.c2{display:grid}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+  .lib-wrap,.libgrid{max-width:none}
+  #modal .sheet{max-width:440px;margin:0 auto}
+}
 </style>
 </head>
 <body>
@@ -345,7 +386,8 @@ function renderDex(){
   const cols=colmode==='prio'?PCOLS:Object.keys(SETS).map(s=>[s==='base'?'Base':SETS[s].name.replace('Team ',''),c=>c.s===s,`var(--${s})`]);
   document.getElementById('main').style.setProperty('--nc',cols.length);
   let hidden=0;
-  let h=`<div class="colhead">${cols.map(c=>`<div style="color:${c[2]}">${c[0]}</div>`).join('')}</div>`;
+  const ch=`${cols.map(c=>`<div style="color:${c[2]}">${c[0]}</div>`).join('')}`;
+  let h=`<div class="dexgrid"><div class="colhead">${ch}</div><div class="colhead c2">${ch}</div>`;
   for(const d of DATA.dex){
     const cs=DATA.cards.filter(c=>c.d===d.d);
     const anyHave=cs.some(has), anyComing=cs.some(c=>st(c)==='v');
@@ -360,6 +402,7 @@ function renderDex(){
     }
     h+='</div>';
   }
+  h+='</div>';
   if(hidden)h+=`<div class="note">${hidden} klara rader är dolda.</div>`;
   h+='<h2>Trainers & energi</h2>';
   for(const s in SETS){
@@ -537,6 +580,9 @@ try{hideDone=!!localStorage.getItem('pk151hide')}catch(x){}
 try{colmode=localStorage.getItem('pk151col')||'set'}catch(x){}
 document.getElementById('filters').addEventListener('click',e=>{const t=e.target.closest('.chip');if(!t)return;filter=t.dataset.f;render()});
 window.addEventListener('hashchange',render);
+const MQ=matchMedia('(min-width:960px)');
+function placeNav(){const n=document.getElementById('nav'),hd=document.getElementById('hdr'),br=hd.querySelector('.brand');if(MQ.matches){if(n.parentNode!==hd)br.after(n)}else if(n.parentNode!==document.body)document.body.insertBefore(n,document.getElementById('modal'))}
+placeNav();MQ.addEventListener('change',()=>{placeNav();render()});
 window.addEventListener('resize',()=>document.documentElement.style.setProperty('--hh',document.getElementById('hdr').offsetHeight+'px'));
 
 Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.json())]).then(([d,b])=>{DATA=d;DB=b;render()}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
