@@ -432,6 +432,9 @@ body.scanmode{background:#000}
 .cand.last{justify-content:center;gap:10px;min-height:220px}
 .cand .lb{width:100%;border:0;border-radius:10px;padding:11px;font:700 14px inherit;font-family:inherit;background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 .psearch.hide{display:none}
+#acctbtn{position:relative}#acctbtn svg{fill:none}#acctdot{position:absolute;right:5px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--sak)}#acctdot.on{background:var(--har)}
+.acbtn{width:100%;margin-top:10px;border:0;border-radius:14px;padding:14px;font:700 15px inherit;font-family:inherit;background:var(--ink);color:var(--card);cursor:pointer}.acbtn.alt{background:var(--bg);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+#sheet .sokq{margin-top:12px}
 .qty{display:flex;align-items:center;justify-content:center;gap:16px;margin:4px 0 12px}.qty button{width:44px;height:44px;border-radius:50%;border:0;background:var(--bg);font:700 22px inherit;font-family:inherit;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}.qty span{font-size:13px;color:var(--mute)}
 .genseg{max-width:360px;margin:0 0 12px;flex-direction:row!important}.genseg a{text-align:center!important}
 .tc.h .bd{background:var(--har)}
@@ -486,7 +489,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 </head>
 <body>
 <header id="hdr">
-  <div class="brand"><svg class="logo" aria-hidden="true" viewBox="-82.2 -118.7 164.4 130.7"><g transform="translate(0 6) matrix(0.8660 0.3346 0.0000 0.7431 -76.21 -112.67)"><rect width="88" height="112" rx="10" fill="#9E1B22"/></g><g transform="matrix(0.8660 0.3346 0.0000 0.7431 -76.21 -112.67)"><rect width="88" height="112" rx="10" fill="#D7262E"/><clipPath id="bdxL"><rect width="88" height="112" rx="10"/></clipPath><rect clip-path="url(#bdxL)" x="81" y="0" width="7" height="112" fill="#9E1B22"/><circle cx="24" cy="26" r="15" fill="#FFFFFF"/><circle cx="24" cy="26" r="10.5" fill="#3BA7F0"/><circle cx="20" cy="22" r="3" fill="#fff"/><circle cx="50" cy="17" r="4" fill="#F5C518"/><circle cx="62" cy="17" r="4" fill="#4CC26B"/><rect x="9" y="54" width="70" height="49" rx="5" fill="#FFFFFF"/><rect x="17" y="64" width="38.5" height="5" rx="2.5" fill="#F2B8BB"/><rect x="17" y="74" width="26.6" height="5" rx="2.5" fill="#F2B8BB"/><rect x="17" y="84" width="33.6" height="5" rx="2.5" fill="#F2B8BB"/></g><g transform="translate(0 6) matrix(0.8660 -0.3346 0.0000 0.7431 0.00 -83.23)"><rect width="88" height="112" rx="10" fill="#9E1B22"/></g><g transform="matrix(0.8660 -0.3346 0.0000 0.7431 0.00 -83.23)"><rect width="88" height="112" rx="10" fill="#D7262E"/><clipPath id="bdxR"><rect width="88" height="112" rx="10"/></clipPath><rect clip-path="url(#bdxR)" x="0" y="0" width="7" height="112" fill="#9E1B22"/><rect x="9" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="9" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="9" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/></g></svg><div><b>Binderdex</b><small>Din Pokémon-samling</small></div><div class="tools"><a class="ib" id="sokbtn" href="#sok" title="Sök kort"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></a><button class="ib" id="hidesw" title="Dölj klara rader"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="x" d="M4 4l16 16"/></svg></button><button class="ib" id="colsw" title="Kolumner: set eller prio"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="4" height="16" rx="1.5"/><rect x="10" y="4" width="4" height="16" rx="1.5"/><rect x="17" y="4" width="4" height="16" rx="1.5"/></svg><span id="colsw_t">Set</span></button><button class="ib" id="infobtn" title="Förklaring"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></button></div></div>
+  <div class="brand"><svg class="logo" aria-hidden="true" viewBox="-82.2 -118.7 164.4 130.7"><g transform="translate(0 6) matrix(0.8660 0.3346 0.0000 0.7431 -76.21 -112.67)"><rect width="88" height="112" rx="10" fill="#9E1B22"/></g><g transform="matrix(0.8660 0.3346 0.0000 0.7431 -76.21 -112.67)"><rect width="88" height="112" rx="10" fill="#D7262E"/><clipPath id="bdxL"><rect width="88" height="112" rx="10"/></clipPath><rect clip-path="url(#bdxL)" x="81" y="0" width="7" height="112" fill="#9E1B22"/><circle cx="24" cy="26" r="15" fill="#FFFFFF"/><circle cx="24" cy="26" r="10.5" fill="#3BA7F0"/><circle cx="20" cy="22" r="3" fill="#fff"/><circle cx="50" cy="17" r="4" fill="#F5C518"/><circle cx="62" cy="17" r="4" fill="#4CC26B"/><rect x="9" y="54" width="70" height="49" rx="5" fill="#FFFFFF"/><rect x="17" y="64" width="38.5" height="5" rx="2.5" fill="#F2B8BB"/><rect x="17" y="74" width="26.6" height="5" rx="2.5" fill="#F2B8BB"/><rect x="17" y="84" width="33.6" height="5" rx="2.5" fill="#F2B8BB"/></g><g transform="translate(0 6) matrix(0.8660 -0.3346 0.0000 0.7431 0.00 -83.23)"><rect width="88" height="112" rx="10" fill="#9E1B22"/></g><g transform="matrix(0.8660 -0.3346 0.0000 0.7431 0.00 -83.23)"><rect width="88" height="112" rx="10" fill="#D7262E"/><clipPath id="bdxR"><rect width="88" height="112" rx="10"/></clipPath><rect clip-path="url(#bdxR)" x="0" y="0" width="7" height="112" fill="#9E1B22"/><rect x="9" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="9" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="9" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/></g></svg><div><b>Binderdex</b><small>Din Pokémon-samling</small></div><div class="tools"><button class="ib" id="acctbtn" title="Konto"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg><i id="acctdot"></i></button><a class="ib" id="sokbtn" href="#sok" title="Sök kort"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></a><button class="ib" id="hidesw" title="Dölj klara rader"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="x" d="M4 4l16 16"/></svg></button><button class="ib" id="colsw" title="Kolumner: set eller prio"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="4" height="16" rx="1.5"/><rect x="10" y="4" width="4" height="16" rx="1.5"/><rect x="17" y="4" width="4" height="16" rx="1.5"/></svg><span id="colsw_t">Set</span></button><button class="ib" id="infobtn" title="Förklaring"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></button></div></div>
   <div id="setseg" class="seg hide"><a href="#base" data-s="base">Base</a><a href="#jungle" data-s="jungle">Jungle</a><a href="#fossil" data-s="fossil">Fossil</a><a href="#rocket" data-s="rocket">Rocket</a></div>
 <div class="frow"><div class="filters" id="filters">
     <span class="chip on" data-f="all">Alla</span>
@@ -521,15 +524,18 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 
 <div id="modal"><div class="sheet" id="sheet"></div></div>
 
+<script src="config.js"></script>
+<script src="sync.js?v=1"></script>
 <script>
 const SETS={base:{code:'base1',name:'Base Set',tot:102},jungle:{code:'base2',name:'Jungle',tot:64},fossil:{code:'base3',name:'Fossil',tot:62},rocket:{code:'base5',name:'Team Rocket',tot:82}};
 const STL={h:'Har',e1:'Har (1st Ed)',v:'På väg',f:'Förfrågan',m:'Saknas'};
 const BD={h:'✓',e1:'1st',v:'VÄG',f:'?'};
 let DATA,OV={},IMGU={};
+const BLANK=(()=>{try{return localStorage.getItem('bdx_blank')==='1'}catch(e){return false}})();
 const uimg=(c,ed)=>{const k=SETS[c.s].code+'-'+c.n;return (!ed&&IMGU[k])||'img/'+k+'.webp'};
 try{OV=JSON.parse(localStorage.getItem('pk151ov')||'{}')}catch(e){OV={}}
 const key=c=>c.s+'-'+c.n;
-const st=c=>OV[key(c)]||c.st;
+const st=c=>OV[key(c)]||(BLANK?'m':c.st);
 const has=c=>['h','e1'].includes(st(c));
 let filter='all',pf=0,colmode='set',hideDone=false;
 const PCOLS=[['P1',c=>pr(c)===1,'var(--acc)'],['P2',c=>pr(c)===2,'var(--mute)'],['P3',c=>pr(c)===3,'var(--mute)'],['P4',c=>pr(c)===4,'var(--mute)'],['P5',c=>pr(c)===5,'var(--mute)'],['Klar',c=>!pr(c),'var(--mute)']];
@@ -599,6 +605,30 @@ async function doSearch(){
   R.innerHTML=hits.length?`<div class="lnote">${hits.length} kort${hits.length>120?' (visar 120)':''}</div><div class="grid">${hits.slice(0,120).map(c=>`<div class="gcard sr${c.has?'':' miss'}" data-sid="${c.id}"><div class="ci2"><img data-simg="${c.id}" alt=""></div><div class="cap">${c.nm}${c.tag?` <span class="vt">${c.tag}</span>`:''}<small>${c.set} · ${c.n}${c.tot?'/'+c.tot:''}</small><small class="st">${c.has?'<b class="hv2">✓ Har</b>':'Saknas'}${c.r!=null?' · '+c.r+' kr':''}</small></div></div>`).join('')}</div>`:'<div class="lnote">Inga träffar.</div>';
   R.querySelectorAll('[data-simg]').forEach(i=>scImg(i.dataset.simg).then(u=>{if(u)i.src=u;else i.parentNode.classList.add('noimg')}));
 }
+function acctBadge(){const S=window.BDXSYNC,d=document.getElementById('acctdot');if(!d||!S)return;d.className=S.session?'on':''}
+function acctSheet(){
+  const S=window.BDXSYNC||{},sh=document.getElementById('sheet');
+  let body;
+  if(!S.on)body=`<h3>Konto</h3><div class="sub">Konton och synk kopplas in när Supabase är uppsatt.</div>`;
+  else if(S.needsChoice)body=`<h3>Välkommen! 👋</h3><div class="sub">Ditt konto är nytt. Hur vill du börja?</div>
+    <button class="acbtn" data-ac="device">Använd samlingen på den här enheten</button>
+    <button class="acbtn alt" data-ac="blank">Börja med en tom samling</button>`;
+  else if(!S.session)body=`<h3>Logga in</h3><div class="sub">Vi skickar en inloggningslänk till din mejl. Inget lösenord.</div>
+    ${S.loginError?`<div class="note" style="color:var(--acc)">${S.loginError}</div>`:''}
+    <input id="acmail" class="sokq" type="email" placeholder="din@mejl.se" autocomplete="email">
+    <button class="acbtn" data-ac="send">Skicka länk</button><div id="acmsg" class="note"></div>`;
+  else body=`<h3>Inloggad</h3><div class="sub">${S.session.email||''}<br>${S.status||''}</div>
+    <button class="acbtn" data-ac="sync">Synka nu</button><button class="acbtn alt" data-ac="out">Logga ut</button>`;
+  sh.innerHTML=body+'<button class="close">Stäng</button>';
+  document.getElementById('modal').classList.add('open');sh.querySelector('.close').onclick=close_;
+  sh.querySelectorAll('[data-ac]').forEach(b=>b.onclick=async()=>{
+    const a=b.dataset.ac;
+    if(a==='send'){const m=document.getElementById('acmail').value.trim();const o=document.getElementById('acmsg');if(!m.includes('@')){o.textContent='Skriv en mejladress.';return}b.disabled=true;o.textContent='Skickar…';try{await S.login(m);o.textContent='✅ Kolla mejlen och tryck på länken på den här enheten.'}catch(e){o.textContent='Kunde inte skicka: '+e.message;b.disabled=false}}
+    if(a==='sync'){b.textContent='Synkar…';try{await S.push();acctSheet()}catch(e){b.textContent='Kunde inte synka'}}
+    if(a==='out')S.logout();
+    if(a==='device'||a==='blank'){b.textContent='Sparar…';await S.chooseStart(a);location.reload()}
+  });
+}
 function renderTrade(){
   let T=[];try{T=JSON.parse(localStorage.getItem('bdx_trade')||'[]')}catch(e){}
   const sum=T.reduce((a,t)=>a+(t.r||0),0);
@@ -659,7 +689,7 @@ const genSeg=g=>`<div class="seg genseg"><a href="#pokedex" class="${g===1?'on':
 async function showGen2(m){
   m.innerHTML=genSeg(2)+'<div class="lnote">Laddar Gen 2…</div>';
   try{
-    G2=G2||await fetch('gen2.json').then(r=>r.json());
+    G2=G2||await fetch('gen2.json').then(r=>r.json());if(BLANK)G2.odex={};
     if(typeof scLoadIdx==='function')await scLoadIdx().catch(()=>{});
   }catch(e){m.innerHTML=genSeg(2)+'<div class="lnote">Kunde inte läsa Gen 2-data.</div>';return}
   if(location.hash!=='#gen2')return;
@@ -885,12 +915,14 @@ try{hideDone=!!localStorage.getItem('pk151hide')}catch(x){}
 try{colmode=localStorage.getItem('pk151col')||'set'}catch(x){}
 document.getElementById('filters').addEventListener('click',e=>{const t=e.target.closest('.chip');if(!t)return;filter=t.dataset.f;render()});
 window.addEventListener('hashchange',render);
+document.getElementById('acctbtn').onclick=acctSheet;
 const MQ=matchMedia('(min-width:960px)');
 function placeNav(){const n=document.getElementById('nav'),hd=document.getElementById('hdr'),br=hd.querySelector('.brand');if(MQ.matches){if(n.parentNode!==hd)br.after(n)}else if(n.parentNode!==document.body)document.body.insertBefore(n,document.getElementById('modal'))}
 placeNav();MQ.addEventListener('change',()=>{placeNav();render()});
 window.addEventListener('resize',()=>document.documentElement.style.setProperty('--hh',document.getElementById('hdr').offsetHeight+'px'));
 
-Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.json())]).then(([d,b])=>{DATA=d;DB=b;render()});fetch('imgu.json').then(r=>r.json()).then(j=>{IMGU=j;if(DATA&&location.hash!=='#scan')render()}).catch(()=>{}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
+Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.json())]).then(([d,b])=>{DATA=d;DB=b;if(BLANK){DATA.dex.forEach(x=>x.o=[]);DB.own=[]}render();
+  const S=window.BDXSYNC;if(S&&S.on){S.onstatus=acctBadge;acctBadge();S.start(changed=>{if(changed&&!sessionStorage.getItem('bdx_rl')){sessionStorage.setItem('bdx_rl','1');location.reload();return}sessionStorage.removeItem('bdx_rl');if(S.needsChoice)acctSheet()});if(S.loginError)acctSheet()}});fetch('imgu.json').then(r=>r.json()).then(j=>{IMGU=j;if(DATA&&location.hash!=='#scan')render()}).catch(()=>{}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
 </script>
 <script src="scancore.js?v=3"></script>
 <script src="scan.js?v=5"></script>
