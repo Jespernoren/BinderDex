@@ -168,6 +168,7 @@ function renderScan(){
     <div class="cam" id="cam"><video id="scv" playsinline muted autoplay></video>
       <div class="guide"><i id="gbox">${'<b></b>'.repeat(9)}</i></div>
       <a class="scx" href="#pokedex" aria-label="Stäng">×</a>
+      <button class="tgtchip" id="tgtchip"></button>
       <button class="traybtn" id="traybtn"><b id="traycount">0</b> skannade<span id="traysum"></span></button>
       <div class="tools2">
         <button class="tb" id="modebtn" aria-label="Byt läge">${ICON.page}<span>Flera</span></button>
@@ -187,6 +188,7 @@ function renderScan(){
     </div>
     <div class="tray" id="pick"></div>
     <div class="tray" id="isheet"></div>
+    <div class="tray" id="lsheet"></div>
     <div class="tray" id="tray"><div class="trayhd"><b>Skannade</b><button id="trayclose" aria-label="Stäng">×</button></div><div id="traylist"></div>
       <button class="savebtn" id="scsave" disabled>Spara i samlingen</button></div>
   </div>`;
@@ -388,7 +390,7 @@ function scSummary(){
 function scTray(){
   const D=document.getElementById('deck');
   const n=SC.tray.reduce((a,t)=>a+t.q,0),sum=SC.tray.reduce((a,t)=>a+(price(t)||0)*t.q,0),nw=SC.tray.filter(t=>!t.has).length;
-  if(D){D.innerHTML=(SC.tray.length?`<button class="dc tgt" id="tgtbtn">Lägg även i<br><b>${SC.target?LST.name(SC.target):'ingen lista'}</b></button>`:'')+SC.tray.map(t=>`<div class="dc${t.has?' hv':''}${t.uid===SC.newUid?' fresh':''}${t.twin&&!t.holoOk?' chk':''}" data-dopen="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:`<span class="ph2">${t.nm}</span>`}${t.has?'':'<i class="nw">NY</i>'}${t.q>1?`<i class="qt">${t.q}×</i>`:''}<div class="dd"><b>${t.nm||'?'}</b><span>${t.set.replace('Base Set 2','Base 2').replace('Legendary Collection','Legendary')} ${t.n}${t.tot?'/'+t.tot:''}</span><span>${t.ed?'1st Ed':t.sl?'Shadowl.':'Unl.'} · ${t.cond}${t.tag&&!t.twin?' · '+t.tag:''}</span>${t.twin?`<span class="hl${t.holoOk?'':' q'}">${t.ra==='HOLO'?'✨ Holo':'Ej holo'}${t.holoOk?'':' ?'}</span>`:''}<em>${price(t)!=null?price(t).toLocaleString('sv-SE')+' kr':'–'}</em></div></div>`).join('');D.classList.toggle('on',SC.tray.length>0)}
+  if(D){D.innerHTML=SC.tray.map(t=>`<div class="dc${t.has?' hv':''}${t.uid===SC.newUid?' fresh':''}" data-dopen="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:`<span class="ph2">${t.nm}</span>`}${t.has?'':'<i class="nw">NY</i>'}${t.q>1?`<i class="qt">${t.q}×</i>`:''}<div class="dd"><b>${t.nm||'?'}</b><span>${t.set.replace('Base Set 2','Base 2').replace('Legendary Collection','Legendary')} ${t.n}${t.tot?'/'+t.tot:''}</span><span>${t.ed?'1st Ed':t.sl?'Shadowl.':'Unl.'} · ${t.cond}${t.tag&&!t.twin?' · '+t.tag:''}</span>${t.twin?`<span class="hl">${t.ra==='HOLO'?'✨ Holo':'Ej holo'}</span>`:''}<em>${price(t)!=null?price(t).toLocaleString('sv-SE')+' kr':'–'}</em></div></div>`).join('');D.classList.toggle('on',SC.tray.length>0)}
   document.getElementById('traycount').textContent=n;document.getElementById('traysum').textContent='';
   const L=document.getElementById('traylist');if(!L)return;
   L.innerHTML=SC.tray.map(t=>`<div class="ti" data-dopen="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:'<span></span>'}<div><b>${t.nm}${t.tag?` <span class="vt">${t.tag}</span>`:''}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''}${t.sl?' · Shadowless':''} · ${CONDN[t.cond]} · ${t.has?'dubblett → byten':'<b class="nwt">ny</b>'}</small></div><span class="r">${price(t)!=null?price(t)+' kr':'–'}</span><button data-rm="${t.uid}" aria-label="Ta bort">×</button></div>`).join('')||'<div class="lnote" style="margin:8px 0">Korten du skannar hamnar här.</div>';
@@ -443,6 +445,18 @@ function scGuess(b){
   el.innerHTML=`<span class="gimg" data-gimg></span><div class="hm"><small>Osäker – är det här rätt?</small><b>${c.nm||'Okänt kort'}?</b><small>${c.set} · ${c.n}${c.tot?'/'+c.tot:''}</small></div><span class="val"><button class="wrong" data-guess="1">Välj kort ›</button></span>`;
   scImg(c.id).then(u=>{const e=el.querySelector('[data-gimg]');if(e&&u)e.innerHTML=`<img src="${u}" alt="">`});
 }
+// ---------- Var sparas korten? (samling eller egen lista) ----------
+function tgtChip(){const c=document.getElementById('tgtchip');if(c)c.innerHTML=`📁 ${SC.target?LST.name(SC.target):'Huvudsamlingen'} <span>▾</span>`}
+function openLists(){
+  const el=document.getElementById('lsheet');if(!el)return;
+  const L=LST.all();
+  el.innerHTML=`<div class="trayhd"><b>Vilken samling?</b><button data-lclose aria-label="Stäng">×</button></div>
+   <div class="lnote2">Alla kort räknas alltid i din huvudsamling. Välj en egen samling om de även ska samlas där, t.ex. en pärm.</div>
+   <button class="lopt${!SC.target?' on':''}" data-tgt=""><b>Huvudsamlingen</b><small>Allt du äger</small></button>
+   ${L.map(l=>`<button class="lopt${SC.target===l.id?' on':''}" data-tgt="${l.id}"><b>${l.nm}</b><small>${LST.items(l.id).length} kort</small></button>`).join('')}
+   <div class="lnew"><input id="lnewin" placeholder="Ny samling, t.ex. Pärm 2 eller Till Simon" autocomplete="off"><button data-lnew>Skapa</button></div>`;
+  el.classList.add('open');
+}
 // ---------- Kortdetaljer: allt som hamnar i registret ----------
 const RAN={COMMON:'Common',UNCOMMON:'Uncommon',RARE:'Rare',HOLO:'Rare Holo',PROMO:'Promo',SHINING:'Shining',SECRET:'Secret Rare','DOUBLE RARE':'Double Rare',ULTRA:'Ultra Rare'};
 const verOf=t=>t.ed?'1st Edition':t.sl?'Shadowless':'Unlimited';
@@ -471,7 +485,7 @@ function openDetail(uid){
    </div>
   </div>
   ${t.twin?(()=>{const o=scInfo(t.twin),isH=t.ra==='HOLO',hId=isH?t.id:t.twin,nId=isH?t.twin:t.id,hp=isH?t.r:o.r,np=isH?o.r:t.r;
-    return `<div class="dlab">Holo eller inte?${t.holoOk?'':' <span class="chk">kontrollera</span>'}</div><div class="dholo"><button data-holo="${uid}|${hId}" class="${isH?'on':''}">✨ Holo<small>${isH?t.n:o.n}${hp!=null?' · '+hp+' kr':''}</small></button><button data-holo="${uid}|${nId}" class="${!isH?'on':''}">Ej holo<small>${!isH?t.n:o.n}${np!=null?' · '+np+' kr':''}</small></button></div>`})():''}
+    return `<div class="dlab">Holo</div><div class="dholo"><button data-holo="${uid}|${hId}" class="${isH?'on':''}">✨ Holo<small>${isH?t.n:o.n}${hp!=null?' · '+hp+' kr':''}</small></button><button data-holo="${uid}|${nId}" class="${!isH?'on':''}">Ej holo<small>${!isH?t.n:o.n}${np!=null?' · '+np+' kr':''}</small></button></div>`})():''}
   ${t.wotc?`<div class="dlab">Version</div><div class="dch">${['Unlimited','1st Edition'].concat(t.sid==='base1'?['Shadowless']:[]).map(v=>`<button data-ver="${uid}|${v}" class="${verOf(t)===v?'on':''}">${v}</button>`).join('')}</div>`:''}
   <div class="dlab">Skick</div><div class="dscale"><input type="range" min="0" max="${COND.length-1}" step="1" value="${COND.indexOf(t.cond)<0?4:COND.indexOf(t.cond)}" data-cslide="${uid}"><div class="dticks">${COND.map(c=>`<span class="${t.cond===c?'on':''}${c==='RAW'?' raw':''}">${c}</span>`).join('')}</div><div class="dcname"><b>${CONDN[t.cond]}</b> · ${CONDS[t.cond]}${CF[t.cond]!==1?` · ${CF[t.cond]>1?'+':'−'}${Math.round(Math.abs(CF[t.cond]-1)*100)} % mot riktpris`:' · riktpris'}</div></div>
   ${alts.length?`<div class="dlab">Samma bild i andra set</div><div class="dalts">${alts.map(a=>`<button data-swap="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.set}</b><small>${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}${a.r!=null?' · '+a.r+' kr':''}</small></button>`).join('')}</div>`:''}
@@ -573,6 +587,10 @@ function bindScanUI(){
   m.onclick=e=>{
     unlockAudio();
     const q=s=>e.target.closest(s);let t;
+    if(q('#tgtchip')){openLists();return}
+    if(q('[data-lclose]')){document.getElementById('lsheet').classList.remove('open');return}
+    if(t=q('[data-tgt]')){SC.target=t.dataset.tgt||null;document.getElementById('lsheet').classList.remove('open');tgtChip();scSummary();scPill(SC.target?`Skannar till ${LST.name(SC.target)}`:'Skannar till huvudsamlingen','ok');return}
+    if(q('[data-lnew]')){const i=document.getElementById('lnewin'),n=i&&i.value.trim();if(!n){i&&i.focus();return}SC.target=LST.create(n);document.getElementById('lsheet').classList.remove('open');tgtChip();scSummary();scPill(`Ny samling: ${n}`,'ok');return}
     if(q('#scsave3')){scSave();return}
     if(q('.schit.sum')){document.getElementById('tray').classList.add('open');return}
     if(q('[data-guess]')&&SC.guess){scPill('Välj rätt kort');scPick(null,SC.guess.top,SC.guess.f);return}
@@ -594,7 +612,6 @@ function bindScanUI(){
     if(t=q('[data-sl]')){const it=itemByUid(t.dataset.sl);it.sl=!it.sl;scShowHit(it);scTray();return}
     if(t=q('[data-cond]')){const it=itemByUid(t.dataset.cond);it.cond=COND[(COND.indexOf(it.cond)+1)%COND.length];scShowHit(it);scTray();return}
     if(t=q('[data-swap]')){const [u,to]=t.dataset.swap.split('|');const it=itemByUid(u);if(it){const from=it.id;learn(to,it.f);Object.assign(it,scInfo(to),{alts:[from,...(SC.grp[to]||[]).filter(a=>a!==from&&a!==to)]});scImg(to).then(x=>{it.img=x;scShowHit(it);scTray()})}return}
-    if(q('#tgtbtn')){const L=[null,...LST.all().map(l=>l.id)];SC.target=L[(L.indexOf(SC.target||null)+1)%L.length];scTray();return}
     if(e.target.id==='scsave'||q('#scsave2')||q('#scsave3')){scSave();return}
     if(t=q('[data-zoomid]')){const im=document.querySelector(`[data-cimg="${t.dataset.zoomid}"] img`);if(im)zoom(im.src);return}
     if(t=q('[data-dopen]')){if(q('[data-ed],[data-sl],[data-cond],[data-swap],[data-zoom]'))return;document.getElementById('tray').classList.remove('open');openDetail(t.dataset.dopen);return}
@@ -619,7 +636,7 @@ function bindScanUI(){
     sh.querySelector('.dsk').textContent=CONDN[it.cond];const p=price(it);sh.querySelector('.dvl').innerHTML=p!=null?`<em>~${p.toLocaleString('sv-SE')} kr</em>`:'saknas';
     sh.querySelector('.dcname').innerHTML=`<b>${CONDN[it.cond]}</b> · ${CONDS[it.cond]}${CF[it.cond]!==1?` · ${CF[it.cond]>1?'+':'−'}${Math.round(Math.abs(CF[it.cond]-1)*100)} % mot riktpris`:' · riktpris'}`});
   m.addEventListener('change',e=>{const r=e.target.closest('[data-cslide]');if(!r)return;const it=itemByUid(r.dataset.cslide);if(it){scShowHit(it);scTray()}});
-  bindSwipe();
+  bindSwipe();tgtChip();
   ['scfile','scfile2'].forEach(i=>{const el=document.getElementById(i);if(el)el.onchange=()=>scPhoto(el.files[0])});
 }
 

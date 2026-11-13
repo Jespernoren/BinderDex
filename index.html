@@ -357,6 +357,11 @@ body.scanmode{background:#000}
 .cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .guide{position:absolute;inset:0 0 120px;display:grid;place-items:center;pointer-events:none}
 .guide i{display:block;height:74%;max-width:84%;aspect-ratio:63/88;border-radius:16px;box-shadow:0 0 0 100vmax rgba(0,0,0,.42);outline:3px solid rgba(255,255,255,.95)}
+.tgtchip{position:absolute;left:14px;top:calc(60px + env(safe-area-inset-top));border:0;border-radius:999px;background:rgba(0,0,0,.5);color:#fff;font:inherit;font-weight:700;font-size:13px;padding:9px 13px;backdrop-filter:blur(10px);z-index:4;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tgtchip span{opacity:.7;font-size:11px}
+#lsheet{z-index:62}#lsheet .lnote2{font-size:12.5px;color:var(--mute);margin:0 0 10px}
+#lsheet .lopt{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px;margin-bottom:6px;border-radius:12px;border:1.5px solid rgba(0,0,0,.12);background:transparent;font:inherit;color:inherit;text-align:left}
+#lsheet .lopt b{font-size:15px}#lsheet .lopt small{color:var(--mute);font-size:12px}#lsheet .lopt.on{border-color:#111;background:#111;color:#fff}#lsheet .lopt.on small{color:rgba(255,255,255,.7)}
+#lsheet .lnew{display:flex;gap:8px;margin-top:10px}#lsheet .lnew input{flex:1;min-width:0;padding:13px;border-radius:12px;border:1.5px solid rgba(0,0,0,.15);font:inherit;font-size:16px}#lsheet .lnew button{border:0;border-radius:12px;background:var(--acc);color:#fff;font:inherit;font-weight:800;padding:0 18px}
 .scx{position:absolute;left:14px;top:calc(12px + env(safe-area-inset-top));width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:24px;line-height:36px;text-align:center;text-decoration:none;backdrop-filter:blur(10px)}
 .traybtn{position:absolute;right:14px;top:calc(12px + env(safe-area-inset-top));border:0;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;font:600 13px inherit;font-family:inherit;padding:9px 14px;backdrop-filter:blur(10px)}
 .traybtn b{font-weight:800}
@@ -480,6 +485,7 @@ body.scanmode{background:#000}
 .lchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 12px}.lchips span{font-size:12px;color:var(--mute);font-weight:600;margin-right:2px}
 .lchip{border:0;border-radius:999px;padding:7px 12px;font:600 13px inherit;font-family:inherit;background:var(--bg);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line);cursor:pointer}.lchip.on{background:var(--ink);color:var(--card);box-shadow:none}
 .scanto{display:inline-flex;align-items:center;gap:6px;background:var(--acc);color:#fff;font-weight:800;font-size:14px;border-radius:12px;padding:11px 16px;text-decoration:none;white-space:nowrap}.shead .scanto{margin-left:auto}.scanto.wide{display:flex;justify-content:center;margin:0 0 12px}
+.mlw{position:relative;flex:none}.mlscan{position:absolute;right:6px;top:6px;width:30px;height:30px;border-radius:50%;background:var(--acc);display:grid;place-items:center;text-decoration:none;font-size:14px}
 .mylists{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 0 12px;padding-bottom:2px}.mylists::-webkit-scrollbar{display:none}
 .ml{flex:none;min-width:120px;text-decoration:none;color:var(--ink);background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;display:flex;flex-direction:column;gap:2px;cursor:pointer}
 .ml b{font-size:14px}.ml span{font-size:12px;color:var(--mute)}.ml small{font-size:12px;font-weight:700}.ml.add{justify-content:center;align-items:center;color:var(--mute);font-weight:700;font-size:13px;min-width:100px}
@@ -580,7 +586,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 
 <script>
 // Automatisk uppdatering: hemskärmsgenvägen ska alltid köra senaste versionen
-const BUILD='20261113094506';
+const BUILD='20261113095228';
 async function chkUpd(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});const j=await r.json();
   if(!j.v||j.v===BUILD)return;
   const busy=window.SC&&SC.tray&&SC.tray.length;
@@ -699,13 +705,13 @@ function acctSheet(){
 function renderMyList(id){
   const T=LST.items(id),sum=T.reduce((a,t)=>a+(t.r||0),0),nm=LST.name(id);
   const others=LST.all().filter(l=>l.id!==id);
-  return `<div class="shead"><div><small>${id==='byta'?'Dubbletter och kort att byta bort':'Din lista'}</small><h1>${nm}</h1></div><a class="scanto" href="#scan" onclick="window.SCAN_TO='${id}'">📷 Skanna till ${nm}</a></div>
-  <div class="filters" style="margin-bottom:12px">${id==='byta'?'<a class="chip" href="#lista">Att köpa</a>':''}${LST.all().map(l=>`<a class="chip${l.id===id?' on':''}" href="#lista-${l.id}">${l.nm} ${LST.items(l.id).length}</a>`).join('')}<button class="chip" data-newlist>+ Ny lista</button></div>
+  return `<div class="shead"><div><small>${id==='byta'?'Dubbletter och kort att byta bort':'Egen samling'}</small><h1>${nm}</h1></div><a class="scanto" href="#scan" onclick="window.SCAN_TO='${id}'">📷 Skanna till ${nm}</a></div>
+  <div class="filters" style="margin-bottom:12px">${id==='byta'?'<a class="chip" href="#lista">Att köpa</a>':''}${LST.all().map(l=>`<a class="chip${l.id===id?' on':''}" href="#lista-${l.id}">${l.nm} ${LST.items(l.id).length}</a>`).join('')}<button class="chip" data-newlist>+ Ny samling</button></div>
   ${kpis([['Kort',T.length,''],['Värde',kr(sum),'riktpris',1]])}
   ${T.length?`<div class="grid">${T.map((t,i)=>`<div class="gcard sr"><div class="ci2"><img loading="lazy" data-tid="${t.id}" data-ted="${t.ed?1:''}" alt=""></div><div class="cap">${t.nm||t.id}<small>${t.set||''} ${t.n||''}${t.ed?' · 1st Ed':''}${t.cond&&t.cond!=='NM'?' · '+t.cond:''}</small><small class="st">${t.r!=null?t.r+' kr':'–'}</small>
     <div class="lacts">${others.map(o=>`<button data-mv="${i}|${o.id}">→ ${o.nm}</button>`).join('')}<button data-trm="${i}">Ta bort</button></div></div></div>`).join('')}</div>`
-   :`<div class="lnote">Listan är tom. Lägg till kort från kortbladet (tryck på ett kort) eller välj listan i scannern innan du sparar.</div>`}
-  ${!['spara','byta'].includes(id)?`<div style="margin-top:20px;display:flex;gap:8px"><button class="trb" data-ren>Byt namn</button><button class="trb" data-dellist>Ta bort listan</button></div>`:''}`;
+   :`<div class="lnote">Samlingen är tom. Tryck på Skanna ovan, eller lägg till kort från kortbladet.</div>`}
+  ${!['spara','byta'].includes(id)?`<div style="margin-top:20px;display:flex;gap:8px"><button class="trb" data-ren>Byt namn</button><button class="trb" data-dellist>Ta bort samlingen</button></div>`:''}`;
 }
 function renderList(){
   const items=DATA.cards.filter(c=>P[key(c)]&&!has(c)&&st(c)!=='v');
@@ -865,7 +871,7 @@ function renderLib(v){
   const tot=st.reduce((a,b)=>a+b.s.q,0),uniq=st.reduce((a,b)=>a+b.s.u,0),ns=st.filter(a=>a.s.q).length,val=st.reduce((a,b)=>a+b.s.val,0);
   let h=`<div class="shead"><div><small>Alla serier och set</small><h1>Samlingen</h1></div></div>
    <a class="scanto wide" href="#scan" onclick="window.SCAN_TO=null">📷 Skanna kort till samlingen</a>
-   <div class="mylists">${LST.all().map(l=>{const T=LST.items(l.id);return `<a class="ml" href="#lista-${l.id}"><b>${l.nm}</b><span>${T.length} kort</span><small>${kr(T.reduce((a,t)=>a+(t.r||0),0))}</small></a>`}).join('')}<a class="ml add" onclick="const n=prompt('Namn på listan, t.ex. Pärm 2');if(n&&n.trim())location.hash='#lista-'+LST.create(n.trim())">+ Ny lista</a></div>
+   <div class="mylists">${LST.all().map(l=>{const T=LST.items(l.id);return `<div class="mlw"><a class="ml" href="#lista-${l.id}"><b>${l.nm}</b><span>${T.length} kort</span><small>${kr(T.reduce((a,t)=>a+(t.r||0),0))}</small></a><a class="mlscan" href="#scan" onclick="window.SCAN_TO='${l.id}'" aria-label="Skanna till ${l.nm}">📷</a></div>`}).join('')}<a class="ml add" onclick="const n=prompt('Namn på samlingen, t.ex. Pärm 2');if(n&&n.trim())location.hash='#lista-'+LST.create(n.trim())">+ Ny samling</a></div>
    ${kpis([['Kort totalt',tot.toLocaleString('sv-SE'),`${uniq} unika`],['Set med kort',`${ns}<em>/${DB.sets.length-2}</em>`,''],['Värde',kr(val),'riktpris',1]])}
    <div class="filters" style="margin:8px 0"><span class="chip${libOnlyMine?' on':''}" data-lib="mine">Bara set jag har kort i</span><span class="chip${!libOnlyMine?' on':''}" data-lib="all">Alla ${DB.sets.length-2} set</span></div>`;
   for(const se of DB.series){
@@ -941,7 +947,7 @@ function render(){
     m.onclick=e=>{const q=s=>e.target.closest(s);let t;
       if(t=q('[data-trm]')){LST.removeAt(id,+t.dataset.trm);render();return}
       if(t=q('[data-mv]')){const [i,to]=t.dataset.mv.split('|');const it=LST.items(id)[+i];LST.removeAt(id,+i);LST.add(to,it);render();return}
-      if(q('[data-newlist]')){const n=prompt('Namn på listan, t.ex. Pärm 2');if(n&&n.trim()){const nid=LST.create(n.trim());location.hash='#lista-'+nid}return}
+      if(q('[data-newlist]')){const n=prompt('Namn på samlingen, t.ex. Pärm 2');if(n&&n.trim()){const nid=LST.create(n.trim());location.hash='#lista-'+nid}return}
       if(q('[data-ren]')){const n=prompt('Nytt namn',LST.name(id));if(n&&n.trim()){LST.rename(id,n.trim());render()}return}
       if(q('[data-dellist]')){if(confirm('Ta bort listan '+LST.name(id)+'? Korten i samlingen påverkas inte.')){LST.del(id);location.hash='#samling'}return}};
     return;}
@@ -1012,6 +1018,6 @@ Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.jso
 </script>
 <script src="quad.js?v=1"></script>
 <script src="scancore.js?v=3"></script>
-<script src="scan.js?v=15"></script>
+<script src="scan.js?v=17"></script>
 </body>
 </html>
