@@ -310,7 +310,9 @@ details.more a,.lnote a{color:var(--ink);text-underline-offset:2px}
 .lc .q{background:var(--ink)}
 /* Samling */
 .libgrid{display:grid;grid-template-columns:1fr;gap:8px}
-.libgrid .lib-row{margin:0;transition:box-shadow .15s,transform .15s}
+.libgrid .lib-row img{width:52px;height:52px}
+.shead img{width:56px;height:56px}
+.libgrid .lib-row{grid-template-columns:56px 1fr auto;margin:0;transition:box-shadow .15s,transform .15s}
 .libgrid .lib-row:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
 .lib-se{letter-spacing:.08em}
 /* Köpa */
