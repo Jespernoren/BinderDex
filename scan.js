@@ -331,14 +331,17 @@ async function scChoose(id){
 // ---------- Foto ----------
 async function scPhoto(file){
   if(!file)return;scPill('Letar i bilden…');
-  const url=URL.createObjectURL(file);const im=await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=url});
-  const W=im.naturalWidth,H=im.naturalHeight;SC.photo={file};
+  const url=URL.createObjectURL(file);const im0=await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=url});
+  // iPhone-foton är 12 MP: skala ned i steg först, annars blir små utsnitt brusiga i Safari
+  let src=im0,w0=im0.naturalWidth,h0=im0.naturalHeight;
+  while(Math.max(w0,h0)>1000){const c=document.createElement('canvas');c.width=Math.round(w0/2);c.height=Math.round(h0/2);const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,0,0,c.width,c.height);src=c;w0=c.width;h0=c.height}
+  const im=src,W=w0,H=h0;SC.photo={file};
   if(SC.mode==='page'){
     let h=H*.94,w=h*0.716;if(w>W*.94){w=W*.94;h=w/0.716}
     const res=pageScan(im,[(W-w)/2,(H-h)/2,w,h],W,H);res.forEach(x=>x.photo=x.ok);SC.page=res;showPage(res);return;
   }
   let best=null;
-  for(const s of [.95,.85,.75,.65,.55]){
+  for(const s of [.95,.85,.75,.65,.55,.45,.38]){
     let h=H*s,w=h*63/88;if(w>W*s){w=W*s;h=w*88/63}
     for(const dx of [-.12,0,.12])for(const dy of [-.1,0,.1]){
       const x=(W-w)/2+dx*W,y=(H-h)/2+dy*H;if(x<0||y<0||x+w>W||y+h>H)continue;
@@ -347,7 +350,7 @@ async function scPhoto(file){
   }
   if(best&&best.s<26&&best.gap>3)scFound(best);
   else if(best&&best.s<32){scPill('Osäker – välj rätt kort');scPick(null,best.top,best.f)}
-  else{scPill('Hittade inget säkert');scEmpty('Hittade inget. Prova Claude eller ta en bild närmare kortet.')}
+  else{scPill('Frågar Claude…');scAsk()}
 }
 async function scBlob(){
   if(SC.photo&&!SC.stream)return SC.photo.file;
