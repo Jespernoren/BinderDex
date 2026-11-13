@@ -366,6 +366,14 @@ body.scanmode{background:#000}
 .guide i::after{content:"";position:absolute;left:6%;right:6%;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);top:8%;animation:sweep 1.6s ease-in-out infinite;border-radius:2px}
 .guide i{position:relative}
 @keyframes sweep{0%{top:8%}50%{top:90%}100%{top:8%}}
+#qsvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0;transition:opacity .2s}
+#qsvg.on{opacity:1}#qsvg polygon{fill:rgba(255,255,255,.10);stroke:#fff;stroke-width:3;stroke-linejoin:round}
+#qsvg circle{fill:#fff}
+#qsvg.seen polygon{stroke:#f5b400;fill:rgba(245,180,0,.12)}#qsvg.seen circle{fill:#f5b400}
+#qsvg.ok polygon{stroke:#16a34a;fill:rgba(22,163,74,.18)}#qsvg.ok circle{fill:#16a34a}
+#qsvg.warn polygon{stroke:#d7262e;fill:rgba(215,38,46,.12)}#qsvg.warn circle{fill:#d7262e}
+#qsvg.snap polygon{animation:qsnap .45s ease-out}@keyframes qsnap{0%{fill:rgba(255,255,255,.85)}100%{fill:rgba(22,163,74,.18)}}
+.scan.hasq .guide i{outline-color:rgba(255,255,255,.25);box-shadow:none}.scan.hasq .guide i::after{display:none}
 #cbox{position:absolute;display:none;border:3px solid #fff;border-radius:10px;z-index:2;transition:all .12s linear;pointer-events:none}
 #cbox.on{display:block}#cbox.seen{border-color:#f5b400;box-shadow:0 0 0 2px rgba(245,180,0,.3)}#cbox.ok{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.35)}#cbox.warn{border-color:#d7262e}
 #dbg{position:absolute;left:10px;top:120px;z-index:5;background:rgba(0,0,0,.7);border-radius:8px;padding:6px;display:flex;gap:6px;align-items:flex-start}
@@ -950,7 +958,8 @@ window.addEventListener('resize',()=>document.documentElement.style.setProperty(
 Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.json())]).then(([d,b])=>{DATA=d;DB=b;if(BLANK){DATA.dex.forEach(x=>x.o=[]);DB.own=[]}render();
   const S=window.BDXSYNC;if(S&&S.on){S.onstatus=acctBadge;acctBadge();S.start(changed=>{if(changed&&!sessionStorage.getItem('bdx_rl')){sessionStorage.setItem('bdx_rl','1');location.reload();return}sessionStorage.removeItem('bdx_rl');if(S.needsChoice)acctSheet()});if(S.loginError)acctSheet()}});fetch('imgu.json').then(r=>r.json()).then(j=>{IMGU=j;if(DATA&&location.hash!=='#scan')render()}).catch(()=>{}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
 </script>
+<script src="quad.js?v=1"></script>
 <script src="scancore.js?v=3"></script>
-<script src="scan.js?v=7"></script>
+<script src="scan.js?v=8"></script>
 </body>
 </html>

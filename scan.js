@@ -243,10 +243,52 @@ function debugShow(v,r,b){
   dcv.getContext('2d').drawImage(v,...r,0,0,63,88);
   d.querySelector('pre').textContent=`s ${b.s.toFixed(1)} gap ${b.gap.toFixed(1)}\n${b.id}\n${v.videoWidth}x${v.videoHeight} ${SC.ms?SC.ms.toFixed(0):'?'} ms`;
 }
+// ---------- Kantdetektering (som en dokumentskanner) ----------
+function qOverlay(q,state){
+  const cam=document.getElementById('cam'),v=document.getElementById('scv');if(!cam||!v)return;
+  let sv=document.getElementById('qsvg');
+  if(!sv){sv=document.createElementNS('http://www.w3.org/2000/svg','svg');sv.id='qsvg';sv.innerHTML='<polygon/><g></g>';cam.appendChild(sv)}
+  const sc=document.querySelector('.scan');
+  if(!q){sv.classList.remove('on');sc&&sc.classList.remove('hasq');SC.qs=null;return}
+  const box=v.getBoundingClientRect(),cb=cam.getBoundingClientRect(),vw=v.videoWidth,vh=v.videoHeight,k=Math.max(box.width/vw,box.height/vh),ox=(box.width-vw*k)/2+box.left-cb.left,oy=(box.height-vh*k)/2+box.top-cb.top;
+  const p=q.map(u=>[ox+u[0]*k,oy+u[1]*k]);
+  // mjuk rörelse mellan bildrutor
+  SC.qs=SC.qs?SC.qs.map((u,i)=>[u[0]+(p[i][0]-u[0])*.6,u[1]+(p[i][1]-u[1])*.6]):p;
+  sv.setAttribute('viewBox',`0 0 ${cb.width} ${cb.height}`);
+  sv.querySelector('polygon').setAttribute('points',SC.qs.map(u=>u.join(',')).join(' '));
+  sv.querySelector('g').innerHTML=SC.qs.map(u=>`<circle cx="${u[0]}" cy="${u[1]}" r="6"/>`).join('');
+  sv.setAttribute('class','on '+(state||''));sc&&sc.classList.add('hasq');
+}
+function qFlash(){const sv=document.getElementById('qsvg');if(!sv)return;sv.classList.remove('snap');void sv.getBBox();sv.classList.add('snap')}
+const qMatch=cv=>scBest(SCAN.feat(cv,0,0,cv.width,cv.height));
+function quadTick(v,W,H){
+  const Q=QUAD.detect(v,W,H,{w:200});
+  if(!Q){SC.qmiss=(SC.qmiss||0)+1;if(SC.qmiss>3){qOverlay(null);SC.qprev=null;if(SC.lock&&SC.qlock){SC.lock=null;SC.qlock=false}}return !!SC.qprev&&SC.qmiss<=3}
+  SC.qmiss=0;
+  const pr=SC.qprev;SC.qprev=Q.q;
+  const w=Math.hypot(Q.q[1][0]-Q.q[0][0],Q.q[1][1]-Q.q[0][1]);
+  const mv=pr?Math.max(...Q.q.map((u,i)=>Math.hypot(u[0]-pr[i][0],u[1]-pr[i][1])))/w:1;
+  if(SC.lock&&SC.qlock){qOverlay(Q.q,'ok');if(mv>.25){SC.lock=null;SC.qlock=false}return true}
+  if(document.getElementById('pick').classList.contains('open')){qOverlay(Q.q,'seen');return true}
+  if(Q.cut){qOverlay(Q.q,'warn');scPill('Lite längre bort – hela kortet ska synas');SC.qstill=0;return true}
+  qOverlay(Q.q,'seen');
+  SC.qstill=mv<.035?(SC.qstill||0)+1:0;
+  if(SC.qstill<2){scPill('Håll still…','seen');return true}
+  const b=QUAD.best(v,W,H,Q,qMatch,4);if(!b)return true;
+  SC.lastF=b.f;debugShow(v,[0,0,W,H],b);(SC.qlog=SC.qlog||[]).push([b.id,+b.s.toFixed(1),+b.gap.toFixed(1)]);
+  if(SC.last===b.id)SC.streak++;else{SC.last=b.id;SC.streak=1}
+  const sure=(b.s<18&&b.gap>4)||(b.s<24&&b.gap>5)||(b.s<27.5&&b.gap>6&&SC.streak>=2);
+  if(sure){SC.lock=b.id;SC.qlock=true;SC.streak=0;SC.unsure=0;qOverlay(b.q,'ok');qFlash();scFound(b);return true}
+  scPill('Läser kortet…','seen');
+  SC.unsure=(SC.unsure||0)+1;
+  if(SC.unsure>=4&&b.s<34){SC.unsure=0;SC.pickOpen=true;scPill('Välj rätt kort');scEmpty('Vilket kort är det?');scPick(null,b.top,b.f)}
+  return true;
+}
 function scTick(){
   const v=document.getElementById('scv');if(!v||!v.videoWidth)return;
   const r=guideRect(v);if(!r)return;
   const W=v.videoWidth,H=v.videoHeight;
+  if(window.QUAD&&quadTick(v,W,H)){showBox(null);return}
   // 1) hitta kortet i bilden
   let rr=refine(v,r,W,H);
   // 2) matcha (kortets egna kanter först, annars ramen)
@@ -495,4 +537,4 @@ function bindScanUI(){
 
 function zoom(src){const z=document.createElement('div');z.id='zoom';z.innerHTML=`<img src="${src}" alt=""><span>Tryck för att stänga</span>`;document.getElementById('main').appendChild(z)}
 
-function closePick(){document.getElementById('pick').classList.remove('open');SC.lock=null;SC.streak=0;SC.unsure=0;SC.still=0;scPill('Håll kortet i ramen','scan')}
+function closePick(){document.getElementById('pick').classList.remove('open');SC.lock=null;SC.qlock=false;SC.qstill=0;SC.streak=0;SC.unsure=0;SC.still=0;scPill('Håll kortet i ramen','scan')}
