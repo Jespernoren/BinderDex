@@ -491,6 +491,7 @@ function openDetail(uid){
   ${alts.length?`<div class="dlab">Samma bild i andra set</div><div class="dalts">${alts.map(a=>`<button data-swap="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.set}</b><small>${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}${a.r!=null?' · '+a.r+' kr':''}</small></button>`).join('')}</div>`:''}
   <div class="dlab">Antal</div><div class="dqty"><button data-qty="${uid}|-1" aria-label="Färre">−</button><b>${t.q}</b><button data-qty="${uid}|1" aria-label="Fler">+</button></div>
   ${cands.length?`<div class="dlab">Inte detta kort? Välj annat</div><div class="dalts">${cands.map(a=>`<button data-repl="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.nm||'?'}</b><small>${a.set} · ${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}</small></button>`).join('')}</div>`:''}
+  <button class="dreg" data-dreg="${t.id}">📖 Visa kortet i registret ›</button>
   <div class="dact"><button data-dwrong="${uid}">🔍 Sök annat kort</button><button class="rm" data-drm="${uid}">Ta bort</button></div>`;
   el.classList.add('open');
   for(const a of [...cands,...alts])scImg(a.id).then(u=>{const e=el.querySelector(`[data-aimg="${a.id}"]`);if(e&&u)e.innerHTML=`<img src="${u}" alt="">`});
@@ -596,6 +597,7 @@ function bindScanUI(){
     if(q('[data-guess]')&&SC.guess){scPill('Välj rätt kort');scPick(null,SC.guess.top,SC.guess.f);return}
     if(t=q('[data-holo]')){const [u,to]=t.dataset.holo.split('|'),it=itemByUid(u);if(it){if(to!==it.id){const keep={ed:it.ed,sl:it.sl,cond:it.cond,q:it.q,holoOk:true};
         Object.assign(it,scInfo(to),keep,{twin:twinOf(to),alts:SC.grp[to]||[]});scImg(to,it.ed).then(x=>{it.img=x;scShowHit(it);scTray()})}else{it.holoOk=true;scShowHit(it);scTray()}}return}
+    if(t=q('[data-dreg]')){const id=t.dataset.dreg,sid=id.slice(0,id.indexOf('-')),n=id.slice(id.indexOf('-')+1),S2=CODE2S[sid];closeDetail();if(S2)open_(S2+'-'+n);else openLib(sid+'|'+n);return}
     if(t=q('[data-dclose]')){closeDetail();return}
     if(t=q('[data-ver]')){const [u,v]=t.dataset.ver.split('|'),it=itemByUid(u);it.ed=v==='1st Edition';it.sl=v==='Shadowless';scImg(it.id,it.ed).then(x=>{it.img=x;scShowHit(it);scTray()});return}
     if(t=q('[data-cnd]')){const [u,c]=t.dataset.cnd.split('|'),it=itemByUid(u);it.cond=c;scShowHit(it);scTray();return}

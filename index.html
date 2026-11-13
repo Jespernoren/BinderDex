@@ -94,7 +94,7 @@ main{padding:8px 8px 60px}
 .gcard .cap small{display:block;color:var(--mute);font-weight:500}
 h2{font-size:14px;margin:18px 4px 8px}
 .hide{display:none!important}
-#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:flex-end;justify-content:center}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:none;align-items:flex-end;justify-content:center}
 #modal.open{display:flex}
 .sheet{background:var(--card);width:100%;max-width:480px;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
 .sheet img{width:62%;display:block;margin:0 auto 10px;border-radius:10px}
@@ -455,6 +455,7 @@ body.scanmode{background:#000}
 #isheet .dalts .ci{display:block;aspect-ratio:63/88;border-radius:5px;overflow:hidden;background:rgba(0,0,0,.06);margin-bottom:4px}#isheet .dalts img{width:100%;display:block}
 #isheet .dalts b{display:block;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#isheet .dalts small{font-size:10.5px;color:var(--mute)}
 #isheet .dqty{display:flex;align-items:center;gap:14px}#isheet .dqty button{width:40px;height:40px;border-radius:50%;border:1px solid rgba(0,0,0,.18);background:transparent;color:inherit;font-size:20px}#isheet .dqty b{font-size:18px;min-width:20px;text-align:center}
+#isheet .dreg{display:block;width:100%;margin-top:14px;padding:12px;border-radius:12px;border:1.5px solid rgba(0,0,0,.15);background:transparent;font:inherit;font-weight:700;color:inherit}
 #isheet .dact{display:flex;gap:8px;padding-top:16px}
 #isheet .dact button{flex:1;padding:13px;border-radius:12px;border:0;background:#111;color:#fff;font:inherit;font-weight:700}#isheet .dact .rm{flex:none;background:transparent;color:#d7262e;border:1px solid rgba(215,38,46,.4)}
 .schit[data-dopen]{cursor:pointer}.ti[data-dopen]{cursor:pointer}
@@ -586,7 +587,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 
 <script>
 // Automatisk uppdatering: hemskärmsgenvägen ska alltid köra senaste versionen
-const BUILD='20261113095228';
+const BUILD='20261113095338';
 async function chkUpd(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});const j=await r.json();
   if(!j.v||j.v===BUILD)return;
   const busy=window.SC&&SC.tray&&SC.tray.length;
@@ -602,7 +603,7 @@ chkUpd();document.addEventListener('visibilitychange',()=>{if(document.visibilit
 <script>
 const SETS={base:{code:'base1',name:'Base Set',tot:102},jungle:{code:'base2',name:'Jungle',tot:64},fossil:{code:'base3',name:'Fossil',tot:62},rocket:{code:'base5',name:'Team Rocket',tot:82}};
 const STL={h:'Har',e1:'Har (1st Ed)',v:'På väg',f:'Förfrågan',m:'Saknas'};
-const BD={h:'✓',e1:'1st',v:'VÄG',f:'?'};
+const BD={h:'✓',e1:'✓',v:'VÄG',f:'?'};
 let DATA,OV={},IMGU={};
 const BLANK=(()=>{try{return localStorage.getItem('bdx_blank')==='1'}catch(e){return false}})();
 const uimg=(c,ed)=>{const k=SETS[c.s].code+'-'+c.n;return (!ed&&IMGU[k])||'img/'+k+'.webp'};
@@ -1018,6 +1019,6 @@ Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.jso
 </script>
 <script src="quad.js?v=1"></script>
 <script src="scancore.js?v=3"></script>
-<script src="scan.js?v=17"></script>
+<script src="scan.js?v=18"></script>
 </body>
 </html>
