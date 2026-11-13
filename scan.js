@@ -45,6 +45,7 @@ async function scImg(id,ed){
     if(SC.simg[sid][n])return SC.simg[sid][n];
   }
   SC.oimg=SC.oimg||await fetch('oimg.json').then(r=>r.json()).catch(()=>({}));
+  if(SC.idx&&!SC.idx[id])return ''; // bara kortbaksida som platshållare
   return SC.oimg[id]||'';
 }
 // ---------- Matchning ----------

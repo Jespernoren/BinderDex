@@ -432,6 +432,13 @@ body.scanmode{background:#000}
 .cand.last{justify-content:center;gap:10px;min-height:220px}
 .cand .lb{width:100%;border:0;border-radius:10px;padding:11px;font:700 14px inherit;font-family:inherit;background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 .psearch.hide{display:none}
+.sokq{width:100%;box-sizing:border-box;border:0;border-radius:14px;background:var(--card);box-shadow:var(--sh);padding:14px 16px;font:500 17px inherit;font-family:inherit;color:var(--ink);outline:none}
+.sokq:focus{box-shadow:0 0 0 2px var(--ink)}
+.gcard.sr{cursor:pointer}.gcard.miss .ci2 img{filter:grayscale(1);opacity:.45}
+.ci2{aspect-ratio:63/88;border-radius:6px;overflow:hidden;background:var(--line)}.ci2 img{width:100%;height:100%;object-fit:cover;display:block}
+.ci2.noimg img{display:none}.ci2.noimg::after{content:"Bild saknas";display:grid;place-items:center;height:100%;font-size:11px;color:var(--mute)}
+.gcard .st{margin-top:2px}.hv2{color:var(--har)}
+#sokbtn svg{fill:none}
 #zoom{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;animation:up .2s ease}
 #zoom img{max-width:92vw;max-height:78dvh;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.6)}
 #zoom span{color:#bbb;font-size:13px}
@@ -476,7 +483,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 </head>
 <body>
 <header id="hdr">
-  <div class="brand"><svg class="logo" aria-hidden="true" viewBox="-82.2 -118.7 164.4 130.7"><g transform="translate(0 6) matrix(0.8660 0.3346 0.0000 0.7431 -76.21 -112.67)"><rect width="88" height="112" rx="10" fill="#9E1B22"/></g><g transform="matrix(0.8660 0.3346 0.0000 0.7431 -76.21 -112.67)"><rect width="88" height="112" rx="10" fill="#D7262E"/><clipPath id="bdxL"><rect width="88" height="112" rx="10"/></clipPath><rect clip-path="url(#bdxL)" x="81" y="0" width="7" height="112" fill="#9E1B22"/><circle cx="24" cy="26" r="15" fill="#FFFFFF"/><circle cx="24" cy="26" r="10.5" fill="#3BA7F0"/><circle cx="20" cy="22" r="3" fill="#fff"/><circle cx="50" cy="17" r="4" fill="#F5C518"/><circle cx="62" cy="17" r="4" fill="#4CC26B"/><rect x="9" y="54" width="70" height="49" rx="5" fill="#FFFFFF"/><rect x="17" y="64" width="38.5" height="5" rx="2.5" fill="#F2B8BB"/><rect x="17" y="74" width="26.6" height="5" rx="2.5" fill="#F2B8BB"/><rect x="17" y="84" width="33.6" height="5" rx="2.5" fill="#F2B8BB"/></g><g transform="translate(0 6) matrix(0.8660 -0.3346 0.0000 0.7431 0.00 -83.23)"><rect width="88" height="112" rx="10" fill="#9E1B22"/></g><g transform="matrix(0.8660 -0.3346 0.0000 0.7431 0.00 -83.23)"><rect width="88" height="112" rx="10" fill="#D7262E"/><clipPath id="bdxR"><rect width="88" height="112" rx="10"/></clipPath><rect clip-path="url(#bdxR)" x="0" y="0" width="7" height="112" fill="#9E1B22"/><rect x="9" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="9" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="9" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/></g></svg><div><b>Binderdex</b><small>Din Pokémon-samling</small></div><div class="tools"><button class="ib" id="hidesw" title="Dölj klara rader"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="x" d="M4 4l16 16"/></svg></button><button class="ib" id="colsw" title="Kolumner: set eller prio"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="4" height="16" rx="1.5"/><rect x="10" y="4" width="4" height="16" rx="1.5"/><rect x="17" y="4" width="4" height="16" rx="1.5"/></svg><span id="colsw_t">Set</span></button><button class="ib" id="infobtn" title="Förklaring"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></button></div></div>
+  <div class="brand"><svg class="logo" aria-hidden="true" viewBox="-82.2 -118.7 164.4 130.7"><g transform="translate(0 6) matrix(0.8660 0.3346 0.0000 0.7431 -76.21 -112.67)"><rect width="88" height="112" rx="10" fill="#9E1B22"/></g><g transform="matrix(0.8660 0.3346 0.0000 0.7431 -76.21 -112.67)"><rect width="88" height="112" rx="10" fill="#D7262E"/><clipPath id="bdxL"><rect width="88" height="112" rx="10"/></clipPath><rect clip-path="url(#bdxL)" x="81" y="0" width="7" height="112" fill="#9E1B22"/><circle cx="24" cy="26" r="15" fill="#FFFFFF"/><circle cx="24" cy="26" r="10.5" fill="#3BA7F0"/><circle cx="20" cy="22" r="3" fill="#fff"/><circle cx="50" cy="17" r="4" fill="#F5C518"/><circle cx="62" cy="17" r="4" fill="#4CC26B"/><rect x="9" y="54" width="70" height="49" rx="5" fill="#FFFFFF"/><rect x="17" y="64" width="38.5" height="5" rx="2.5" fill="#F2B8BB"/><rect x="17" y="74" width="26.6" height="5" rx="2.5" fill="#F2B8BB"/><rect x="17" y="84" width="33.6" height="5" rx="2.5" fill="#F2B8BB"/></g><g transform="translate(0 6) matrix(0.8660 -0.3346 0.0000 0.7431 0.00 -83.23)"><rect width="88" height="112" rx="10" fill="#9E1B22"/></g><g transform="matrix(0.8660 -0.3346 0.0000 0.7431 0.00 -83.23)"><rect width="88" height="112" rx="10" fill="#D7262E"/><clipPath id="bdxR"><rect width="88" height="112" rx="10"/></clipPath><rect clip-path="url(#bdxR)" x="0" y="0" width="7" height="112" fill="#9E1B22"/><rect x="9" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="9" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="9" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="42" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="9" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="34" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/><rect x="59" y="75" width="20" height="28" rx="3.50" fill="#FFFFFF"/></g></svg><div><b>Binderdex</b><small>Din Pokémon-samling</small></div><div class="tools"><a class="ib" id="sokbtn" href="#sok" title="Sök kort"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></a><button class="ib" id="hidesw" title="Dölj klara rader"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="x" d="M4 4l16 16"/></svg></button><button class="ib" id="colsw" title="Kolumner: set eller prio"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="4" height="16" rx="1.5"/><rect x="10" y="4" width="4" height="16" rx="1.5"/><rect x="17" y="4" width="4" height="16" rx="1.5"/></svg><span id="colsw_t">Set</span></button><button class="ib" id="infobtn" title="Förklaring"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></button></div></div>
   <div id="setseg" class="seg hide"><a href="#base" data-s="base">Base</a><a href="#jungle" data-s="jungle">Jungle</a><a href="#fossil" data-s="fossil">Fossil</a><a href="#rocket" data-s="rocket">Rocket</a></div>
 <div class="frow"><div class="filters" id="filters">
     <span class="chip on" data-f="all">Alla</span>
@@ -570,6 +577,25 @@ function prio(){
 }
 const kr=n=>'~'+Math.round(n).toLocaleString('sv-SE')+' kr';
 function kpis(a){return `<div class="kpis">${a.map(([l,v,s,acc])=>`<div class="kpi${acc?' acc':''}"><small>${l}</small><b>${v}</b>${s?`<span>${s}</span>`:''}</div>`).join('')}</div>`}
+let SOKQ='';
+function renderSearch(){
+  return `<div class="shead"><div><small>Wizards-eran och dina egna kort</small><h1>Sök</h1></div></div>
+  <input id="sokq" class="sokq" type="search" placeholder="Namn, t.ex. Charizard, Pikachu, Mewtwo" autocomplete="off" value="${SOKQ.replace(/"/g,'&quot;')}">
+  <div class="filters" style="margin:10px 0 14px"><span class="chip on" data-sf="all">Alla</span><span class="chip" data-sf="have">Har</span><span class="chip" data-sf="miss">Saknas</span></div>
+  <div id="sokres" class="sokres"></div>`;
+}
+let SOKF='all';
+async function doSearch(){
+  const R=document.getElementById('sokres');if(!R)return;
+  const q=SOKQ.trim().toLowerCase();
+  if(q.length<2){R.innerHTML='<div class="lnote">Skriv minst två bokstäver.</div>';return}
+  try{await scLoadIdx()}catch(e){}
+  let hits=scAll().filter(([id,nm])=>nm.toLowerCase().includes(q)).map(([id])=>scInfo(id));
+  if(SOKF==='have')hits=hits.filter(c=>c.has);if(SOKF==='miss')hits=hits.filter(c=>!c.has);
+  hits.sort((a,b)=>(b.has-a.has)||((a.yr||'').localeCompare(b.yr||''))||(parseInt(a.n)-parseInt(b.n)));
+  R.innerHTML=hits.length?`<div class="lnote">${hits.length} kort${hits.length>120?' (visar 120)':''}</div><div class="grid">${hits.slice(0,120).map(c=>`<div class="gcard sr${c.has?'':' miss'}" data-sid="${c.id}"><div class="ci2"><img data-simg="${c.id}" alt=""></div><div class="cap">${c.nm}${c.tag?` <span class="vt">${c.tag}</span>`:''}<small>${c.set} · ${c.n}${c.tot?'/'+c.tot:''}</small><small class="st">${c.has?'<b class="hv2">✓ Har</b>':'Saknas'}${c.r!=null?' · '+c.r+' kr':''}</small></div></div>`).join('')}</div>`:'<div class="lnote">Inga träffar.</div>';
+  R.querySelectorAll('[data-simg]').forEach(i=>scImg(i.dataset.simg).then(u=>{if(u)i.src=u;else i.parentNode.classList.add('noimg')}));
+}
 function renderTrade(){
   let T=[];try{T=JSON.parse(localStorage.getItem('bdx_trade')||'[]')}catch(e){}
   const sum=T.reduce((a,t)=>a+(t.r||0),0);
@@ -754,6 +780,7 @@ function openLib(k){
    <div class="note">${mine.length?'Du har: '+mine.map(m=>`${m.q}× ${m.v||''}${m.r?` (~${m.r} kr)`:''}`).join(', '):'Du har inte det här kortet.'}</div>
    <a class="tr" href="https://www.tradera.com/search?q=${q}" target="_blank" rel="noopener">Sök på Tradera</a><button class="close">Stäng</button>`;
   document.getElementById('modal').classList.add('open');document.querySelector('#sheet .close').onclick=close_;
+  if(!img&&typeof scImg==='function')scImg(sid+'-'+n).then(u=>{if(u){const i=document.createElement('img');i.src=u;i.alt='';const sh=document.getElementById('sheet');sh.insertBefore(i,sh.firstChild)}});
 }
 
 function render(){
@@ -761,6 +788,11 @@ function render(){
   if(v!=='scan')scStop();
   document.body.classList.toggle('scanmode',v==='scan');
   if(v==='scan'){['hidesw','colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='scan'));const m=document.getElementById('main');m.classList.remove('pm');m.innerHTML=renderScan();scStart();return;}
+  if(v==='sok'){['hidesw','colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');document.querySelectorAll('#nav a').forEach(a=>a.classList.remove('on'));const m=document.getElementById('main');m.classList.remove('pm');m.innerHTML=renderSearch();
+    const qi=document.getElementById('sokq');let tm;qi.oninput=()=>{SOKQ=qi.value;clearTimeout(tm);tm=setTimeout(doSearch,180)};setTimeout(()=>qi.focus(),50);doSearch();
+    m.onclick=e=>{const f=e.target.closest('[data-sf]');if(f){SOKF=f.dataset.sf;m.querySelectorAll('[data-sf]').forEach(x=>x.classList.toggle('on',x===f));doSearch();return}
+      const c=e.target.closest('[data-sid]');if(!c)return;const id=c.dataset.sid,sid=id.slice(0,id.indexOf('-')),n=id.slice(id.indexOf('-')+1);
+      const S2={base1:'base',base2:'jungle',base3:'fossil',base5:'rocket'}[sid];if(S2)open_(S2+'-'+n);else openLib(sid+'|'+n)};return;}
   if(v==='byten'){['hidesw','colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='lista'));const m=document.getElementById('main');m.classList.remove('pm');m.innerHTML=renderTrade();m.querySelectorAll('[data-tid]').forEach(i=>scImg(i.dataset.tid).then(u=>{if(u)i.src=u}));m.onclick=e=>{const b=e.target.closest('[data-trm]');if(b){let T=JSON.parse(localStorage.getItem('bdx_trade')||'[]');T.splice(+b.dataset.trm,1);localStorage.setItem('bdx_trade',JSON.stringify(T));render()}};return;}
   if(v==='samling'||v.startsWith('set-')){['hidesw','colsw','infobtn'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');renderLib(v);return;}
   document.getElementById('prog').classList.remove('hide');document.querySelector('.legend').classList.remove('hide');document.getElementById('filters').classList.remove('hide');document.getElementById('pfilters').classList.remove('hide');
@@ -823,6 +855,6 @@ window.addEventListener('resize',()=>document.documentElement.style.setProperty(
 Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.json())]).then(([d,b])=>{DATA=d;DB=b;render()});fetch('imgu.json').then(r=>r.json()).then(j=>{IMGU=j;if(DATA&&location.hash!=='#scan')render()}).catch(()=>{}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
 </script>
 <script src="scancore.js?v=3"></script>
-<script src="scan.js?v=4"></script>
+<script src="scan.js?v=5"></script>
 </body>
 </html>
