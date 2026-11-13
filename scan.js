@@ -14,7 +14,18 @@ async function scLoadIdx(){
   const raw=await fetch('scanidx.json').then(r=>r.json());
   SC.grp=raw._grp||{};SC.ra=raw._ra||{};SC.pr=raw._pr||{};SC.back=SCAN.unpack(raw._back);SC.idx={};
   for(const k in raw)if(k[0]!=='_')SC.idx[k]=SCAN.unpack(raw[k]);
+  SC.twin=null;
   for(const id in LEARN)LEARN[id].forEach((p,i)=>{try{SC.idx[id+'#L'+i]=SCAN.unpack(p)}catch(e){}});
+}
+// Holo/ej holo: samma Pokémon i samma set, en holo och en vanlig (t.ex. Jungle 1 och 17)
+function twinOf(id){
+  id=base(id);
+  if(!SC.twin){SC.twin={};const bySet={};
+    for(const k in SC.ra){const sid=k.slice(0,k.indexOf('-'));(bySet[sid]=bySet[sid]||[]).push(k)}
+    for(const sid in bySet){const L=bySet[sid],nm={};
+      for(const k of L){const n=(scInfo(k).nm||'').toLowerCase();if(n)(nm[n]=nm[n]||[]).push(k)}
+      for(const n in nm){const g=nm[n];if(g.length!==2)continue;const h=g.filter(k=>SC.ra[k]==='HOLO');if(h.length!==1)continue;const o=g.find(k=>k!==h[0]);SC.twin[h[0]]=o;SC.twin[o]=h[0]}}}
+  return SC.twin[id]||null;
 }
 // ---------- Kortinfo ----------
 function owned(id){
@@ -199,6 +210,7 @@ function feedback(){shutter();try{navigator.vibrate&&navigator.vibrate(35)}catch
 
 async function scStart(){
   await scLoadIdx();
+  if('SCAN_TO' in window){SC.target=window.SCAN_TO||null;delete window.SCAN_TO}
   bindScanUI();setMode(SC.mode);
   const v=document.getElementById('scv');
   try{
@@ -355,6 +367,7 @@ async function pageAdd(){
 // ---------- Travar och träffar ----------
 async function addItem(id,b){
   const it=Object.assign(scInfo(id),{uid:++SC.uid,q:1,alts:b&&b.alts?b.alts:(SC.grp[id]||[]),top:b&&b.top||[],f:b&&b.f?SCAN.pack(b.f):null,ed:false,sl:false,cond:'RAW'});
+  it.twin=twinOf(id);it.holoOk=false;
   it.img=await scImg(id);
   SC.tray.unshift(it);scShowHit(it);scTray();return it;
 }
@@ -367,15 +380,15 @@ function scShowHit(it){
 function scSummary(){
   const el=document.getElementById('schit');if(!el)return;
   if(el.dataset.guess&&SC.guessOn)return;
-  const n=SC.tray.reduce((a,t)=>a+t.q,0);if(!n){scEmpty('Rikta kameran mot ett kort');return}
+  const n=SC.tray.reduce((a,t)=>a+t.q,0);if(!n){scEmpty(SC.target?`📁 Skannar till ${LST.name(SC.target)}`:'Rikta kameran mot ett kort');return}
   const sum=SC.tray.reduce((a,t)=>a+(price(t)||0)*t.q,0),nw=SC.tray.filter(t=>!t.has).length;
   el.className='schit sum';el.removeAttribute('data-dopen');el.removeAttribute('data-guess');
-  el.innerHTML=`<div class="hm"><small>Totalt ${n} kort${nw?` · ${nw} nya`:''}</small><b>~${sum.toLocaleString('sv-SE')} kr</b></div><button class="ssave" id="scsave3">Spara</button>`;
+  el.innerHTML=`<div class="hm"><small>Totalt ${n} kort${nw?` · ${nw} nya`:''}${SC.target?` · → ${LST.name(SC.target)}`:''}</small><b>~${sum.toLocaleString('sv-SE')} kr</b></div><button class="ssave" id="scsave3">Spara</button>`;
 }
 function scTray(){
   const D=document.getElementById('deck');
   const n=SC.tray.reduce((a,t)=>a+t.q,0),sum=SC.tray.reduce((a,t)=>a+(price(t)||0)*t.q,0),nw=SC.tray.filter(t=>!t.has).length;
-  if(D){D.innerHTML=(SC.tray.length?`<button class="dc tgt" id="tgtbtn">Lägg även i<br><b>${SC.target?LST.name(SC.target):'ingen lista'}</b></button>`:'')+SC.tray.map(t=>`<div class="dc${t.has?' hv':''}${t.uid===SC.newUid?' fresh':''}" data-dopen="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:`<span class="ph2">${t.nm}</span>`}${t.has?'':'<i class="nw">NY</i>'}${t.q>1?`<i class="qt">${t.q}×</i>`:''}<div class="dd"><b>${t.nm||'?'}</b><span>${t.set.replace('Base Set 2','Base 2').replace('Legendary Collection','Legendary')} ${t.n}${t.tot?'/'+t.tot:''}</span><span>${t.ed?'1st Ed':t.sl?'Shadowl.':'Unl.'} · ${t.cond}${t.tag?' · '+t.tag:''}</span><em>${price(t)!=null?price(t).toLocaleString('sv-SE')+' kr':'–'}</em></div></div>`).join('');D.classList.toggle('on',SC.tray.length>0)}
+  if(D){D.innerHTML=(SC.tray.length?`<button class="dc tgt" id="tgtbtn">Lägg även i<br><b>${SC.target?LST.name(SC.target):'ingen lista'}</b></button>`:'')+SC.tray.map(t=>`<div class="dc${t.has?' hv':''}${t.uid===SC.newUid?' fresh':''}${t.twin&&!t.holoOk?' chk':''}" data-dopen="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:`<span class="ph2">${t.nm}</span>`}${t.has?'':'<i class="nw">NY</i>'}${t.q>1?`<i class="qt">${t.q}×</i>`:''}<div class="dd"><b>${t.nm||'?'}</b><span>${t.set.replace('Base Set 2','Base 2').replace('Legendary Collection','Legendary')} ${t.n}${t.tot?'/'+t.tot:''}</span><span>${t.ed?'1st Ed':t.sl?'Shadowl.':'Unl.'} · ${t.cond}${t.tag&&!t.twin?' · '+t.tag:''}</span>${t.twin?`<span class="hl${t.holoOk?'':' q'}">${t.ra==='HOLO'?'✨ Holo':'Ej holo'}${t.holoOk?'':' ?'}</span>`:''}<em>${price(t)!=null?price(t).toLocaleString('sv-SE')+' kr':'–'}</em></div></div>`).join('');D.classList.toggle('on',SC.tray.length>0)}
   document.getElementById('traycount').textContent=n;document.getElementById('traysum').textContent='';
   const L=document.getElementById('traylist');if(!L)return;
   L.innerHTML=SC.tray.map(t=>`<div class="ti" data-dopen="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:'<span></span>'}<div><b>${t.nm}${t.tag?` <span class="vt">${t.tag}</span>`:''}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''}${t.sl?' · Shadowless':''} · ${CONDN[t.cond]} · ${t.has?'dubblett → byten':'<b class="nwt">ny</b>'}</small></div><span class="r">${price(t)!=null?price(t)+' kr':'–'}</span><button data-rm="${t.uid}" aria-label="Ta bort">×</button></div>`).join('')||'<div class="lnote" style="margin:8px 0">Korten du skannar hamnar här.</div>';
@@ -438,7 +451,7 @@ function openDetail(uid){
   el.dataset.uid=uid;
   const alts=(t.alts||[]).map(a=>scInfo(a));
   if((!t.top||!t.top.length)&&t.f&&SC.idx){try{t.top=scBest(SCAN.unpack(t.f)).top}catch(e){}}
-  const skip=new Set([t.id,...(t.alts||[])]);
+  const skip=new Set([t.id,t.twin,...(t.alts||[])]);
   const cands=[...new Set((t.top||[]).map(x=>x.id))].filter(i=>!skip.has(i)).slice(0,6).map(i=>scInfo(i));
   const row=(k,v)=>`<div class="dr"><span>${k}</span><b>${v}</b></div>`;
   const p=price(t);
@@ -457,6 +470,8 @@ function openDetail(uid){
     ${row('Kort-id',`<code>${t.id}</code>`)}
    </div>
   </div>
+  ${t.twin?(()=>{const o=scInfo(t.twin),isH=t.ra==='HOLO',hId=isH?t.id:t.twin,nId=isH?t.twin:t.id,hp=isH?t.r:o.r,np=isH?o.r:t.r;
+    return `<div class="dlab">Holo eller inte?${t.holoOk?'':' <span class="chk">kontrollera</span>'}</div><div class="dholo"><button data-holo="${uid}|${hId}" class="${isH?'on':''}">✨ Holo<small>${isH?t.n:o.n}${hp!=null?' · '+hp+' kr':''}</small></button><button data-holo="${uid}|${nId}" class="${!isH?'on':''}">Ej holo<small>${!isH?t.n:o.n}${np!=null?' · '+np+' kr':''}</small></button></div>`})():''}
   ${t.wotc?`<div class="dlab">Version</div><div class="dch">${['Unlimited','1st Edition'].concat(t.sid==='base1'?['Shadowless']:[]).map(v=>`<button data-ver="${uid}|${v}" class="${verOf(t)===v?'on':''}">${v}</button>`).join('')}</div>`:''}
   <div class="dlab">Skick</div><div class="dscale"><input type="range" min="0" max="${COND.length-1}" step="1" value="${COND.indexOf(t.cond)<0?4:COND.indexOf(t.cond)}" data-cslide="${uid}"><div class="dticks">${COND.map(c=>`<span class="${t.cond===c?'on':''}${c==='RAW'?' raw':''}">${c}</span>`).join('')}</div><div class="dcname"><b>${CONDN[t.cond]}</b> · ${CONDS[t.cond]}${CF[t.cond]!==1?` · ${CF[t.cond]>1?'+':'−'}${Math.round(Math.abs(CF[t.cond]-1)*100)} % mot riktpris`:' · riktpris'}</div></div>
   ${alts.length?`<div class="dlab">Samma bild i andra set</div><div class="dalts">${alts.map(a=>`<button data-swap="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.set}</b><small>${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}${a.r!=null?' · '+a.r+' kr':''}</small></button>`).join('')}</div>`:''}
@@ -561,6 +576,8 @@ function bindScanUI(){
     if(q('#scsave3')){scSave();return}
     if(q('.schit.sum')){document.getElementById('tray').classList.add('open');return}
     if(q('[data-guess]')&&SC.guess){scPill('Välj rätt kort');scPick(null,SC.guess.top,SC.guess.f);return}
+    if(t=q('[data-holo]')){const [u,to]=t.dataset.holo.split('|'),it=itemByUid(u);if(it){if(to!==it.id){const keep={ed:it.ed,sl:it.sl,cond:it.cond,q:it.q,holoOk:true};
+        Object.assign(it,scInfo(to),keep,{twin:twinOf(to),alts:SC.grp[to]||[]});scImg(to,it.ed).then(x=>{it.img=x;scShowHit(it);scTray()})}else{it.holoOk=true;scShowHit(it);scTray()}}return}
     if(t=q('[data-dclose]')){closeDetail();return}
     if(t=q('[data-ver]')){const [u,v]=t.dataset.ver.split('|'),it=itemByUid(u);it.ed=v==='1st Edition';it.sl=v==='Shadowless';scImg(it.id,it.ed).then(x=>{it.img=x;scShowHit(it);scTray()});return}
     if(t=q('[data-cnd]')){const [u,c]=t.dataset.cnd.split('|'),it=itemByUid(u);it.cond=c;scShowHit(it);scTray();return}
@@ -602,9 +619,21 @@ function bindScanUI(){
     sh.querySelector('.dsk').textContent=CONDN[it.cond];const p=price(it);sh.querySelector('.dvl').innerHTML=p!=null?`<em>~${p.toLocaleString('sv-SE')} kr</em>`:'saknas';
     sh.querySelector('.dcname').innerHTML=`<b>${CONDN[it.cond]}</b> · ${CONDS[it.cond]}${CF[it.cond]!==1?` · ${CF[it.cond]>1?'+':'−'}${Math.round(Math.abs(CF[it.cond]-1)*100)} % mot riktpris`:' · riktpris'}`});
   m.addEventListener('change',e=>{const r=e.target.closest('[data-cslide]');if(!r)return;const it=itemByUid(r.dataset.cslide);if(it){scShowHit(it);scTray()}});
+  bindSwipe();
   ['scfile','scfile2'].forEach(i=>{const el=document.getElementById(i);if(el)el.onchange=()=>scPhoto(el.files[0])});
 }
 
+
+// Svep nedåt för att stänga ark
+function bindSwipe(){
+  document.querySelectorAll('.scan .tray').forEach(el=>{
+    if(el._sw)return;el._sw=1;let y0=null,dy=0,act=false;
+    el.addEventListener('touchstart',e=>{if(el.scrollTop>0){y0=null;return}y0=e.touches[0].clientY;dy=0;act=false},{passive:true});
+    el.addEventListener('touchmove',e=>{if(y0==null)return;dy=e.touches[0].clientY-y0;if(dy>8&&el.scrollTop<=0){act=true;e.preventDefault();el.style.transition='none';el.style.transform=`translateY(${dy}px)`}},{passive:false});
+    el.addEventListener('touchend',()=>{if(y0==null)return;el.style.transition='';el.style.transform='';
+      if(act&&dy>80){if(el.id==='isheet')closeDetail();else if(el.id==='pick')closePick();else el.classList.remove('open')}y0=null;act=false});
+  });
+}
 function zoom(src){const z=document.createElement('div');z.id='zoom';z.innerHTML=`<img src="${src}" alt=""><span>Tryck för att stänga</span>`;document.getElementById('main').appendChild(z)}
 
 function closePick(){document.getElementById('pick').classList.remove('open');SC.lock=null;SC.qlock=false;SC.qstill=0;SC.streak=0;SC.unsure=0;SC.still=0;scPill('Håll kortet i ramen','scan')}

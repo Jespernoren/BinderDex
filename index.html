@@ -432,6 +432,13 @@ body.scanmode{background:#000}
 #isheet .dch{display:flex;flex-wrap:wrap;gap:6px}
 #isheet .dch button{border:1px solid rgba(0,0,0,.15);background:transparent;color:inherit;border-radius:999px;padding:8px 12px;font:inherit;font-size:13px;font-weight:600}
 #isheet .dch button.on{background:#111;color:#fff;border-color:#111}
+#isheet .dholo{display:flex;gap:8px}#isheet .dholo button{flex:1;padding:12px 8px;border-radius:12px;border:1.5px solid rgba(0,0,0,.15);background:transparent;font:inherit;font-weight:800;font-size:15px;color:inherit}
+#isheet .dholo button small{display:block;font-size:11.5px;font-weight:600;color:var(--mute);margin-top:2px}
+#isheet .dholo button.on{background:#111;color:#fff;border-color:#111}#isheet .dholo button.on small{color:rgba(255,255,255,.7)}
+#isheet .dholo button.on:first-child{background:linear-gradient(135deg,#f5b400,#d7262e 45%,#7c3aed);border-color:transparent}
+#isheet .dlab .chk{background:#f5b400;color:#111;border-radius:999px;padding:1px 7px;font-size:10px;margin-left:4px;letter-spacing:0}
+.dc .dd .hl{font-weight:800;color:#7c3aed}.dc .dd .hl.q{color:#b07d00}.dc.chk{outline:2px solid #f5b400}
+.scan .tray::before{content:'';display:block;width:40px;height:5px;border-radius:3px;background:rgba(0,0,0,.18);margin:-6px auto 8px}
 #isheet .dscale{padding:2px 2px 0}
 #isheet .dscale input{width:100%;accent-color:#111;height:28px;margin:0}
 #isheet .dticks{display:flex;justify-content:space-between;font-size:10.5px;font-weight:700;color:var(--mute);padding:0 2px}
@@ -472,6 +479,7 @@ body.scanmode{background:#000}
 .psearch.hide{display:none}
 .lchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 12px}.lchips span{font-size:12px;color:var(--mute);font-weight:600;margin-right:2px}
 .lchip{border:0;border-radius:999px;padding:7px 12px;font:600 13px inherit;font-family:inherit;background:var(--bg);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line);cursor:pointer}.lchip.on{background:var(--ink);color:var(--card);box-shadow:none}
+.scanto{display:inline-flex;align-items:center;gap:6px;background:var(--acc);color:#fff;font-weight:800;font-size:14px;border-radius:12px;padding:11px 16px;text-decoration:none;white-space:nowrap}.shead .scanto{margin-left:auto}.scanto.wide{display:flex;justify-content:center;margin:0 0 12px}
 .mylists{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 0 12px;padding-bottom:2px}.mylists::-webkit-scrollbar{display:none}
 .ml{flex:none;min-width:120px;text-decoration:none;color:var(--ink);background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;display:flex;flex-direction:column;gap:2px;cursor:pointer}
 .ml b{font-size:14px}.ml span{font-size:12px;color:var(--mute)}.ml small{font-size:12px;font-weight:700}.ml.add{justify-content:center;align-items:center;color:var(--mute);font-weight:700;font-size:13px;min-width:100px}
@@ -572,7 +580,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 
 <script>
 // Automatisk uppdatering: hemskärmsgenvägen ska alltid köra senaste versionen
-const BUILD='20261113091731';
+const BUILD='20261113094506';
 async function chkUpd(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});const j=await r.json();
   if(!j.v||j.v===BUILD)return;
   const busy=window.SC&&SC.tray&&SC.tray.length;
@@ -691,7 +699,7 @@ function acctSheet(){
 function renderMyList(id){
   const T=LST.items(id),sum=T.reduce((a,t)=>a+(t.r||0),0),nm=LST.name(id);
   const others=LST.all().filter(l=>l.id!==id);
-  return `<div class="shead"><div><small>${id==='byta'?'Dubbletter och kort att byta bort':'Din lista'}</small><h1>${nm}</h1></div></div>
+  return `<div class="shead"><div><small>${id==='byta'?'Dubbletter och kort att byta bort':'Din lista'}</small><h1>${nm}</h1></div><a class="scanto" href="#scan" onclick="window.SCAN_TO='${id}'">📷 Skanna till ${nm}</a></div>
   <div class="filters" style="margin-bottom:12px">${id==='byta'?'<a class="chip" href="#lista">Att köpa</a>':''}${LST.all().map(l=>`<a class="chip${l.id===id?' on':''}" href="#lista-${l.id}">${l.nm} ${LST.items(l.id).length}</a>`).join('')}<button class="chip" data-newlist>+ Ny lista</button></div>
   ${kpis([['Kort',T.length,''],['Värde',kr(sum),'riktpris',1]])}
   ${T.length?`<div class="grid">${T.map((t,i)=>`<div class="gcard sr"><div class="ci2"><img loading="lazy" data-tid="${t.id}" data-ted="${t.ed?1:''}" alt=""></div><div class="cap">${t.nm||t.id}<small>${t.set||''} ${t.n||''}${t.ed?' · 1st Ed':''}${t.cond&&t.cond!=='NM'?' · '+t.cond:''}</small><small class="st">${t.r!=null?t.r+' kr':'–'}</small>
@@ -856,6 +864,7 @@ function renderLib(v){
   const st=DB.sets.map(x=>({x,s:setStat(x)}));
   const tot=st.reduce((a,b)=>a+b.s.q,0),uniq=st.reduce((a,b)=>a+b.s.u,0),ns=st.filter(a=>a.s.q).length,val=st.reduce((a,b)=>a+b.s.val,0);
   let h=`<div class="shead"><div><small>Alla serier och set</small><h1>Samlingen</h1></div></div>
+   <a class="scanto wide" href="#scan" onclick="window.SCAN_TO=null">📷 Skanna kort till samlingen</a>
    <div class="mylists">${LST.all().map(l=>{const T=LST.items(l.id);return `<a class="ml" href="#lista-${l.id}"><b>${l.nm}</b><span>${T.length} kort</span><small>${kr(T.reduce((a,t)=>a+(t.r||0),0))}</small></a>`}).join('')}<a class="ml add" onclick="const n=prompt('Namn på listan, t.ex. Pärm 2');if(n&&n.trim())location.hash='#lista-'+LST.create(n.trim())">+ Ny lista</a></div>
    ${kpis([['Kort totalt',tot.toLocaleString('sv-SE'),`${uniq} unika`],['Set med kort',`${ns}<em>/${DB.sets.length-2}</em>`,''],['Värde',kr(val),'riktpris',1]])}
    <div class="filters" style="margin:8px 0"><span class="chip${libOnlyMine?' on':''}" data-lib="mine">Bara set jag har kort i</span><span class="chip${!libOnlyMine?' on':''}" data-lib="all">Alla ${DB.sets.length-2} set</span></div>`;
@@ -1003,6 +1012,6 @@ Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.jso
 </script>
 <script src="quad.js?v=1"></script>
 <script src="scancore.js?v=3"></script>
-<script src="scan.js?v=13"></script>
+<script src="scan.js?v=15"></script>
 </body>
 </html>
