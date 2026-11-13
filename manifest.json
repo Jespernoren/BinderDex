@@ -1,0 +1,1 @@
+{"name": "Binderdex", "short_name": "Binderdex", "start_url": "./#scan", "display": "standalone", "background_color": "#000000", "theme_color": "#D7262E", "icons": [{"src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png"}]}
