@@ -27,6 +27,18 @@ function twinOf(id){
       for(const n in nm){const g=nm[n];if(g.length!==2)continue;const h=g.filter(k=>SC.ra[k]==='HOLO');if(h.length!==1)continue;const o=g.find(k=>k!==h[0]);SC.twin[h[0]]=o;SC.twin[o]=h[0]}}}
   return SC.twin[id]||null;
 }
+// 1st Edition-stämpeln: mall (180x252-koordinater) byggd från kort med och utan stämpel
+const ST1={x0:4,y0:129,w:15,h:18,t:[194.5, 186.5, 171.0, 168.0, 165.0, 160.5, 158.0, 159.0, 157.5, 152.0, 146.0, 163.5, 194.0, 202.5, 181.5, 194.0, 186.5, 171.0, 168.0, 166.5, 163.0, 160.5, 160.0, 158.5, 152.0, 150.0, 169.0, 193.0, 189.5, 178.5, 194.0, 187.0, 172.0, 168.5, 167.5, 164.5, 162.5, 161.0, 158.5, 152.0, 148.5, 170.0, 188.0, 184.0, 180.0, 194.5, 187.0, 172.0, 169.5, 168.5, 165.5, 163.0, 161.0, 158.0, 154.5, 149.0, 154.5, 158.0, 148.5, 143.0, 194.0, 187.0, 172.5, 170.5, 168.5, 168.0, 167.5, 165.0, 157.5, 155.0, 152.0, 154.5, 139.0, 128.0, 107.0, 194.5, 187.0, 173.5, 170.0, 170.0, 168.5, 168.5, 159.5, 145.0, 123.0, 133.0, 139.5, 129.5, 125.5, 121.0, 194.0, 187.0, 175.5, 172.0, 173.5, 173.5, 156.5, 125.0, 121.0, 88.5, 103.0, 105.5, 118.5, 130.5, 125.0, 194.5, 187.0, 177.0, 173.5, 163.5, 123.5, 120.0, 105.5, 106.5, 108.5, 103.0, 94.0, 101.0, 82.0, 101.0, 195.0, 187.0, 178.0, 176.5, 148.0, 73.5, 70.5, 101.0, 96.0, 77.5, 80.5, 92.0, 78.0, 64.5, 89.5, 194.0, 187.0, 178.5, 171.5, 155.5, 127.0, 84.0, 77.0, 58.0, 63.0, 64.5, 60.0, 77.0, 83.0, 106.0, 194.5, 187.0, 177.5, 135.0, 98.5, 109.0, 94.0, 50.0, 35.0, 97.0, 93.5, 26.5, 63.5, 87.0, 54.5, 194.0, 187.0, 175.0, 140.0, 76.0, 74.0, 81.0, 40.0, 27.5, 94.0, 95.5, 33.0, 44.5, 86.5, 64.5, 194.0, 188.0, 175.0, 159.5, 153.5, 144.5, 118.5, 41.5, 24.0, 94.0, 97.0, 29.5, 45.0, 133.5, 159.0, 194.0, 188.0, 176.0, 171.0, 166.0, 174.0, 155.5, 77.0, 39.5, 95.5, 91.0, 38.0, 79.5, 164.5, 169.5, 194.5, 188.0, 171.0, 164.5, 168.0, 169.0, 169.0, 149.5, 85.5, 66.5, 70.0, 94.5, 146.5, 174.0, 169.0, 194.5, 188.0, 171.0, 164.5, 168.5, 169.0, 172.0, 169.0, 162.5, 140.5, 137.0, 158.5, 173.5, 168.0, 170.0, 195.5, 188.5, 171.5, 165.5, 168.5, 169.0, 169.5, 171.0, 176.0, 176.5, 175.0, 173.0, 167.0, 169.5, 171.0, 195.0, 187.5, 170.0, 166.0, 168.0, 169.0, 169.5, 172.0, 171.0, 172.5, 171.5, 169.5, 169.5, 172.0, 170.5],m:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]};
+const ED1SETS=['base1','base2','base3','base5','gym1','gym2','neo1','neo2','neo3','neo4'];
+function stampScore(cv){
+  const W=cv.width,H=cv.height,d=cv.getContext('2d').getImageData(0,0,W,H).data,g=new Float32Array(W*H);
+  for(let i=0;i<W*H;i++)g[i]=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2];
+  const t=[],idx=[];for(let i=0;i<ST1.t.length;i++)if(ST1.m[i]){t.push(ST1.t[i]);idx.push(i)}
+  const tm=t.reduce((a,b)=>a+b,0)/t.length,tt=t.map(v=>v-tm),tn=Math.hypot(...tt);let best=-1;
+  for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const q=idx.map(i=>{const x=ST1.x0+dx+i%ST1.w,y=ST1.y0+dy+(i/ST1.w|0);return g[y*W+x]});
+    const qm=q.reduce((a,b)=>a+b,0)/q.length;let s=0,qn=0;for(let k=0;k<q.length;k++){const v=q[k]-qm;s+=v*tt[k];qn+=v*v}const c=s/(Math.sqrt(qn)*tn+1e-6);if(c>best)best=c}
+  return best;
+}
 // ---------- Kortinfo ----------
 function owned(id){
   const sid=id.slice(0,id.indexOf('-')),n=id.slice(id.indexOf('-')+1);
@@ -294,7 +306,9 @@ function quadTick(v,W,H){
   SC.lastF=b.f;debugShow(v,[0,0,W,H],b);(SC.qlog=SC.qlog||[]).push([b.id,+b.s.toFixed(1),+b.gap.toFixed(1)]);
   if(SC.last===b.id)SC.streak++;else{SC.last=b.id;SC.streak=1}
   const sure=(b.s<18&&b.gap>4)||(b.s<24&&b.gap>5)||(b.s<27.5&&b.gap>6&&SC.streak>=2);
-  if(sure){SC.lock=b.id;SC.qlock=true;SC.streak=0;SC.unsure=0;qOverlay(b.q,'ok');qFlash();scFound(b);return true}
+  if(sure){SC.lock=b.id;SC.qlock=true;SC.streak=0;SC.unsure=0;qOverlay(b.q,'ok');qFlash();
+    if(ED1SETS.includes(base(b.id).split('-')[0])){try{const cv=QUAD.warp(v,W,H,b.q);b.st1=stampScore(cv);b.ed1=b.st1>.6}catch(e){}}
+    scFound(b);return true}
   scPill('Läser kortet…','seen');
   SC.unsure=(SC.unsure||0)+1;
   if(SC.unsure>=4&&b.s<34){SC.unsure=0;scGuess(b)}
@@ -368,9 +382,10 @@ async function pageAdd(){
 }
 // ---------- Travar och träffar ----------
 async function addItem(id,b){
+  const ed1=!!(b&&b.ed1);
   const it=Object.assign(scInfo(id),{uid:++SC.uid,q:1,alts:b&&b.alts?b.alts:(SC.grp[id]||[]),top:b&&b.top||[],f:b&&b.f?SCAN.pack(b.f):null,ed:false,sl:false,cond:'RAW'});
-  it.twin=twinOf(id);it.holoOk=false;
-  it.img=await scImg(id);
+  it.twin=twinOf(id);it.holoOk=false;it.ed=ed1&&it.wotc;
+  it.img=await scImg(id,it.ed);
   SC.tray.unshift(it);scShowHit(it);scTray();return it;
 }
 async function scFound(b){SC.guessOn=false;feedback();scPill('Hittade!','ok');await addItem(b.id,b)}
@@ -385,7 +400,7 @@ function scSummary(){
   const n=SC.tray.reduce((a,t)=>a+t.q,0);if(!n){scEmpty(SC.target?`📁 Skannar till ${LST.name(SC.target)}`:'Rikta kameran mot ett kort');return}
   const sum=SC.tray.reduce((a,t)=>a+(price(t)||0)*t.q,0),nw=SC.tray.filter(t=>!t.has).length;
   el.className='schit sum';el.removeAttribute('data-dopen');el.removeAttribute('data-guess');
-  el.innerHTML=`<div class="hm"><small>Totalt ${n} kort${nw?` · ${nw} nya`:''}${SC.target?` · → ${LST.name(SC.target)}`:''}</small><b>~${sum.toLocaleString('sv-SE')} kr</b></div><button class="ssave" id="scsave3">Spara</button>`;
+  el.innerHTML=`<div class="hm"><small>Totalt ${n} kort${nw?` · ${nw} nya`:''}${SC.target?` · → ${LST.name(SC.target)}`:''}</small><b>${sum.toLocaleString('sv-SE')} kr</b></div><button class="ssave" id="scsave3">Spara</button>`;
 }
 function scTray(){
   const D=document.getElementById('deck');
@@ -424,7 +439,7 @@ function scSave(){
   if(setMsg.length)lines.push(setMsg.join(' · '));
   if(nNew&&!gained.length&&!setMsg.length)lines.push(`✅ ${nNew} nya kort sparade`);
   if(SC.target)lines.push(`📁 Även sparade i ${LST.name(SC.target)}`);
-  if(nTrade)lines.push(`🔁 ${nTrade} dubbletter till byteshögen (~${tradeKr.toLocaleString('sv-SE')} kr)`);
+  if(nTrade)lines.push(`🔁 ${nTrade} dubbletter till byteshögen (${tradeKr.toLocaleString('sv-SE')} kr)`);
   const el=document.getElementById('schit');el.className='schit empty saved';el.innerHTML=`<span>${lines.join('<br>')||'Sparat'}</span>`;
   if(gained.length)scPill(`🎉 ${gained.length} ny${gained.length>1?'a':''} i Gen 1`,'ok');
 }
@@ -478,7 +493,7 @@ function openDetail(uid){
     ${row('Sällsynthet',RAN[t.ra]||t.ra||'–')}
     ${row('Version',verOf(t))}
     <div class="dr"><span>Skick</span><b class="dsk">${CONDN[t.cond]}</b></div>
-    <div class="dr"><span>Värde</span><b class="dvl">${p!=null?`<em>~${p.toLocaleString('sv-SE')} kr</em>`:'saknas'}</b></div>
+    <div class="dr"><span>Värde</span><b class="dvl">${p!=null?`<em>${p.toLocaleString('sv-SE')} kr</em>`:'saknas'}</b></div>
     <div class="dsub">Riktpris (RAW): Unlimited ${t.r!=null?t.r+' kr':'–'}${t.wotc?` · 1st Ed ${t.r1!=null?t.r1+' kr':'–'}`:''}</div>
     ${row('Sparas i',t.has?'Byta (har redan)':'Samlingen (ny)')}
     ${row('Kort-id',`<code>${t.id}</code>`)}
@@ -635,7 +650,7 @@ function bindScanUI(){
   };
   m.addEventListener('input',e=>{const r=e.target.closest('[data-cslide]');if(!r)return;const it=itemByUid(r.dataset.cslide);if(!it)return;it.cond=COND[+r.value];
     const sh=document.getElementById('isheet');sh.querySelectorAll('.dticks span').forEach((x,i)=>x.classList.toggle('on',i===+r.value));
-    sh.querySelector('.dsk').textContent=CONDN[it.cond];const p=price(it);sh.querySelector('.dvl').innerHTML=p!=null?`<em>~${p.toLocaleString('sv-SE')} kr</em>`:'saknas';
+    sh.querySelector('.dsk').textContent=CONDN[it.cond];const p=price(it);sh.querySelector('.dvl').innerHTML=p!=null?`<em>${p.toLocaleString('sv-SE')} kr</em>`:'saknas';
     sh.querySelector('.dcname').innerHTML=`<b>${CONDN[it.cond]}</b> · ${CONDS[it.cond]}${CF[it.cond]!==1?` · ${CF[it.cond]>1?'+':'−'}${Math.round(Math.abs(CF[it.cond]-1)*100)} % mot riktpris`:' · riktpris'}`});
   m.addEventListener('change',e=>{const r=e.target.closest('[data-cslide]');if(!r)return;const it=itemByUid(r.dataset.cslide);if(it){scShowHit(it);scTray()}});
   bindSwipe();tgtChip();
