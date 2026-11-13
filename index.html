@@ -560,6 +560,18 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 
 <div id="modal"><div class="sheet" id="sheet"></div></div>
 
+<script>
+// Automatisk uppdatering: hemskärmsgenvägen ska alltid köra senaste versionen
+const BUILD='20261113075734';
+async function chkUpd(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});const j=await r.json();
+  if(!j.v||j.v===BUILD)return;
+  const busy=window.SC&&SC.tray&&SC.tray.length;
+  if(!busy){location.replace(location.pathname+'?u='+j.v+location.hash);return}
+  if(!document.getElementById('updbar')){const b=document.createElement('button');b.id='updbar';b.textContent='Ny version finns – tryck för att uppdatera';b.onclick=()=>location.replace(location.pathname+'?u='+j.v+location.hash);document.body.appendChild(b)}
+}catch(e){}}
+chkUpd();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')chkUpd()});setInterval(chkUpd,300000);
+</script>
+<style>#updbar{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:200;background:#111;color:#fff;border:0;border-radius:999px;padding:10px 16px;font:inherit;font-weight:700;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.3)}</style>
 <script src="config.js"></script>
 <script src="sync.js?v=2"></script>
 <script src="lists.js?v=1"></script>
