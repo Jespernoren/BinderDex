@@ -447,9 +447,9 @@ function openDetail(uid){
   </div>
   ${t.wotc?`<div class="dlab">Version</div><div class="dch">${['Unlimited','1st Edition'].concat(t.sid==='base1'?['Shadowless']:[]).map(v=>`<button data-ver="${uid}|${v}" class="${verOf(t)===v?'on':''}">${v}</button>`).join('')}</div>`:''}
   <div class="dlab">Skick</div><div class="dch">${COND.map(c=>`<button data-cnd="${uid}|${c}" class="${t.cond===c?'on':''}">${CONDN[c]}</button>`).join('')}</div>
-  ${cands.length?`<div class="dlab">Fel kort? Andra möjliga matchningar</div><div class="dalts">${cands.map(a=>`<button data-repl="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.nm||'?'}</b><small>${a.set} · ${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}</small></button>`).join('')}</div>`:''}
   ${alts.length?`<div class="dlab">Samma bild i andra set</div><div class="dalts">${alts.map(a=>`<button data-swap="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.set}</b><small>${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}${a.r!=null?' · '+a.r+' kr':''}</small></button>`).join('')}</div>`:''}
   <div class="dlab">Antal</div><div class="dqty"><button data-qty="${uid}|-1" aria-label="Färre">−</button><b>${t.q}</b><button data-qty="${uid}|1" aria-label="Fler">+</button></div>
+  ${cands.length?`<div class="dlab">Inte detta kort? Välj annat</div><div class="dalts">${cands.map(a=>`<button data-repl="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.nm||'?'}</b><small>${a.set} · ${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}</small></button>`).join('')}</div>`:''}
   <div class="dact"><button data-dwrong="${uid}">🔍 Sök annat kort</button><button class="rm" data-drm="${uid}">Ta bort</button></div>`;
   el.classList.add('open');
   for(const a of [...cands,...alts])scImg(a.id).then(u=>{const e=el.querySelector(`[data-aimg="${a.id}"]`);if(e&&u)e.innerHTML=`<img src="${u}" alt="">`});
