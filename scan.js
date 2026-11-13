@@ -1,8 +1,9 @@
 // Binderdex scanner: håll kortet i ramen, appen hittar det själv.
 const SC={idx:null,grp:{},ra:{},pr:{},back:null,stream:null,track:null,timer:null,last:null,streak:0,lock:null,tray:[],simg:{},oimg:null,uid:0,mode:'one',sound:true,torch:false,lastF:null,page:null};
 const CODE2S={base1:'base',base2:'jungle',base3:'fossil',base5:'rocket'};
-const COND=['NM','LP','MP','HP'];
-const CONDN={NM:'Near Mint',LP:'Lightly Played',MP:'Moderately Played',HP:'Heavily Played'};
+const COND=['DMG','HP','MP','LP','RAW','NM','M'];
+const CONDN={DMG:'Damaged',HP:'Heavily Played',MP:'Moderately Played',LP:'Lightly Played',RAW:'RAW (ej bedömt)',NM:'Near Mint',M:'Mint'};
+const CONDS={DMG:'Skadat',HP:'Mycket slitet',MP:'Slitet',LP:'Lätt slitet',RAW:'Blandat, ej bedömt',NM:'Nästan nyskick',M:'Nyskick'};
 let EXTRA={},LEARN={},VARS={};
 try{EXTRA=JSON.parse(localStorage.getItem('bdx_extra')||'{}');LEARN=JSON.parse(localStorage.getItem('bdx_learn')||'{}');VARS=JSON.parse(localStorage.getItem('bdx_var')||'{}');SC.sound=localStorage.getItem('bdx_snd')!=='0'}catch(e){}
 const ls=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
@@ -35,7 +36,7 @@ function scInfo(id){
     has:owned(id),
     wotc:/^(base|gym|neo)/.test(sid)};
 }
-const CF={NM:1,LP:.85,MP:.65,HP:.45};
+const CF={DMG:.3,HP:.45,MP:.65,LP:.85,RAW:1,NM:1.15,M:1.4};
 const price=t=>{const p=t.ed&&t.r1?t.r1:t.r;return p==null?null:Math.max(1,Math.round(p*(CF[t.cond]||1)))};
 async function scImg(id,ed){
   id=base(id);const sid=id.slice(0,id.indexOf('-')),n=id.slice(id.indexOf('-')+1);
@@ -282,7 +283,7 @@ function quadTick(v,W,H){
   if(sure){SC.lock=b.id;SC.qlock=true;SC.streak=0;SC.unsure=0;qOverlay(b.q,'ok');qFlash();scFound(b);return true}
   scPill('Läser kortet…','seen');
   SC.unsure=(SC.unsure||0)+1;
-  if(SC.unsure>=4&&b.s<34){SC.unsure=0;SC.pickOpen=true;scPill('Välj rätt kort');scEmpty('Vilket kort är det?');scPick(null,b.top,b.f)}
+  if(SC.unsure>=4&&b.s<34){SC.unsure=0;scGuess(b)}
   return true;
 }
 function scTick(){
@@ -320,7 +321,7 @@ function scTick(){
   if(sure){SC.lock=b.id;SC.streak=0;SC.unsure=0;showBox(rr,'ok');scFound(b);return}
   scPill('Kort hittat – läser…','seen');
   SC.unsure=(SC.unsure||0)+1;
-  if(SC.unsure>=7&&b.s<36){SC.unsure=0;SC.pickOpen=true;scPill('Välj rätt kort');scEmpty('Vilket kort är det?');scPick(null,b.top,b.f)}
+  if(SC.unsure>=7&&b.s<36){SC.unsure=0;scGuess(b)}
 }
 // ---------- Pärmsida 3x3 ----------
 function cells(r){const [x,y,w,h]=r,cw=w/3,ch=h/3,o=[];for(let i=0;i<3;i++)for(let j=0;j<3;j++)o.push([x+j*cw+cw*.04,y+i*ch+ch*.04,cw*.92,ch*.92]);return o}
@@ -353,7 +354,7 @@ async function pageAdd(){
 }
 // ---------- Travar och träffar ----------
 async function addItem(id,b){
-  const it=Object.assign(scInfo(id),{uid:++SC.uid,q:1,alts:b&&b.alts?b.alts:(SC.grp[id]||[]),top:b&&b.top||[],f:b&&b.f?SCAN.pack(b.f):null,ed:false,sl:false,cond:'NM'});
+  const it=Object.assign(scInfo(id),{uid:++SC.uid,q:1,alts:b&&b.alts?b.alts:(SC.grp[id]||[]),top:b&&b.top||[],f:b&&b.f?SCAN.pack(b.f):null,ed:false,sl:false,cond:'RAW'});
   it.img=await scImg(id);
   SC.tray.unshift(it);scShowHit(it);scTray();return it;
 }
@@ -362,11 +363,11 @@ function itemByUid(u){return SC.tray.find(t=>t.uid===+u)}
 function scShowHit(it){
   const el=document.getElementById('schit');if(!el||!it)return;
   const alts=(it.alts||[]).map(a=>scInfo(a));
-  el.className='schit';el.dataset.uid=it.uid;el.dataset.dopen=it.uid;
+  el.className='schit';el.removeAttribute('data-guess');el.dataset.uid=it.uid;el.dataset.dopen=it.uid;
   el.innerHTML=`${it.img?`<img src="${it.img}" alt="" data-zoom="${it.img}">`:''}<div class="hm">
    <small>${it.set} · ${it.n}${it.tot?'/'+it.tot:''} · ${verOf(it)} · ${it.cond}</small>
    <b>${it.nm||'Okänt namn'}${it.tag?` <span class="vt">${it.tag}</span>`:''}</b>
-   <div class="vars"><em class="${it.has?'hv':'nw'}">${it.has?'HAR REDAN':'NY'}</em>${it.wotc?`<button data-ed="${it.uid}" class="${it.ed?'on':''}">1st Ed</button>`:''}${it.sid==='base1'?`<button data-sl="${it.uid}" class="${it.sl?'on':''}">Shadowless</button>`:''}<button data-cond="${it.uid}">${CONDN[it.cond]}</button>${alts.map(a=>`<button data-swap="${it.uid}|${a.id}" class="alt">${a.set.replace('Legendary Collection','Legendary C.').replace('Base Set 2','Base 2')}${a.sid===it.sid?' '+a.n:''}${a.tag?' '+a.tag:''}</button>`).join('')}</div></div>
+   <div class="vars"><em class="${it.has?'hv':'nw'}">${it.has?'HAR REDAN':'NY'}</em>${it.wotc?`<button data-ed="${it.uid}" class="${it.ed?'on':''}">1st Ed</button>`:''}${it.sid==='base1'?`<button data-sl="${it.uid}" class="${it.sl?'on':''}">Shadowless</button>`:''}<button data-cond="${it.uid}">${it.cond==='RAW'?'RAW':CONDN[it.cond]}</button>${alts.map(a=>`<button data-swap="${it.uid}|${a.id}" class="alt">${a.set.replace('Legendary Collection','Legendary C.').replace('Base Set 2','Base 2')}${a.sid===it.sid?' '+a.n:''}${a.tag?' '+a.tag:''}</button>`).join('')}</div></div>
    <span class="val">${price(it)!=null?`${price(it).toLocaleString('sv-SE')} kr`:'–'}${it.ed&&!it.r1?'<small>1st-pris saknas</small>':''}<button class="wrong" data-dopen="${it.uid}">Detaljer ›</button></span>`;
   refreshDetail();
 }
@@ -418,6 +419,15 @@ function learn(id,fp){
   L.forEach((p,i)=>SC.idx[id+'#L'+i]=SCAN.unpack(p));
   ls('bdx_learn',LEARN);
 }
+// Osäker: visa gissningen i rutan, öppna förslagen först när man trycker
+function scGuess(b){
+  const el=document.getElementById('schit');if(!el)return;
+  SC.guess={top:b.top,f:b.f};const c=scInfo(b.top&&b.top[0]?b.top[0].id:b.id);
+  scPill('Osäker – tryck på rutan','seen');
+  el.className='schit guess';el.removeAttribute('data-dopen');el.dataset.guess='1';
+  el.innerHTML=`<span class="gimg" data-gimg></span><div class="hm"><small>Osäker – är det här rätt?</small><b>${c.nm||'Okänt kort'}?</b><small>${c.set} · ${c.n}${c.tot?'/'+c.tot:''}</small></div><span class="val"><button class="wrong" data-guess="1">Välj kort ›</button></span>`;
+  scImg(c.id).then(u=>{const e=el.querySelector('[data-gimg]');if(e&&u)e.innerHTML=`<img src="${u}" alt="">`});
+}
 // ---------- Kortdetaljer: allt som hamnar i registret ----------
 const RAN={COMMON:'Common',UNCOMMON:'Uncommon',RARE:'Rare',HOLO:'Rare Holo',PROMO:'Promo',SHINING:'Shining',SECRET:'Secret Rare','DOUBLE RARE':'Double Rare',ULTRA:'Ultra Rare'};
 const verOf=t=>t.ed?'1st Edition':t.sl?'Shadowless':'Unlimited';
@@ -438,15 +448,15 @@ function openDetail(uid){
     ${row('Nummer',`${t.n}${t.tot?' / '+t.tot:''}`)}
     ${row('Sällsynthet',RAN[t.ra]||t.ra||'–')}
     ${row('Version',verOf(t))}
-    ${row('Skick',CONDN[t.cond])}
-    ${row('Värde',p!=null?`<em>~${p.toLocaleString('sv-SE')} kr</em>`:'saknas')}
-    <div class="dsub">Riktpris NM: Unlimited ${t.r!=null?t.r+' kr':'–'}${t.wotc?` · 1st Ed ${t.r1!=null?t.r1+' kr':'–'}`:''}</div>
+    <div class="dr"><span>Skick</span><b class="dsk">${CONDN[t.cond]}</b></div>
+    <div class="dr"><span>Värde</span><b class="dvl">${p!=null?`<em>~${p.toLocaleString('sv-SE')} kr</em>`:'saknas'}</b></div>
+    <div class="dsub">Riktpris (RAW): Unlimited ${t.r!=null?t.r+' kr':'–'}${t.wotc?` · 1st Ed ${t.r1!=null?t.r1+' kr':'–'}`:''}</div>
     ${row('Sparas i',t.has?'Byta (har redan)':'Samlingen (ny)')}
     ${row('Kort-id',`<code>${t.id}</code>`)}
    </div>
   </div>
   ${t.wotc?`<div class="dlab">Version</div><div class="dch">${['Unlimited','1st Edition'].concat(t.sid==='base1'?['Shadowless']:[]).map(v=>`<button data-ver="${uid}|${v}" class="${verOf(t)===v?'on':''}">${v}</button>`).join('')}</div>`:''}
-  <div class="dlab">Skick</div><div class="dch">${COND.map(c=>`<button data-cnd="${uid}|${c}" class="${t.cond===c?'on':''}">${CONDN[c]}</button>`).join('')}</div>
+  <div class="dlab">Skick</div><div class="dscale"><input type="range" min="0" max="${COND.length-1}" step="1" value="${COND.indexOf(t.cond)<0?4:COND.indexOf(t.cond)}" data-cslide="${uid}"><div class="dticks">${COND.map(c=>`<span class="${t.cond===c?'on':''}${c==='RAW'?' raw':''}">${c}</span>`).join('')}</div><div class="dcname"><b>${CONDN[t.cond]}</b> · ${CONDS[t.cond]}${CF[t.cond]!==1?` · ${CF[t.cond]>1?'+':'−'}${Math.round(Math.abs(CF[t.cond]-1)*100)} % mot riktpris`:' · riktpris'}</div></div>
   ${alts.length?`<div class="dlab">Samma bild i andra set</div><div class="dalts">${alts.map(a=>`<button data-swap="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.set}</b><small>${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}${a.r!=null?' · '+a.r+' kr':''}</small></button>`).join('')}</div>`:''}
   <div class="dlab">Antal</div><div class="dqty"><button data-qty="${uid}|-1" aria-label="Färre">−</button><b>${t.q}</b><button data-qty="${uid}|1" aria-label="Fler">+</button></div>
   ${cands.length?`<div class="dlab">Inte detta kort? Välj annat</div><div class="dalts">${cands.map(a=>`<button data-repl="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.nm||'?'}</b><small>${a.set} · ${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}</small></button>`).join('')}</div>`:''}
@@ -546,6 +556,7 @@ function bindScanUI(){
   m.onclick=e=>{
     unlockAudio();
     const q=s=>e.target.closest(s);let t;
+    if(q('[data-guess]')&&SC.guess){scPill('Välj rätt kort');scPick(null,SC.guess.top,SC.guess.f);return}
     if(t=q('[data-dclose]')){closeDetail();return}
     if(t=q('[data-ver]')){const [u,v]=t.dataset.ver.split('|'),it=itemByUid(u);it.ed=v==='1st Edition';it.sl=v==='Shadowless';scImg(it.id,it.ed).then(x=>{it.img=x;scShowHit(it);scTray()});return}
     if(t=q('[data-cnd]')){const [u,c]=t.dataset.cnd.split('|'),it=itemByUid(u);it.cond=c;scShowHit(it);scTray();return}
@@ -560,7 +571,7 @@ function bindScanUI(){
     if(t=q('[data-zoom]')){e.stopPropagation();zoom(t.dataset.zoom);return}
     if(q('#zoom')){document.getElementById('zoom').remove();return}
     if(t=q('[data-sl]')){const it=itemByUid(t.dataset.sl);it.sl=!it.sl;scShowHit(it);scTray();return}
-    if(t=q('[data-cond]')){const it=itemByUid(t.dataset.cond);it.cond=COND[(COND.indexOf(it.cond)+1)%4];scShowHit(it);scTray();return}
+    if(t=q('[data-cond]')){const it=itemByUid(t.dataset.cond);it.cond=COND[(COND.indexOf(it.cond)+1)%COND.length];scShowHit(it);scTray();return}
     if(t=q('[data-swap]')){const [u,to]=t.dataset.swap.split('|');const it=itemByUid(u);if(it){const from=it.id;learn(to,it.f);Object.assign(it,scInfo(to),{alts:[from,...(SC.grp[to]||[]).filter(a=>a!==from&&a!==to)]});scImg(to).then(x=>{it.img=x;scShowHit(it);scTray()})}return}
     if(q('#tgtbtn')){const L=[null,...LST.all().map(l=>l.id)];SC.target=L[(L.indexOf(SC.target||null)+1)%L.length];scTray();return}
     if(e.target.id==='scsave'||q('#scsave2')){scSave();return}
@@ -582,6 +593,11 @@ function bindScanUI(){
     if(q('#sndbtn')){SC.sound=!SC.sound;q('#sndbtn').classList.toggle('off',!SC.sound);try{localStorage.setItem('bdx_snd',SC.sound?'1':'0')}catch(x){}if(SC.sound){unlockAudio();shutter()}return}
     if(q('#torchbtn')){SC.torch=!SC.torch;q('#torchbtn').classList.toggle('on',SC.torch);try{SC.track.applyConstraints({advanced:[{torch:SC.torch}]})}catch(x){}return}
   };
+  m.addEventListener('input',e=>{const r=e.target.closest('[data-cslide]');if(!r)return;const it=itemByUid(r.dataset.cslide);if(!it)return;it.cond=COND[+r.value];
+    const sh=document.getElementById('isheet');sh.querySelectorAll('.dticks span').forEach((x,i)=>x.classList.toggle('on',i===+r.value));
+    sh.querySelector('.dsk').textContent=CONDN[it.cond];const p=price(it);sh.querySelector('.dvl').innerHTML=p!=null?`<em>~${p.toLocaleString('sv-SE')} kr</em>`:'saknas';
+    sh.querySelector('.dcname').innerHTML=`<b>${CONDN[it.cond]}</b> · ${CONDS[it.cond]}${CF[it.cond]!==1?` · ${CF[it.cond]>1?'+':'−'}${Math.round(Math.abs(CF[it.cond]-1)*100)} % mot riktpris`:' · riktpris'}`});
+  m.addEventListener('change',e=>{const r=e.target.closest('[data-cslide]');if(!r)return;const it=itemByUid(r.dataset.cslide);if(it){scShowHit(it);scTray()}});
   ['scfile','scfile2'].forEach(i=>{const el=document.getElementById(i);if(el)el.onchange=()=>scPhoto(el.files[0])});
 }
 
