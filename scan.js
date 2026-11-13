@@ -2,6 +2,7 @@
 const SC={idx:null,grp:{},ra:{},pr:{},back:null,stream:null,track:null,timer:null,last:null,streak:0,lock:null,tray:[],simg:{},oimg:null,uid:0,mode:'one',sound:true,torch:false,lastF:null,page:null};
 const CODE2S={base1:'base',base2:'jungle',base3:'fossil',base5:'rocket'};
 const COND=['NM','LP','MP','HP'];
+const CONDN={NM:'Near Mint',LP:'Lightly Played',MP:'Moderately Played',HP:'Heavily Played'};
 let EXTRA={},LEARN={},VARS={};
 try{EXTRA=JSON.parse(localStorage.getItem('bdx_extra')||'{}');LEARN=JSON.parse(localStorage.getItem('bdx_learn')||'{}');VARS=JSON.parse(localStorage.getItem('bdx_var')||'{}');SC.sound=localStorage.getItem('bdx_snd')!=='0'}catch(e){}
 const ls=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
@@ -244,7 +245,7 @@ function scShowHit(it){
   el.innerHTML=`${it.img?`<img src="${it.img}" alt="">`:''}<div class="hm">
    <small>${it.set} · ${it.n}${it.tot?'/'+it.tot:''}</small>
    <b>${it.nm||'Okänt namn'}${it.tag?` <span class="vt">${it.tag}</span>`:''}</b>
-   <div class="vars"><em class="${it.has?'hv':'nw'}">${it.has?'HAR REDAN':'NY'}</em>${it.wotc?`<button data-ed="${it.uid}" class="${it.ed?'on':''}">1st Ed</button>`:''}${it.sid==='base1'?`<button data-sl="${it.uid}" class="${it.sl?'on':''}">Shadowless</button>`:''}<button data-cond="${it.uid}">${it.cond}</button>${alts.map(a=>`<button data-swap="${it.uid}|${a.id}" class="alt">${a.set.replace('Legendary Collection','Legendary C.').replace('Base Set 2','Base 2')}${a.sid===it.sid?' '+a.n:''}${a.tag?' '+a.tag:''}</button>`).join('')}</div></div>
+   <div class="vars"><em class="${it.has?'hv':'nw'}">${it.has?'HAR REDAN':'NY'}</em>${it.wotc?`<button data-ed="${it.uid}" class="${it.ed?'on':''}">1st Ed</button>`:''}${it.sid==='base1'?`<button data-sl="${it.uid}" class="${it.sl?'on':''}">Shadowless</button>`:''}<button data-cond="${it.uid}">${CONDN[it.cond]}</button>${alts.map(a=>`<button data-swap="${it.uid}|${a.id}" class="alt">${a.set.replace('Legendary Collection','Legendary C.').replace('Base Set 2','Base 2')}${a.sid===it.sid?' '+a.n:''}${a.tag?' '+a.tag:''}</button>`).join('')}</div></div>
    <span class="val">${price(it)!=null?`${price(it).toLocaleString('sv-SE')} kr`:'–'}${it.ed&&!it.r1?'<small>1st-pris saknas</small>':''}<button class="wrong" data-wrong="${it.uid}">Fel kort?</button></span>`;
 }
 function scTray(){
@@ -253,7 +254,7 @@ function scTray(){
   if(D){D.innerHTML=SC.tray.map(t=>`<div class="dc${t.has?' hv':''}" data-wrong="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:`<span class="ph2">${t.nm}</span>`}${t.has?'':'<i class="nw">NY</i>'}${t.ed?'<i class="ed">1st</i>':''}<small>${price(t)!=null?price(t)+' kr':'–'}</small></div>`).join('')+(SC.tray.length?`<button class="dc save" id="scsave2">Spara<br>${n} st</button>`:'');D.classList.toggle('on',SC.tray.length>0)}
   document.getElementById('traycount').textContent=n;document.getElementById('traysum').textContent=n?` · ${sum.toLocaleString('sv-SE')} kr${nw?` · ${nw} nya`:''}`:'';
   const L=document.getElementById('traylist');if(!L)return;
-  L.innerHTML=SC.tray.map(t=>`<div class="ti">${t.img?`<img src="${t.img}" alt="">`:'<span></span>'}<div><b>${t.nm}${t.tag?` <span class="vt">${t.tag}</span>`:''}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''}${t.sl?' · Shadowless':''} · ${t.cond} · ${t.has?'dubblett → byten':'<b class="nwt">ny</b>'}</small></div><span class="r">${price(t)!=null?price(t)+' kr':'–'}</span><button data-rm="${t.uid}" aria-label="Ta bort">×</button></div>`).join('')||'<div class="lnote" style="margin:8px 0">Korten du skannar hamnar här.</div>';
+  L.innerHTML=SC.tray.map(t=>`<div class="ti">${t.img?`<img src="${t.img}" alt="">`:'<span></span>'}<div><b>${t.nm}${t.tag?` <span class="vt">${t.tag}</span>`:''}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''}${t.sl?' · Shadowless':''} · ${CONDN[t.cond]} · ${t.has?'dubblett → byten':'<b class="nwt">ny</b>'}</small></div><span class="r">${price(t)!=null?price(t)+' kr':'–'}</span><button data-rm="${t.uid}" aria-label="Ta bort">×</button></div>`).join('')||'<div class="lnote" style="margin:8px 0">Korten du skannar hamnar här.</div>';
   document.getElementById('scsave').disabled=!SC.tray.length;
 }
 let TRADE=[];try{TRADE=JSON.parse(localStorage.getItem('bdx_trade')||'[]')}catch(e){}

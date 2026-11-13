@@ -557,7 +557,7 @@ function renderTrade(){
   return `<div class="shead"><div><small>Dubbletter att byta bort</small><h1>Byten</h1></div></div>
   <div class="filters" style="margin-bottom:12px"><a class="chip" href="#lista">Att köpa</a><a class="chip on" href="#byten">Byteshög</a></div>
   ${kpis([['Kort i högen',T.length,''],['Bytesvärde',kr(sum),'riktpris',1]])}
-  ${T.length?`<div class="litems">${T.map((t,i)=>`<div class="li"><div class="tc h"><img loading="lazy" data-tid="${t.id}" alt=""></div><div class="lmid"><b>${t.nm}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''} · ${t.cond}</small></div><div class="kr"><b>${t.r!=null?t.r+' kr':'–'}</b><button class="trb" data-trm="${i}">Ta bort</button></div></div>`).join('')}</div>`:'<div class="lnote">Högen är tom. Dubbletter du skannar hamnar här när du sparar.</div>'}`;
+  ${T.length?`<div class="litems">${T.map((t,i)=>`<div class="li"><div class="tc h"><img loading="lazy" data-tid="${t.id}" alt=""></div><div class="lmid"><b>${t.nm}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''} · ${({NM:'Near Mint',LP:'Lightly Played',MP:'Moderately Played',HP:'Heavily Played'})[t.cond]||t.cond}</small></div><div class="kr"><b>${t.r!=null?t.r+' kr':'–'}</b><button class="trb" data-trm="${i}">Ta bort</button></div></div>`).join('')}</div>`:'<div class="lnote">Högen är tom. Dubbletter du skannar hamnar här när du sparar.</div>'}`;
 }
 function renderList(){
   const items=DATA.cards.filter(c=>P[key(c)]&&!has(c)&&st(c)!=='v');
