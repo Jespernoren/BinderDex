@@ -432,6 +432,8 @@ body.scanmode{background:#000}
 .cand.last{justify-content:center;gap:10px;min-height:220px}
 .cand .lb{width:100%;border:0;border-radius:10px;padding:11px;font:700 14px inherit;font-family:inherit;background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 .psearch.hide{display:none}
+.genseg{max-width:360px;margin:0 0 12px;flex-direction:row!important}.genseg a{text-align:center!important}
+.tc.h .bd{background:var(--har)}
 .sokq{width:100%;box-sizing:border-box;border:0;border-radius:14px;background:var(--card);box-shadow:var(--sh);padding:14px 16px;font:500 17px inherit;font-family:inherit;color:var(--ink);outline:none}
 .sokq:focus{box-shadow:0 0 0 2px var(--ink)}
 .gcard.sr{cursor:pointer}.gcard.miss .ci2 img{filter:grayscale(1);opacity:.45}
@@ -651,12 +653,44 @@ function pass(c){
   return true;
 }
 
+let G2=null;const NEO=[['neo1','Genesis'],['neo2','Discovery'],['neo3','Revelation'],['neo4','Destiny']];
+const genSeg=g=>`<div class="seg genseg"><a href="#pokedex" class="${g===1?'on':''}">Gen 1 · 151</a><a href="#gen2" class="${g===2?'on':''}">Gen 2 · 100</a></div>`;
+async function showGen2(m){
+  m.innerHTML=genSeg(2)+'<div class="lnote">Laddar Gen 2…</div>';
+  try{
+    G2=G2||await fetch('gen2.json').then(r=>r.json());
+    if(typeof scLoadIdx==='function')await scLoadIdx().catch(()=>{});
+  }catch(e){m.innerHTML=genSeg(2)+'<div class="lnote">Kunde inte läsa Gen 2-data.</div>';return}
+  if(location.hash!=='#gen2')return;
+  const own={};for(const [sid] of NEO)own[sid]=new Set(ownOf(sid).map(c=>String(c.n)));
+  const SETNM=Object.fromEntries(DB.sets.map(x=>[x.id,x.nm]));
+  const other={};for(const k in G2.odex){const sid=k.slice(0,k.indexOf('-'));if(NEO.some(n=>n[0]===sid))continue;(other[G2.odex[k]]=other[G2.odex[k]]||new Set()).add(SETNM[sid]||sid)}
+  try{for(const id in EXTRA){const sid=id.slice(0,id.indexOf('-'));const c=(DB.cards[sid]||[]).find(c=>sid+'-'+c[0]===id);if(c&&c[3]>=152&&c[3]<=251&&!NEO.some(n=>n[0]===sid))(other[c[3]]=other[c[3]]||new Set()).add(SETNM[sid])}}catch(e){}
+  let have=0,rows='';const per=NEO.map(()=>[0,0]);
+  for(let d=152;d<=251;d++){
+    const nm=G2.names[d]||'?';let any=false,cells='';
+    NEO.forEach(([sid],i)=>{const cs=(DB.cards[sid]||[]).filter(c=>c[3]===d);
+      cells+=cs.length?`<div class="cell">${cs.map(c=>{const h=own[sid].has(c[0]);per[i][1]++;if(h){per[i][0]++;any=true}const p=(SC.pr||{})[sid+'-'+c[0]]||[];
+        return `<div class="tc ${h?'h':'m'}" data-g2="${sid}|${c[0]}"><img loading="lazy" data-g2img="${sid}-${c[0]}" alt="${c[1]}"><span class="nr">${c[0]}</span>${h?'<span class="bd">✓</span>':''}${!h&&p[0]!=null?`<span class="rkv">${p[0]} kr</span>`:''}</div>`}).join('')}</div>`:'<div class="cell none">–</div>'});
+    const oth=other[d];if(oth&&oth.size)any=true;if(any)have++;
+    if(hideDone&&any)continue;
+    rows+=`<div class="row"><div class="lab"><span class="dot" style="background:${any?'var(--har)':'var(--acc)'}"></span><span class="no">#${d}</span><span class="nm">${nm}</span>${oth&&oth.size&&!NEO.some(([sid])=>0)?`<span class="oth">Har i: ${[...oth].slice(0,2).join(', ')}</span>`:''}</div>${cells}</div>`;
+  }
+  const pc=x=>Math.round(x*100);
+  m.style.setProperty('--nc',4);
+  m.innerHTML=genSeg(2)+`<div class="prog2" style="margin:0 0 14px"><div class="hero"><div><small>Gen 2 · arter</small><b>${have}<span>/100</span></b></div><div class="ring" style="--p:${have}"><span>${have}%</span></div></div>
+   <div class="tiles">${NEO.map(([sid,l],i)=>`<a class="pt" href="#set-${sid}"><b>${l}</b><span class="pp">${per[i][1]?pc(per[i][0]/per[i][1]):0}%</span><span class="bar"><i style="width:${per[i][1]?per[i][0]/per[i][1]*100:0}%"></i></span><small>${per[i][0]}/${per[i][1]} kort</small></a>`).join('')}</div></div>
+   <div class="dexgrid"><div class="colhead">${NEO.map(n=>`<div>${n[1]}</div>`).join('')}</div>${rows}</div>`;
+  m.onclick=e=>{const t=e.target.closest('[data-g2]');if(t)openLib(t.dataset.g2)};
+  for(const [sid] of NEO){SIMG[sid]=SIMG[sid]||await fetch('simg/'+sid+'.json').then(r=>r.json()).catch(()=>({}));
+    m.querySelectorAll(`[data-g2img^="${sid}-"]`).forEach(i=>{const n=i.dataset.g2img.slice(sid.length+1);if(SIMG[sid][n])i.src=SIMG[sid][n]})}
+}
 function renderDex(){
   const cols=colmode==='prio'?PCOLS:Object.keys(SETS).map(s=>[s==='base'?'Base':SETS[s].name.replace('Team ',''),c=>c.s===s,`var(--${s})`]);
   document.getElementById('main').style.setProperty('--nc',cols.length);
   let hidden=0;
   const ch=`${cols.map(c=>`<div style="color:${c[2]}">${c[0]}</div>`).join('')}`;
-  let h=`<div class="dexgrid"><div class="colhead">${ch}</div><div class="colhead c2">${ch}</div>`;
+  let h=genSeg(1)+`<div class="dexgrid"><div class="colhead">${ch}</div><div class="colhead c2">${ch}</div>`;
   for(const d of DATA.dex){
     const cs=DATA.cards.filter(c=>c.d===d.d);
     const anyHave=cs.some(has), anyComing=cs.some(c=>st(c)==='v');
@@ -793,6 +827,7 @@ function render(){
     m.onclick=e=>{const f=e.target.closest('[data-sf]');if(f){SOKF=f.dataset.sf;m.querySelectorAll('[data-sf]').forEach(x=>x.classList.toggle('on',x===f));doSearch();return}
       const c=e.target.closest('[data-sid]');if(!c)return;const id=c.dataset.sid,sid=id.slice(0,id.indexOf('-')),n=id.slice(id.indexOf('-')+1);
       const S2={base1:'base',base2:'jungle',base3:'fossil',base5:'rocket'}[sid];if(S2)open_(S2+'-'+n);else openLib(sid+'|'+n)};return;}
+  if(v==='gen2'){['colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.getElementById('hidesw').classList.remove('hide');document.getElementById('hidesw').classList.toggle('on',hideDone);document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='pokedex'));const m=document.getElementById('main');m.classList.remove('pm');showGen2(m);return;}
   if(v==='byten'){['hidesw','colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='lista'));const m=document.getElementById('main');m.classList.remove('pm');m.innerHTML=renderTrade();m.querySelectorAll('[data-tid]').forEach(i=>scImg(i.dataset.tid).then(u=>{if(u)i.src=u}));m.onclick=e=>{const b=e.target.closest('[data-trm]');if(b){let T=JSON.parse(localStorage.getItem('bdx_trade')||'[]');T.splice(+b.dataset.trm,1);localStorage.setItem('bdx_trade',JSON.stringify(T));render()}};return;}
   if(v==='samling'||v.startsWith('set-')){['hidesw','colsw','infobtn'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');renderLib(v);return;}
   document.getElementById('prog').classList.remove('hide');document.querySelector('.legend').classList.remove('hide');document.getElementById('filters').classList.remove('hide');document.getElementById('pfilters').classList.remove('hide');
