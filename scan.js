@@ -174,6 +174,7 @@ function renderScan(){
       </div>
     </div>
     <div class="tray" id="pick"></div>
+    <div class="tray" id="isheet"></div>
     <div class="tray" id="tray"><div class="trayhd"><b>Skannade</b><button id="trayclose" aria-label="Stäng">×</button></div><div id="traylist"></div>
       <button class="savebtn" id="scsave" disabled>Spara i samlingen</button></div>
   </div>`;
@@ -361,20 +362,21 @@ function itemByUid(u){return SC.tray.find(t=>t.uid===+u)}
 function scShowHit(it){
   const el=document.getElementById('schit');if(!el||!it)return;
   const alts=(it.alts||[]).map(a=>scInfo(a));
-  el.className='schit';el.dataset.uid=it.uid;
+  el.className='schit';el.dataset.uid=it.uid;el.dataset.dopen=it.uid;
   el.innerHTML=`${it.img?`<img src="${it.img}" alt="" data-zoom="${it.img}">`:''}<div class="hm">
-   <small>${it.set} · ${it.n}${it.tot?'/'+it.tot:''}</small>
+   <small>${it.set} · ${it.n}${it.tot?'/'+it.tot:''} · ${verOf(it)} · ${it.cond}</small>
    <b>${it.nm||'Okänt namn'}${it.tag?` <span class="vt">${it.tag}</span>`:''}</b>
    <div class="vars"><em class="${it.has?'hv':'nw'}">${it.has?'HAR REDAN':'NY'}</em>${it.wotc?`<button data-ed="${it.uid}" class="${it.ed?'on':''}">1st Ed</button>`:''}${it.sid==='base1'?`<button data-sl="${it.uid}" class="${it.sl?'on':''}">Shadowless</button>`:''}<button data-cond="${it.uid}">${CONDN[it.cond]}</button>${alts.map(a=>`<button data-swap="${it.uid}|${a.id}" class="alt">${a.set.replace('Legendary Collection','Legendary C.').replace('Base Set 2','Base 2')}${a.sid===it.sid?' '+a.n:''}${a.tag?' '+a.tag:''}</button>`).join('')}</div></div>
-   <span class="val">${price(it)!=null?`${price(it).toLocaleString('sv-SE')} kr`:'–'}${it.ed&&!it.r1?'<small>1st-pris saknas</small>':''}<button class="wrong" data-wrong="${it.uid}">Fel kort?</button></span>`;
+   <span class="val">${price(it)!=null?`${price(it).toLocaleString('sv-SE')} kr`:'–'}${it.ed&&!it.r1?'<small>1st-pris saknas</small>':''}<button class="wrong" data-dopen="${it.uid}">Detaljer ›</button></span>`;
+  refreshDetail();
 }
 function scTray(){
   const D=document.getElementById('deck');
   const n=SC.tray.reduce((a,t)=>a+t.q,0),sum=SC.tray.reduce((a,t)=>a+(price(t)||0)*t.q,0),nw=SC.tray.filter(t=>!t.has).length;
-  if(D){D.innerHTML=(SC.tray.length?`<button class="dc tgt" id="tgtbtn">Lägg även i<br><b>${SC.target?LST.name(SC.target):'ingen lista'}</b></button>`:'')+SC.tray.map(t=>`<div class="dc${t.has?' hv':''}" data-wrong="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:`<span class="ph2">${t.nm}</span>`}${t.has?'':'<i class="nw">NY</i>'}${t.ed?'<i class="ed">1st</i>':''}<small>${price(t)!=null?price(t)+' kr':'–'}</small></div>`).join('')+(SC.tray.length?`<button class="dc save" id="scsave2">Spara<br>${n} st</button>`:'');D.classList.toggle('on',SC.tray.length>0)}
+  if(D){D.innerHTML=(SC.tray.length?`<button class="dc tgt" id="tgtbtn">Lägg även i<br><b>${SC.target?LST.name(SC.target):'ingen lista'}</b></button>`:'')+SC.tray.map(t=>`<div class="dc${t.has?' hv':''}" data-dopen="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:`<span class="ph2">${t.nm}</span>`}${t.has?'':'<i class="nw">NY</i>'}${t.ed?'<i class="ed">1st</i>':''}<small>${price(t)!=null?price(t)+' kr':'–'}</small></div>`).join('')+(SC.tray.length?`<button class="dc save" id="scsave2">Spara<br>${n} st</button>`:'');D.classList.toggle('on',SC.tray.length>0)}
   document.getElementById('traycount').textContent=n;document.getElementById('traysum').textContent=n?` · ${sum.toLocaleString('sv-SE')} kr${nw?` · ${nw} nya`:''}`:'';
   const L=document.getElementById('traylist');if(!L)return;
-  L.innerHTML=SC.tray.map(t=>`<div class="ti">${t.img?`<img src="${t.img}" alt="">`:'<span></span>'}<div><b>${t.nm}${t.tag?` <span class="vt">${t.tag}</span>`:''}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''}${t.sl?' · Shadowless':''} · ${CONDN[t.cond]} · ${t.has?'dubblett → byten':'<b class="nwt">ny</b>'}</small></div><span class="r">${price(t)!=null?price(t)+' kr':'–'}</span><button data-rm="${t.uid}" aria-label="Ta bort">×</button></div>`).join('')||'<div class="lnote" style="margin:8px 0">Korten du skannar hamnar här.</div>';
+  L.innerHTML=SC.tray.map(t=>`<div class="ti" data-dopen="${t.uid}">${t.img?`<img src="${t.img}" alt="">`:'<span></span>'}<div><b>${t.nm}${t.tag?` <span class="vt">${t.tag}</span>`:''}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''}${t.sl?' · Shadowless':''} · ${CONDN[t.cond]} · ${t.has?'dubblett → byten':'<b class="nwt">ny</b>'}</small></div><span class="r">${price(t)!=null?price(t)+' kr':'–'}</span><button data-rm="${t.uid}" aria-label="Ta bort">×</button></div>`).join('')||'<div class="lnote" style="margin:8px 0">Korten du skannar hamnar här.</div>';
   document.getElementById('scsave').disabled=!SC.tray.length;
 }
 const TRADE={unshift:e=>LST.add('byta',e)};
@@ -416,6 +418,40 @@ function learn(id,fp){
   L.forEach((p,i)=>SC.idx[id+'#L'+i]=SCAN.unpack(p));
   ls('bdx_learn',LEARN);
 }
+// ---------- Kortdetaljer: allt som hamnar i registret ----------
+const RAN={COMMON:'Common',UNCOMMON:'Uncommon',RARE:'Rare',HOLO:'Rare Holo',PROMO:'Promo',SHINING:'Shining',SECRET:'Secret Rare','DOUBLE RARE':'Double Rare',ULTRA:'Ultra Rare'};
+const verOf=t=>t.ed?'1st Edition':t.sl?'Shadowless':'Unlimited';
+function openDetail(uid){
+  const t=itemByUid(uid);const el=document.getElementById('isheet');if(!t||!el)return;
+  el.dataset.uid=uid;
+  const alts=(t.alts||[]).map(a=>scInfo(a));
+  const row=(k,v)=>`<div class="dr"><span>${k}</span><b>${v}</b></div>`;
+  const p=price(t);
+  el.innerHTML=`<div class="trayhd"><b>${t.nm||'Okänt kort'}</b><button data-dclose aria-label="Stäng">×</button></div>
+  <div class="dbody">
+   <div class="dimg">${t.img?`<img src="${t.img}" alt="" data-zoom="${t.img}">`:''}${t.tag?`<span class="vt">${t.tag}</span>`:''}</div>
+   <div class="dtab">
+    ${row('Serie',`${t.set}${t.yr?' · '+t.yr:''}`)}
+    ${row('Nummer',`${t.n}${t.tot?' / '+t.tot:''}`)}
+    ${row('Sällsynthet',RAN[t.ra]||t.ra||'–')}
+    ${row('Version',verOf(t))}
+    ${row('Skick',CONDN[t.cond])}
+    ${row('Värde',p!=null?`<em>~${p.toLocaleString('sv-SE')} kr</em>`:'saknas')}
+    <div class="dsub">Riktpris NM: Unlimited ${t.r!=null?t.r+' kr':'–'}${t.wotc?` · 1st Ed ${t.r1!=null?t.r1+' kr':'–'}`:''}</div>
+    ${row('Sparas i',t.has?'Byta (har redan)':'Samlingen (ny)')}
+    ${row('Kort-id',`<code>${t.id}</code>`)}
+   </div>
+  </div>
+  ${t.wotc?`<div class="dlab">Version</div><div class="dch">${['Unlimited','1st Edition'].concat(t.sid==='base1'?['Shadowless']:[]).map(v=>`<button data-ver="${uid}|${v}" class="${verOf(t)===v?'on':''}">${v}</button>`).join('')}</div>`:''}
+  <div class="dlab">Skick</div><div class="dch">${COND.map(c=>`<button data-cnd="${uid}|${c}" class="${t.cond===c?'on':''}">${CONDN[c]}</button>`).join('')}</div>
+  ${alts.length?`<div class="dlab">Samma bild i andra set</div><div class="dalts">${alts.map(a=>`<button data-swap="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.set}</b><small>${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}${a.r!=null?' · '+a.r+' kr':''}</small></button>`).join('')}</div>`:''}
+  <div class="dlab">Antal</div><div class="dqty"><button data-qty="${uid}|-1" aria-label="Färre">−</button><b>${t.q}</b><button data-qty="${uid}|1" aria-label="Fler">+</button></div>
+  <div class="dact"><button data-dwrong="${uid}">Fel kort – välj annat</button><button class="rm" data-drm="${uid}">Ta bort</button></div>`;
+  el.classList.add('open');
+  for(const a of alts)scImg(a.id).then(u=>{const e=el.querySelector(`[data-aimg="${a.id}"]`);if(e&&u)e.innerHTML=`<img src="${u}" alt="">`});
+}
+function refreshDetail(){const el=document.getElementById('isheet');if(el&&el.classList.contains('open'))openDetail(el.dataset.uid)}
+function closeDetail(){const el=document.getElementById('isheet');if(el)el.classList.remove('open')}
 // ---------- Välj rätt kort ----------
 async function scPick(uid,topIn,f){
   const it=uid?itemByUid(uid):null;
@@ -506,6 +542,12 @@ function bindScanUI(){
   m.onclick=e=>{
     unlockAudio();
     const q=s=>e.target.closest(s);let t;
+    if(t=q('[data-dclose]')){closeDetail();return}
+    if(t=q('[data-ver]')){const [u,v]=t.dataset.ver.split('|'),it=itemByUid(u);it.ed=v==='1st Edition';it.sl=v==='Shadowless';scImg(it.id,it.ed).then(x=>{it.img=x;scShowHit(it);scTray()});return}
+    if(t=q('[data-cnd]')){const [u,c]=t.dataset.cnd.split('|'),it=itemByUid(u);it.cond=c;scShowHit(it);scTray();return}
+    if(t=q('[data-qty]')){const [u,d]=t.dataset.qty.split('|'),it=itemByUid(u);it.q=Math.max(1,it.q+ +d);scShowHit(it);scTray();return}
+    if(t=q('[data-dwrong]')){closeDetail();scPick(t.dataset.dwrong);return}
+    if(t=q('[data-drm]')){SC.tray=SC.tray.filter(x=>x.uid!==+t.dataset.drm);closeDetail();scTray();const f=SC.tray[0];f?scShowHit(f):scEmpty('Kortet togs bort');return}
     if(t=q('[data-rm]')){SC.tray=SC.tray.filter(x=>x.uid!==+t.dataset.rm);scTray();return}
     if(t=q('[data-ed]')){const it=itemByUid(t.dataset.ed);it.ed=!it.ed;scImg(it.id,it.ed).then(u=>{it.img=u;scShowHit(it);scTray()});return}
     if(t=q('[data-zoom]')){e.stopPropagation();zoom(t.dataset.zoom);return}
@@ -516,6 +558,7 @@ function bindScanUI(){
     if(q('#tgtbtn')){const L=[null,...LST.all().map(l=>l.id)];SC.target=L[(L.indexOf(SC.target||null)+1)%L.length];scTray();return}
     if(e.target.id==='scsave'||q('#scsave2')){scSave();return}
     if(t=q('[data-zoomid]')){const im=document.querySelector(`[data-cimg="${t.dataset.zoomid}"] img`);if(im)zoom(im.src);return}
+    if(t=q('[data-dopen]')){if(q('[data-ed],[data-sl],[data-cond],[data-swap],[data-zoom]'))return;document.getElementById('tray').classList.remove('open');openDetail(t.dataset.dopen);return}
     if(t=q('[data-choose]')){scChoose(t.dataset.choose);return}
     if(t=q('[data-wrong]')){scPick(t.dataset.wrong);return}
     if(q('[data-psearch]')){document.getElementById('psearch').classList.remove('hide');document.getElementById('pq').focus();return}

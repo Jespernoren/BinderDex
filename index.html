@@ -419,6 +419,27 @@ body.scanmode{background:#000}
 .pr2 b{font-size:14px}.pr2 small{grid-row:2;font-size:12px;color:var(--mute)}.pr2 span{grid-row:1/3;grid-column:2;align-self:center;font-weight:700;font-size:13px}
 .skip{width:100%;margin-top:12px;border:0;border-radius:14px;padding:13px;font:700 14px inherit;font-family:inherit;background:var(--bg);color:var(--ink2)}
 #pick{z-index:61}
+#isheet{z-index:62;max-height:86%;overflow:auto}
+#isheet .dbody{display:flex;gap:14px;padding:4px 0}
+#isheet .dimg{flex:none;width:38%;max-width:170px;position:relative}#isheet .dimg img{width:100%;border-radius:8px;display:block;cursor:zoom-in;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+#isheet .dimg .vt{position:absolute;left:6px;top:6px}
+#isheet .dtab{flex:1;min-width:0;font-size:13px}
+#isheet .dr{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.07)}
+#isheet .dr span{color:var(--mute)}#isheet .dr b{text-align:right;font-weight:700}#isheet .dr em{font-style:normal;color:var(--acc);font-weight:800}
+#isheet .dr code{font-size:11.5px;opacity:.8}
+#isheet .dsub{font-size:11.5px;color:var(--mute);padding:3px 0 5px;border-bottom:1px solid rgba(0,0,0,.07)}
+#isheet .dlab{padding:12px 0 6px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+#isheet .dch{display:flex;flex-wrap:wrap;gap:6px}
+#isheet .dch button{border:1px solid rgba(0,0,0,.15);background:transparent;color:inherit;border-radius:999px;padding:8px 12px;font:inherit;font-size:13px;font-weight:600}
+#isheet .dch button.on{background:#111;color:#fff;border-color:#111}
+#isheet .dalts{display:flex;gap:8px;overflow-x:auto}
+#isheet .dalts button{flex:none;width:96px;background:rgba(0,0,0,.05);border:0;border-radius:10px;padding:6px;color:inherit;text-align:left;font:inherit}
+#isheet .dalts .ci{display:block;aspect-ratio:63/88;border-radius:5px;overflow:hidden;background:rgba(0,0,0,.06);margin-bottom:4px}#isheet .dalts img{width:100%;display:block}
+#isheet .dalts b{display:block;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#isheet .dalts small{font-size:10.5px;color:var(--mute)}
+#isheet .dqty{display:flex;align-items:center;gap:14px}#isheet .dqty button{width:40px;height:40px;border-radius:50%;border:1px solid rgba(0,0,0,.18);background:transparent;color:inherit;font-size:20px}#isheet .dqty b{font-size:18px;min-width:20px;text-align:center}
+#isheet .dact{display:flex;gap:8px;padding-top:16px}
+#isheet .dact button{flex:1;padding:13px;border-radius:12px;border:0;background:#111;color:#fff;font:inherit;font-weight:700}#isheet .dact .rm{flex:none;background:transparent;color:#d7262e;border:1px solid rgba(215,38,46,.4)}
+.schit[data-dopen]{cursor:pointer}.ti[data-dopen]{cursor:pointer}
 #pick .trayhd button[data-pclose]::after{content:'';}
 .pick-hint{font-size:12px;color:var(--mute);text-align:center;margin:-4px 0 8px}
 .deck{position:absolute;left:0;right:0;bottom:88px;display:flex;gap:8px;overflow-x:auto;padding:0 12px 4px;scroll-snap-type:x mandatory;scrollbar-width:none;z-index:3;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -960,6 +981,6 @@ Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.jso
 </script>
 <script src="quad.js?v=1"></script>
 <script src="scancore.js?v=3"></script>
-<script src="scan.js?v=8"></script>
+<script src="scan.js?v=9"></script>
 </body>
 </html>
