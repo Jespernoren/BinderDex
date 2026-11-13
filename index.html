@@ -502,7 +502,8 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 const SETS={base:{code:'base1',name:'Base Set',tot:102},jungle:{code:'base2',name:'Jungle',tot:64},fossil:{code:'base3',name:'Fossil',tot:62},rocket:{code:'base5',name:'Team Rocket',tot:82}};
 const STL={h:'Har',e1:'Har (1st Ed)',v:'På väg',f:'Förfrågan',m:'Saknas'};
 const BD={h:'✓',e1:'1st',v:'VÄG',f:'?'};
-let DATA,OV={};
+let DATA,OV={},IMGU={};
+const uimg=(c,ed)=>{const k=SETS[c.s].code+'-'+c.n;return (!ed&&IMGU[k])||'img/'+k+'.webp'};
 try{OV=JSON.parse(localStorage.getItem('pk151ov')||'{}')}catch(e){OV={}}
 const key=c=>c.s+'-'+c.n;
 const st=c=>OV[key(c)]||c.st;
@@ -515,7 +516,7 @@ const pp=c=>!pf||pr(c)===pf;
 function thumb(c,big){
   const s=st(c),cls=(s==='e1'?'e1':s);
   return `<div class="tc ${cls}" data-k="${key(c)}">
-    <img loading="lazy" src="${s==='e1'||c.s==='base'?'img':'imgu'}/${SETS[c.s].code}-${c.n}.webp" alt="${c.nm} ${c.n}/${SETS[c.s].tot}">
+    <img loading="lazy" src="${uimg(c,s==='e1')}" alt="${c.nm} ${c.n}/${SETS[c.s].tot}">
     <span class="nr">${c.n}</span>${P[key(c)]&&!has(c)&&st(c)!=='v'?`<span class="pr p${P[key(c)]}">P${P[key(c)]}</span>`:''}
     ${(s!=='m'&&s!=='f')?`<span class="bd">${BD[s]}</span>`:''}
     <span class="rkv">${c.r} kr</span>
@@ -773,7 +774,7 @@ function open_(k){
   const c=DATA.cards.find(x=>key(x)===k);if(!c)return;
   const s=st(c),q=encodeURIComponent(`${c.nm.replace(/ [♂♀]/,'')} ${c.n}/${SETS[c.s].tot}`);
   document.getElementById('sheet').innerHTML=`
-    <img src="${st(c)==='e1'||c.s==='base'?'img':'imgu'}/${SETS[c.s].code}-${c.n}.webp" alt="${c.nm}">
+    <img src="${uimg(c,st(c)==='e1')}" alt="${c.nm}">
     <h3>${c.nm}</h3>
     <div class="sub">${SETS[c.s].name} · ${c.n}/${SETS[c.s].tot}${c.d?` · Pokédex #${c.d}`:''}<br>Riktpris ~${c.r} kr · max ${mx(c)} kr</div>
     <div class="btns">${['h','v','f','m'].map(x=>`<button data-s="${x}" class="${(s===x||(x==='h'&&s==='e1'))?'on':''}">${STL[x]}</button>`).join('')}</div>
@@ -806,7 +807,7 @@ function placeNav(){const n=document.getElementById('nav'),hd=document.getElemen
 placeNav();MQ.addEventListener('change',()=>{placeNav();render()});
 window.addEventListener('resize',()=>document.documentElement.style.setProperty('--hh',document.getElementById('hdr').offsetHeight+'px'));
 
-Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.json())]).then(([d,b])=>{DATA=d;DB=b;render()}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
+Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.json())]).then(([d,b])=>{DATA=d;DB=b;render()});fetch('imgu.json').then(r=>r.json()).then(j=>{IMGU=j;if(DATA&&location.hash!=='#scan')render()}).catch(()=>{}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
 </script>
 <script src="scancore.js"></script>
 <script src="scan.js"></script>

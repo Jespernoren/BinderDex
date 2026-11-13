@@ -39,7 +39,7 @@ const CF={NM:1,LP:.85,MP:.65,HP:.45};
 const price=t=>{const p=t.ed&&t.r1?t.r1:t.r;return p==null?null:Math.max(1,Math.round(p*(CF[t.cond]||1)))};
 async function scImg(id,ed){
   id=base(id);const sid=id.slice(0,id.indexOf('-')),n=id.slice(id.indexOf('-')+1);
-  if(CODE2S[sid])return `${ed||sid==='base1'?'img':'imgu'}/${id}.webp`;
+  if(CODE2S[sid])return (!ed&&IMGU[id])||`img/${id}.webp`;
   if(['basep','base4','base6','gym1','gym2','neo1','neo2','neo3','neo4'].includes(sid)){
     SC.simg[sid]=SC.simg[sid]||await fetch('simg/'+sid+'.json').then(r=>r.json()).catch(()=>({}));
     if(SC.simg[sid][n])return SC.simg[sid][n];
