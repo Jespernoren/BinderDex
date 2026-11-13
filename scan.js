@@ -85,6 +85,56 @@ function refine(src,r,SW,SH,pad=.16){
   if(asp<.62||asp>.82||rh<gh*.5)return null;
   return [rx,ry,rw,rh];
 }
+
+// Leta efter kortet i hela bilden (om det inte ligger i ramen)
+const swv=document.createElement('canvas'),swx=swv.getContext('2d',{willReadFrequently:true});
+const PJ=[[1,-.03,0],[1,.03,0],[1,0,-.025],[1,0,.025],[.95,0,0],[1.05,0,0],[1,-.03,-.025],[1,.03,.025],[1,-.03,.025],[1,.03,-.025]];
+let HQ=null,HQN=0,SWT=6,SWD=[1],SWC=160,SWP=40,SWI=3;
+function hamQ(f){
+  if(!HQ||HQN!==Object.keys(SC.idx).length){const ks=Object.keys(SC.idx);HQN=ks.length;HQ=new Uint32Array(HQN*4);ks.forEach((k,i)=>{const r=SC.idx[k];HQ[i*4]=r.a[0];HQ[i*4+1]=r.a[1];HQ[i*4+2]=r.w[0];HQ[i*4+3]=r.w[1]})}
+  const pc=x=>{x-=(x>>>1)&0x55555555;x=(x&0x33333333)+((x>>>2)&0x33333333);return(((x+(x>>>4))&0x0F0F0F0F)*0x01010101)>>>24};
+  const a0=f.a[0],a1=f.a[1],w0=f.w[0],w1=f.w[1];let q=1e9;
+  for(let i=0;i<HQ.length;i+=4){const v=(pc(a0^HQ[i])+pc(a1^HQ[i+1]))*5+(pc(w0^HQ[i+2])+pc(w1^HQ[i+3]))*3;if(v<q)q=v}
+  return q/10;
+}
+function edgeRects(CW,CH,n){
+  const d=swx.getImageData(0,0,CW,CH).data,g=new Float32Array(CW*CH);
+  for(let i=0;i<CW*CH;i++)g[i]=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2];
+  // kumulativa kantsummor: lodräta kanter längs kolumner, vågräta längs rader
+  const VX=new Float32Array(CW*(CH+1)),HY=new Float32Array(CH*(CW+1));
+  for(let x=1;x<CW-1;x++){let c=0;for(let y=0;y<CH;y++){const i=y*CW+x;c+=Math.max(Math.abs(g[i+1]-g[i-1]),i>1?Math.abs(g[i]-g[i-2])*.7:0,Math.abs(g[i+2<CW*CH?i+2:i]-g[i])*.7);VX[x*(CH+1)+y+1]=c}}
+  for(let y=1;y<CH-1;y++){let c=0;for(let x=0;x<CW;x++){const i=y*CW+x;c+=Math.max(Math.abs(g[i+CW]-g[i-CW]),y>1?Math.abs(g[i]-g[i-2*CW])*.7:0,y<CH-2?Math.abs(g[i+2*CW]-g[i])*.7:0);HY[y*(CW+1)+x+1]=c}}
+  const vs=(x,y0,y1)=>{x=Math.round(x);if(x<1||x>CW-2)return 0;y0=Math.max(0,Math.round(y0));y1=Math.min(CH,Math.round(y1));return y1>y0?(VX[x*(CH+1)+y1]-VX[x*(CH+1)+y0])/(y1-y0):0};
+  const hs=(y,x0,x1)=>{y=Math.round(y);if(y<1||y>CH-2)return 0;x0=Math.max(0,Math.round(x0));x1=Math.min(CW,Math.round(x1));return x1>x0?(HY[y*(CW+1)+x1]-HY[y*(CW+1)+x0])/(x1-x0):0};
+  const out=[];
+  for(let h=CH*.28;h<=Math.min(CH*.98,CW*.99/.716);h*=1.045){const w=h*.716,st=Math.max(1.5,w*.025);
+    for(let y=-h*.02;y+h<=CH+h*.02;y+=st)for(let x=-w*.02;x+w<=CW+w*.02;x+=st){
+      const L=vs(x,y+h*.1,y+h*.9),R=vs(x+w,y+h*.1,y+h*.9),T=hs(y,x+w*.1,x+w*.9),B=hs(y+h,x+w*.1,x+w*.9);
+      const m=Math.min(L,R,T,B);if(m<6)continue;out.push([(L+R+T+B)/4+m,x,y,w,h])}}
+  out.sort((a,b)=>b[0]-a[0]);
+  const keep=[],iou=(a,b)=>{const x1=Math.max(a[1],b[1]),y1=Math.max(a[2],b[2]),x2=Math.min(a[1]+a[3],b[1]+b[3]),y2=Math.min(a[2]+a[4],b[2]+b[4]),i=Math.max(0,x2-x1)*Math.max(0,y2-y1);return i/(a[3]*a[4]+b[3]*b[4]-i)};
+  for(const c of out){if(keep.every(k=>iou(k,c)<.6))keep.push(c);if(keep.length>=n)break}
+  return keep;
+}
+function sweep(src,vis){
+  const [vx,vy,vw,vh]=vis,CW=SWC,k=CW/vw,CH=Math.round(vh*k);swv.width=CW;swv.height=CH;
+  swx.imageSmoothingQuality='high';swx.drawImage(src,vx,vy,vw,vh,0,0,CW,CH);
+  const rects=edgeRects(CW,CH,SWT);SC.swDbg=rects;
+  let best=null;
+  for(const c of rects){const [,x,y,w,h]=c;
+    for(const ds of SWD){const nw=w*ds,nh=h*ds,r=[vx+(x-(nw-w)/2)/k,vy+(y-(nh-h)/2)/k,nw/k,nh/k];const b=scBest(SCAN.feat(src,...r));b.r=r;if(!best||b.s<best.s)best=b}}
+  return best&&best.s<SWP?polish(src,best.r,best,SWI):best;
+}
+function polish(src,r,best,its=2){
+  if(!best){best=scBest(SCAN.feat(src,...r));best.r=r}
+  for(let it=0;it<its;it++){const [x,y,w,h]=best.r;let nb=best;
+    for(const [ds,dx,dy] of PJ){
+      const nw=w*ds,nh=h*ds,rr=[x+(w-nw)/2+dx*w,y+(h-nh)/2+dy*h,nw,nh];const b=scBest(SCAN.feat(src,...rr));if(b.s<nb.s){b.r=rr;nb=b}}
+    if(nb===best)break;best=nb}
+  return best;
+}
+function visRect(v){const box=v.getBoundingClientRect(),vw=v.videoWidth,vh=v.videoHeight,sc=Math.max(box.width/vw,box.height/vh),ox=(box.width-vw*sc)/2,oy=(box.height-vh*sc)/2;
+  return [Math.max(0,-ox/sc),Math.max(0,-oy/sc),Math.min(vw,box.width/sc),Math.min(vh,box.height/sc)]}
 function bestAt(src,r,SW,SH){
   const a=scBest(SCAN.feat(src,...r));
   let best=a;const rr=refine(src,r,SW,SH);if(!rr)return a;
@@ -198,10 +248,13 @@ function scTick(){
   const r=guideRect(v);if(!r)return;
   const W=v.videoWidth,H=v.videoHeight;
   // 1) hitta kortet i bilden
-  const rr=refine(v,r,W,H);
+  let rr=refine(v,r,W,H);
   // 2) matcha (kortets egna kanter först, annars ramen)
   let b=scBest(SCAN.feat(v,...r));
   if(rr){const b2=scBest(SCAN.feat(v,...rr));if(b2.s<b.s)b=b2}
+  // inte i ramen? leta i hela bilden (var tredje varv, det kostar lite mer)
+  if(SC.swR&&b.s>22){const b4=polish(v,SC.swR,null,1);if(b4.s<b.s&&b4.s<32){b=b4;rr=b4.r;SC.swR=b4.r}else SC.swR=null}
+  if(b.s>22&&!SC.lock&&(SC.tk=(SC.tk||0)+1)%3===0){const b3=sweep(v,[0,0,W,H]);if(b3&&b3.s<b.s-2&&b3.s<32){b=b3;rr=b3.r;SC.swR=b3.r}}
   SC.lastF=b.f;debugShow(v,rr||r,b);
   if(SC.lock){
     const d=Math.min(...[SC.lock,...(SC.grp[SC.lock]||[])].map(i=>SC.idx[i]?SCAN.score(b.f,SC.idx[i]):99));
@@ -224,7 +277,7 @@ function scTick(){
   if(sure){SC.lock=b.id;SC.streak=0;SC.unsure=0;showBox(rr,'ok');scFound(b);return}
   scPill('Kort hittat – läser…','seen');
   SC.unsure=(SC.unsure||0)+1;
-  if(SC.unsure>=7&&b.s<42){SC.unsure=0;SC.pickOpen=true;scPill('Välj rätt kort');scEmpty('Vilket kort är det?');scPick(null,b.top,b.f)}
+  if(SC.unsure>=7&&b.s<36){SC.unsure=0;SC.pickOpen=true;scPill('Välj rätt kort');scEmpty('Vilket kort är det?');scPick(null,b.top,b.f)}
 }
 // ---------- Pärmsida 3x3 ----------
 function cells(r){const [x,y,w,h]=r,cw=w/3,ch=h/3,o=[];for(let i=0;i<3;i++)for(let j=0;j<3;j++)o.push([x+j*cw+cw*.04,y+i*ch+ch*.04,cw*.92,ch*.92]);return o}
@@ -375,6 +428,7 @@ async function scPhoto(file){
       const b=bestAt(im,[x,y,w,h],W,H);if(!best||b.s<best.s)best=b;
     }
   }
+  {const b3=sweep(im,[0,0,W,H]);if(b3&&(!best||b3.s<best.s))best=b3}
   if(best&&best.s<26&&best.gap>3)scFound(best);
   else if(best&&best.s<32){scPill('Osäker – välj rätt kort');scPick(null,best.top,best.f)}
   else{scPill('Frågar Claude…');scAsk()}

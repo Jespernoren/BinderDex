@@ -951,6 +951,6 @@ Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.jso
   const S=window.BDXSYNC;if(S&&S.on){S.onstatus=acctBadge;acctBadge();S.start(changed=>{if(changed&&!sessionStorage.getItem('bdx_rl')){sessionStorage.setItem('bdx_rl','1');location.reload();return}sessionStorage.removeItem('bdx_rl');if(S.needsChoice)acctSheet()});if(S.loginError)acctSheet()}});fetch('imgu.json').then(r=>r.json()).then(j=>{IMGU=j;if(DATA&&location.hash!=='#scan')render()}).catch(()=>{}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
 </script>
 <script src="scancore.js?v=3"></script>
-<script src="scan.js?v=6"></script>
+<script src="scan.js?v=7"></script>
 </body>
 </html>
