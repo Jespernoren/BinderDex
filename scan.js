@@ -425,6 +425,9 @@ function openDetail(uid){
   const t=itemByUid(uid);const el=document.getElementById('isheet');if(!t||!el)return;
   el.dataset.uid=uid;
   const alts=(t.alts||[]).map(a=>scInfo(a));
+  if((!t.top||!t.top.length)&&t.f&&SC.idx){try{t.top=scBest(SCAN.unpack(t.f)).top}catch(e){}}
+  const skip=new Set([t.id,...(t.alts||[])]);
+  const cands=[...new Set((t.top||[]).map(x=>x.id))].filter(i=>!skip.has(i)).slice(0,6).map(i=>scInfo(i));
   const row=(k,v)=>`<div class="dr"><span>${k}</span><b>${v}</b></div>`;
   const p=price(t);
   el.innerHTML=`<div class="trayhd"><b>${t.nm||'Okänt kort'}</b><button data-dclose aria-label="Stäng">×</button></div>
@@ -444,11 +447,12 @@ function openDetail(uid){
   </div>
   ${t.wotc?`<div class="dlab">Version</div><div class="dch">${['Unlimited','1st Edition'].concat(t.sid==='base1'?['Shadowless']:[]).map(v=>`<button data-ver="${uid}|${v}" class="${verOf(t)===v?'on':''}">${v}</button>`).join('')}</div>`:''}
   <div class="dlab">Skick</div><div class="dch">${COND.map(c=>`<button data-cnd="${uid}|${c}" class="${t.cond===c?'on':''}">${CONDN[c]}</button>`).join('')}</div>
+  ${cands.length?`<div class="dlab">Fel kort? Andra möjliga matchningar</div><div class="dalts">${cands.map(a=>`<button data-repl="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.nm||'?'}</b><small>${a.set} · ${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}</small></button>`).join('')}</div>`:''}
   ${alts.length?`<div class="dlab">Samma bild i andra set</div><div class="dalts">${alts.map(a=>`<button data-swap="${uid}|${a.id}"><span class="ci" data-aimg="${a.id}"></span><b>${a.set}</b><small>${a.n}${a.tot?'/'+a.tot:''}${a.tag?' · '+a.tag:''}${a.r!=null?' · '+a.r+' kr':''}</small></button>`).join('')}</div>`:''}
   <div class="dlab">Antal</div><div class="dqty"><button data-qty="${uid}|-1" aria-label="Färre">−</button><b>${t.q}</b><button data-qty="${uid}|1" aria-label="Fler">+</button></div>
-  <div class="dact"><button data-dwrong="${uid}">Fel kort – välj annat</button><button class="rm" data-drm="${uid}">Ta bort</button></div>`;
+  <div class="dact"><button data-dwrong="${uid}">🔍 Sök annat kort</button><button class="rm" data-drm="${uid}">Ta bort</button></div>`;
   el.classList.add('open');
-  for(const a of alts)scImg(a.id).then(u=>{const e=el.querySelector(`[data-aimg="${a.id}"]`);if(e&&u)e.innerHTML=`<img src="${u}" alt="">`});
+  for(const a of [...cands,...alts])scImg(a.id).then(u=>{const e=el.querySelector(`[data-aimg="${a.id}"]`);if(e&&u)e.innerHTML=`<img src="${u}" alt="">`});
 }
 function refreshDetail(){const el=document.getElementById('isheet');if(el&&el.classList.contains('open'))openDetail(el.dataset.uid)}
 function closeDetail(){const el=document.getElementById('isheet');if(el)el.classList.remove('open')}
@@ -546,7 +550,10 @@ function bindScanUI(){
     if(t=q('[data-ver]')){const [u,v]=t.dataset.ver.split('|'),it=itemByUid(u);it.ed=v==='1st Edition';it.sl=v==='Shadowless';scImg(it.id,it.ed).then(x=>{it.img=x;scShowHit(it);scTray()});return}
     if(t=q('[data-cnd]')){const [u,c]=t.dataset.cnd.split('|'),it=itemByUid(u);it.cond=c;scShowHit(it);scTray();return}
     if(t=q('[data-qty]')){const [u,d]=t.dataset.qty.split('|'),it=itemByUid(u);it.q=Math.max(1,it.q+ +d);scShowHit(it);scTray();return}
-    if(t=q('[data-dwrong]')){closeDetail();scPick(t.dataset.dwrong);return}
+    if(t=q('[data-repl]')){const [u,to]=t.dataset.repl.split('|'),it=itemByUid(u);if(it){const from=it.id,keep={ed:it.ed&&scInfo(to).wotc,sl:false,cond:it.cond,q:it.q};learn(to,it.f);
+      Object.assign(it,scInfo(to),keep,{alts:SC.grp[to]||[],top:[{id:from},...(it.top||[]).filter(x=>x.id!==to&&x.id!==from)]});
+      scImg(to,it.ed).then(x=>{it.img=x;scShowHit(it);scTray();feedback()})}return}
+    if(t=q('[data-dwrong]')){closeDetail();scPick(t.dataset.dwrong);setTimeout(()=>{const ps=document.getElementById('psearch');if(ps){ps.classList.remove('hide');document.getElementById('pq').focus()}},50);return}
     if(t=q('[data-drm]')){SC.tray=SC.tray.filter(x=>x.uid!==+t.dataset.drm);closeDetail();scTray();const f=SC.tray[0];f?scShowHit(f):scEmpty('Kortet togs bort');return}
     if(t=q('[data-rm]')){SC.tray=SC.tray.filter(x=>x.uid!==+t.dataset.rm);scTray();return}
     if(t=q('[data-ed]')){const it=itemByUid(t.dataset.ed);it.ed=!it.ed;scImg(it.id,it.ed).then(u=>{it.img=u;scShowHit(it);scTray()});return}
