@@ -3,7 +3,7 @@
 (function(){
 const CFG=window.BDX_SUPA||{};
 const ON=!!(CFG.url&&CFG.key);
-const KEYS=['pk151ov','bdx_extra','bdx_trade','bdx_var','bdx_learn','bdx_blank','bdx_sets'];
+const KEYS=['pk151ov','bdx_extra','bdx_trade','bdx_var','bdx_learn','bdx_blank','bdx_sets','bdx_lists'];
 const S={on:ON,session:null,pushT:null,busy:false};
 window.BDXSYNC=S;
 const get=k=>{try{return localStorage.getItem(k)}catch(e){return null}};

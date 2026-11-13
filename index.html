@@ -432,6 +432,13 @@ body.scanmode{background:#000}
 .cand.last{justify-content:center;gap:10px;min-height:220px}
 .cand .lb{width:100%;border:0;border-radius:10px;padding:11px;font:700 14px inherit;font-family:inherit;background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 .psearch.hide{display:none}
+.lchips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 12px}.lchips span{font-size:12px;color:var(--mute);font-weight:600;margin-right:2px}
+.lchip{border:0;border-radius:999px;padding:7px 12px;font:600 13px inherit;font-family:inherit;background:var(--bg);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line);cursor:pointer}.lchip.on{background:var(--ink);color:var(--card);box-shadow:none}
+.mylists{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 0 12px;padding-bottom:2px}.mylists::-webkit-scrollbar{display:none}
+.ml{flex:none;min-width:120px;text-decoration:none;color:var(--ink);background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;display:flex;flex-direction:column;gap:2px;cursor:pointer}
+.ml b{font-size:14px}.ml span{font-size:12px;color:var(--mute)}.ml small{font-size:12px;font-weight:700}.ml.add{justify-content:center;align-items:center;color:var(--mute);font-weight:700;font-size:13px;min-width:100px}
+.lacts{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.lacts button{border:0;border-radius:999px;padding:3px 8px;font:600 11px inherit;font-family:inherit;background:var(--bg);color:var(--ink2);cursor:pointer}
+.dc.tgt{width:76px;height:81px;border:0;border-radius:8px;background:rgba(0,0,0,.55);color:#fff;font:600 10.5px inherit;font-family:inherit;line-height:1.3;backdrop-filter:blur(8px)}.dc.tgt b{font-size:11.5px}
 #acctbtn{position:relative}#acctbtn svg{fill:none}#acctdot{position:absolute;right:5px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--sak)}#acctdot.on{background:var(--har)}
 .acbtn{width:100%;margin-top:10px;border:0;border-radius:14px;padding:14px;font:700 15px inherit;font-family:inherit;background:var(--ink);color:var(--card);cursor:pointer}.acbtn.alt{background:var(--bg);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 #sheet .sokq{margin-top:12px}
@@ -525,7 +532,8 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 <div id="modal"><div class="sheet" id="sheet"></div></div>
 
 <script src="config.js"></script>
-<script src="sync.js?v=1"></script>
+<script src="sync.js?v=2"></script>
+<script src="lists.js?v=1"></script>
 <script>
 const SETS={base:{code:'base1',name:'Base Set',tot:102},jungle:{code:'base2',name:'Jungle',tot:64},fossil:{code:'base3',name:'Fossil',tot:62},rocket:{code:'base5',name:'Team Rocket',tot:82}};
 const STL={h:'Har',e1:'Har (1st Ed)',v:'På väg',f:'Förfrågan',m:'Saknas'};
@@ -629,13 +637,16 @@ function acctSheet(){
     if(a==='device'||a==='blank'){b.textContent='Sparar…';await S.chooseStart(a);location.reload()}
   });
 }
-function renderTrade(){
-  let T=[];try{T=JSON.parse(localStorage.getItem('bdx_trade')||'[]')}catch(e){}
-  const sum=T.reduce((a,t)=>a+(t.r||0),0);
-  return `<div class="shead"><div><small>Dubbletter att byta bort</small><h1>Byten</h1></div></div>
-  <div class="filters" style="margin-bottom:12px"><a class="chip" href="#lista">Att köpa</a><a class="chip on" href="#byten">Byteshög</a></div>
-  ${kpis([['Kort i högen',T.length,''],['Bytesvärde',kr(sum),'riktpris',1]])}
-  ${T.length?`<div class="litems">${T.map((t,i)=>`<div class="li"><div class="tc h"><img loading="lazy" data-tid="${t.id}" alt=""></div><div class="lmid"><b>${t.nm}</b><small>${t.set} ${t.n}${t.ed?' · 1st Ed':''} · ${({NM:'Near Mint',LP:'Lightly Played',MP:'Moderately Played',HP:'Heavily Played'})[t.cond]||t.cond}</small></div><div class="kr"><b>${t.r!=null?t.r+' kr':'–'}</b><button class="trb" data-trm="${i}">Ta bort</button></div></div>`).join('')}</div>`:'<div class="lnote">Högen är tom. Dubbletter du skannar hamnar här när du sparar.</div>'}`;
+function renderMyList(id){
+  const T=LST.items(id),sum=T.reduce((a,t)=>a+(t.r||0),0),nm=LST.name(id);
+  const others=LST.all().filter(l=>l.id!==id);
+  return `<div class="shead"><div><small>${id==='byta'?'Dubbletter och kort att byta bort':'Din lista'}</small><h1>${nm}</h1></div></div>
+  <div class="filters" style="margin-bottom:12px">${id==='byta'?'<a class="chip" href="#lista">Att köpa</a>':''}${LST.all().map(l=>`<a class="chip${l.id===id?' on':''}" href="#lista-${l.id}">${l.nm} ${LST.items(l.id).length}</a>`).join('')}<button class="chip" data-newlist>+ Ny lista</button></div>
+  ${kpis([['Kort',T.length,''],['Värde',kr(sum),'riktpris',1]])}
+  ${T.length?`<div class="grid">${T.map((t,i)=>`<div class="gcard sr"><div class="ci2"><img loading="lazy" data-tid="${t.id}" data-ted="${t.ed?1:''}" alt=""></div><div class="cap">${t.nm||t.id}<small>${t.set||''} ${t.n||''}${t.ed?' · 1st Ed':''}${t.cond&&t.cond!=='NM'?' · '+t.cond:''}</small><small class="st">${t.r!=null?t.r+' kr':'–'}</small>
+    <div class="lacts">${others.map(o=>`<button data-mv="${i}|${o.id}">→ ${o.nm}</button>`).join('')}<button data-trm="${i}">Ta bort</button></div></div></div>`).join('')}</div>`
+   :`<div class="lnote">Listan är tom. Lägg till kort från kortbladet (tryck på ett kort) eller välj listan i scannern innan du sparar.</div>`}
+  ${!['spara','byta'].includes(id)?`<div style="margin-top:20px;display:flex;gap:8px"><button class="trb" data-ren>Byt namn</button><button class="trb" data-dellist>Ta bort listan</button></div>`:''}`;
 }
 function renderList(){
   const items=DATA.cards.filter(c=>P[key(c)]&&!has(c)&&st(c)!=='v');
@@ -654,7 +665,7 @@ function renderList(){
   }
   const all=items.filter(c=>!pf||P[key(c)]===pf),p1=items.filter(c=>P[key(c)]===1);
   return `<div class="shead"><div><small>Inköpslista</small><h1>Köpa</h1></div></div>
-  <div class="filters" style="margin-bottom:12px"><a class="chip on" href="#lista">Att köpa</a><a class="chip" href="#byten">Byteshög</a></div>
+  <div class="filters" style="margin-bottom:12px"><a class="chip on" href="#lista">Att köpa</a><a class="chip" href="#lista-byta">Byteshög</a></div>
   ${kpis([['Kort att köpa',all.length,pf?`P${pf}`:'alla prio'],['P1 köp direkt',p1.length,kr(p1.reduce((a,c)=>a+c.r,0)),1],['Riktpris totalt',kr(all.reduce((a,c)=>a+c.r,0)),'']])}
   <div class="lnote">Max = riktpris + 30 %, minst 10 kr. Klicka på ett kort för att ändra status.</div>`+h;
 }
@@ -794,6 +805,7 @@ function renderLib(v){
   const st=DB.sets.map(x=>({x,s:setStat(x)}));
   const tot=st.reduce((a,b)=>a+b.s.q,0),uniq=st.reduce((a,b)=>a+b.s.u,0),ns=st.filter(a=>a.s.q).length,val=st.reduce((a,b)=>a+b.s.val,0);
   let h=`<div class="shead"><div><small>Alla serier och set</small><h1>Samlingen</h1></div></div>
+   <div class="mylists">${LST.all().map(l=>{const T=LST.items(l.id);return `<a class="ml" href="#lista-${l.id}"><b>${l.nm}</b><span>${T.length} kort</span><small>${kr(T.reduce((a,t)=>a+(t.r||0),0))}</small></a>`}).join('')}<a class="ml add" onclick="const n=prompt('Namn på listan, t.ex. Pärm 2');if(n&&n.trim())location.hash='#lista-'+LST.create(n.trim())">+ Ny lista</a></div>
    ${kpis([['Kort totalt',tot.toLocaleString('sv-SE'),`${uniq} unika`],['Set med kort',`${ns}<em>/${DB.sets.length-2}</em>`,''],['Värde',kr(val),'riktpris',1]])}
    <div class="filters" style="margin:8px 0"><span class="chip${libOnlyMine?' on':''}" data-lib="mine">Bara set jag har kort i</span><span class="chip${!libOnlyMine?' on':''}" data-lib="all">Alla ${DB.sets.length-2} set</span></div>`;
   for(const se of DB.series){
@@ -843,9 +855,11 @@ function openLib(k){
   const q=encodeURIComponent(`${nm} ${n}${x.t?'/'+x.t:''} ${x.nm}`);
   document.getElementById('sheet').innerHTML=`${img?`<img src="${img.src}" alt="">`:''}<h3>${nm}</h3><div class="sub">${x.nm} · ${n}${x.t?'/'+x.t:''}${ra?' · '+ra:''}${full&&full[3]?' · Pokédex #'+full[3]:''}</div>
    <div class="note">${mine.length?'Du har: '+mine.map(m=>`${m.q}× ${m.v||''}${m.r?` (~${m.r} kr)`:''}`).join(', '):'Du har inte det här kortet.'}</div>
+   ${listChips(sid+'-'+n)}
    <div class="qty"><button data-q="-1">−</button><span>${(()=>{try{return EXTRA[sid+'-'+n]||0}catch(e){return 0}})()} tillagda av dig</span><button data-q="1">+</button></div>
    <a class="tr" href="https://www.tradera.com/search?q=${q}" target="_blank" rel="noopener">Sök på Tradera</a><button class="close">Stäng</button>`;
   document.getElementById('modal').classList.add('open');document.querySelector('#sheet .close').onclick=close_;
+  bindListChips(document.getElementById('sheet'),sid+'-'+n,{nm,set:x.nm,n,r:(mine[0]||{}).r??((typeof SC!=='undefined'&&SC.pr&&SC.pr[sid+'-'+n]||[])[0]??null)});
   document.querySelectorAll('#sheet [data-q]').forEach(b=>b.onclick=()=>{const id=sid+'-'+n;EXTRA[id]=Math.max(0,(EXTRA[id]||0)+(+b.dataset.q));if(!EXTRA[id])delete EXTRA[id];try{localStorage.setItem('bdx_extra',JSON.stringify(EXTRA))}catch(e){}close_();render()});
   if(!img&&typeof scImg==='function')scImg(sid+'-'+n).then(u=>{if(u){const i=document.createElement('img');i.src=u;i.alt='';const sh=document.getElementById('sheet');sh.insertBefore(i,sh.firstChild)}});
 }
@@ -861,7 +875,17 @@ function render(){
       const c=e.target.closest('[data-sid]');if(!c)return;const id=c.dataset.sid,sid=id.slice(0,id.indexOf('-')),n=id.slice(id.indexOf('-')+1);
       const S2={base1:'base',base2:'jungle',base3:'fossil',base5:'rocket'}[sid];if(S2)open_(S2+'-'+n);else openLib(sid+'|'+n)};return;}
   if(v==='gen2'){['colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.getElementById('hidesw').classList.remove('hide');document.getElementById('hidesw').classList.toggle('on',hideDone);document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='pokedex'));const m=document.getElementById('main');m.classList.remove('pm');showGen2(m);return;}
-  if(v==='byten'){['hidesw','colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='lista'));const m=document.getElementById('main');m.classList.remove('pm');m.innerHTML=renderTrade();m.querySelectorAll('[data-tid]').forEach(i=>scImg(i.dataset.tid).then(u=>{if(u)i.src=u}));m.onclick=e=>{const b=e.target.closest('[data-trm]');if(b){let T=JSON.parse(localStorage.getItem('bdx_trade')||'[]');T.splice(+b.dataset.trm,1);localStorage.setItem('bdx_trade',JSON.stringify(T));render()}};return;}
+  if(v==='byten'){location.hash='#lista-byta';return}
+  if(v.startsWith('lista-')){const id=v.slice(6);['hidesw','colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='samling'));const m=document.getElementById('main');m.classList.remove('pm');m.innerHTML=renderMyList(id);
+    m.querySelectorAll('[data-tid]').forEach(i=>scImg(i.dataset.tid,!!i.dataset.ted).then(u=>{if(u)i.src=u;else i.parentNode.classList.add('noimg')}));
+    m.onclick=e=>{const q=s=>e.target.closest(s);let t;
+      if(t=q('[data-trm]')){LST.removeAt(id,+t.dataset.trm);render();return}
+      if(t=q('[data-mv]')){const [i,to]=t.dataset.mv.split('|');const it=LST.items(id)[+i];LST.removeAt(id,+i);LST.add(to,it);render();return}
+      if(q('[data-newlist]')){const n=prompt('Namn på listan, t.ex. Pärm 2');if(n&&n.trim()){const nid=LST.create(n.trim());location.hash='#lista-'+nid}return}
+      if(q('[data-ren]')){const n=prompt('Nytt namn',LST.name(id));if(n&&n.trim()){LST.rename(id,n.trim());render()}return}
+      if(q('[data-dellist]')){if(confirm('Ta bort listan '+LST.name(id)+'? Korten i samlingen påverkas inte.')){LST.del(id);location.hash='#samling'}return}};
+    return;}
+  if(v==='byten_old'){['hidesw','colsw','infobtn','prog','filters','pfilters','setseg'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==='lista'));const m=document.getElementById('main');m.classList.remove('pm');m.innerHTML=renderTrade();m.querySelectorAll('[data-tid]').forEach(i=>scImg(i.dataset.tid).then(u=>{if(u)i.src=u}));m.onclick=e=>{const b=e.target.closest('[data-trm]');if(b){let T=JSON.parse(localStorage.getItem('bdx_trade')||'[]');T.splice(+b.dataset.trm,1);localStorage.setItem('bdx_trade',JSON.stringify(T));render()}};return;}
   if(v==='samling'||v.startsWith('set-')){['hidesw','colsw','infobtn'].forEach(i=>document.getElementById(i).classList.add('hide'));document.querySelector('.legend').classList.remove('show');renderLib(v);return;}
   document.getElementById('prog').classList.remove('hide');document.querySelector('.legend').classList.remove('hide');document.getElementById('filters').classList.remove('hide');document.getElementById('pfilters').classList.remove('hide');
   const view=SETS[v]||v==='lista'?v:'pokedex';
@@ -892,9 +916,11 @@ function open_(k){
     <div class="sub">${SETS[c.s].name} · ${c.n}/${SETS[c.s].tot}${c.d?` · Pokédex #${c.d}`:''}<br>Riktpris ~${c.r} kr · max ${mx(c)} kr</div>
     <div class="btns">${['h','v','f','m'].map(x=>`<button data-s="${x}" class="${(s===x||(x==='h'&&s==='e1'))?'on':''}">${STL[x]}</button>`).join('')}</div>
     <div class="note">${s==='e1'?'Du har en 1st Edition-version. ':''}Ändrar du status sparas det bara i den här webbläsaren.</div>
+    ${listChips(SETS[c.s].code+'-'+c.n)}
     <a class="tr" href="https://www.tradera.com/search?q=${q}" target="_blank" rel="noopener">Sök på Tradera</a>
     <button class="close">Stäng</button>`;
   document.getElementById('modal').classList.add('open');
+  bindListChips(document.getElementById('sheet'),SETS[c.s].code+'-'+c.n,{nm:c.nm,set:SETS[c.s].name,n:String(c.n),ed:s==='e1'?1:0,r:c.r});
   document.querySelectorAll('#sheet .btns button').forEach(b=>b.onclick=()=>{
     const ns=b.dataset.s;
     if(ns===c.st||(ns==='h'&&c.st==='e1'))delete OV[k];else OV[k]=ns;
@@ -914,7 +940,7 @@ document.getElementById('prog').addEventListener('click',e=>{const t=e.target.cl
 try{hideDone=!!localStorage.getItem('pk151hide')}catch(x){}
 try{colmode=localStorage.getItem('pk151col')||'set'}catch(x){}
 document.getElementById('filters').addEventListener('click',e=>{const t=e.target.closest('.chip');if(!t)return;filter=t.dataset.f;render()});
-window.addEventListener('hashchange',render);
+window.addEventListener('hashchange',()=>{close_();render()});
 document.getElementById('acctbtn').onclick=acctSheet;
 const MQ=matchMedia('(min-width:960px)');
 function placeNav(){const n=document.getElementById('nav'),hd=document.getElementById('hdr'),br=hd.querySelector('.brand');if(MQ.matches){if(n.parentNode!==hd)br.after(n)}else if(n.parentNode!==document.body)document.body.insertBefore(n,document.getElementById('modal'))}
@@ -925,6 +951,6 @@ Promise.all([fetch('data.json').then(r=>r.json()),fetch('db.json').then(r=>r.jso
   const S=window.BDXSYNC;if(S&&S.on){S.onstatus=acctBadge;acctBadge();S.start(changed=>{if(changed&&!sessionStorage.getItem('bdx_rl')){sessionStorage.setItem('bdx_rl','1');location.reload();return}sessionStorage.removeItem('bdx_rl');if(S.needsChoice)acctSheet()});if(S.loginError)acctSheet()}});fetch('imgu.json').then(r=>r.json()).then(j=>{IMGU=j;if(DATA&&location.hash!=='#scan')render()}).catch(()=>{}).catch(()=>{document.getElementById('main').innerHTML='<p style="padding:20px">Kunde inte läsa data.</p>'});
 </script>
 <script src="scancore.js?v=3"></script>
-<script src="scan.js?v=5"></script>
+<script src="scan.js?v=6"></script>
 </body>
 </html>
