@@ -419,6 +419,11 @@ body.scanmode{background:#000}
 .cand.last{justify-content:center;gap:10px;min-height:220px}
 .cand .lb{width:100%;border:0;border-radius:10px;padding:11px;font:700 14px inherit;font-family:inherit;background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 .psearch.hide{display:none}
+#zoom{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;animation:up .2s ease}
+#zoom img{max-width:92vw;max-height:78dvh;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+#zoom span{color:#bbb;font-size:13px}
+.schit img{cursor:zoom-in}
+.cand{position:relative}.zb{position:absolute;right:12px;top:12px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.6);display:grid;place-items:center;font-size:14px}
 .vt{display:inline-block;vertical-align:2px;font-size:9.5px;font-weight:800;letter-spacing:.04em;color:#fff;background:var(--ink);border-radius:4px;padding:1px 5px;margin-left:2px}
 .cand .vt{margin:0}
 
@@ -510,7 +515,7 @@ const pp=c=>!pf||pr(c)===pf;
 function thumb(c,big){
   const s=st(c),cls=(s==='e1'?'e1':s);
   return `<div class="tc ${cls}" data-k="${key(c)}">
-    <img loading="lazy" src="img/${SETS[c.s].code}-${c.n}.webp" alt="${c.nm} ${c.n}/${SETS[c.s].tot}">
+    <img loading="lazy" src="${s==='e1'||c.s==='base'?'img':'imgu'}/${SETS[c.s].code}-${c.n}.webp" alt="${c.nm} ${c.n}/${SETS[c.s].tot}">
     <span class="nr">${c.n}</span>${P[key(c)]&&!has(c)&&st(c)!=='v'?`<span class="pr p${P[key(c)]}">P${P[key(c)]}</span>`:''}
     ${(s!=='m'&&s!=='f')?`<span class="bd">${BD[s]}</span>`:''}
     <span class="rkv">${c.r} kr</span>
@@ -768,7 +773,7 @@ function open_(k){
   const c=DATA.cards.find(x=>key(x)===k);if(!c)return;
   const s=st(c),q=encodeURIComponent(`${c.nm.replace(/ [♂♀]/,'')} ${c.n}/${SETS[c.s].tot}`);
   document.getElementById('sheet').innerHTML=`
-    <img src="img/${SETS[c.s].code}-${c.n}.webp" alt="${c.nm}">
+    <img src="${st(c)==='e1'||c.s==='base'?'img':'imgu'}/${SETS[c.s].code}-${c.n}.webp" alt="${c.nm}">
     <h3>${c.nm}</h3>
     <div class="sub">${SETS[c.s].name} · ${c.n}/${SETS[c.s].tot}${c.d?` · Pokédex #${c.d}`:''}<br>Riktpris ~${c.r} kr · max ${mx(c)} kr</div>
     <div class="btns">${['h','v','f','m'].map(x=>`<button data-s="${x}" class="${(s===x||(x==='h'&&s==='e1'))?'on':''}">${STL[x]}</button>`).join('')}</div>

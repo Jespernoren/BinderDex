@@ -37,9 +37,9 @@ function scInfo(id){
 }
 const CF={NM:1,LP:.85,MP:.65,HP:.45};
 const price=t=>{const p=t.ed&&t.r1?t.r1:t.r;return p==null?null:Math.max(1,Math.round(p*(CF[t.cond]||1)))};
-async function scImg(id){
+async function scImg(id,ed){
   id=base(id);const sid=id.slice(0,id.indexOf('-')),n=id.slice(id.indexOf('-')+1);
-  if(CODE2S[sid])return `img/${id}.webp`;
+  if(CODE2S[sid])return `${ed||sid==='base1'?'img':'imgu'}/${id}.webp`;
   if(['basep','base4','base6','gym1','gym2','neo1','neo2','neo3','neo4'].includes(sid)){
     SC.simg[sid]=SC.simg[sid]||await fetch('simg/'+sid+'.json').then(r=>r.json()).catch(()=>({}));
     if(SC.simg[sid][n])return SC.simg[sid][n];
@@ -242,7 +242,7 @@ function scShowHit(it){
   const el=document.getElementById('schit');if(!el||!it)return;
   const alts=(it.alts||[]).map(a=>scInfo(a));
   el.className='schit';el.dataset.uid=it.uid;
-  el.innerHTML=`${it.img?`<img src="${it.img}" alt="">`:''}<div class="hm">
+  el.innerHTML=`${it.img?`<img src="${it.img}" alt="" data-zoom="${it.img}">`:''}<div class="hm">
    <small>${it.set} · ${it.n}${it.tot?'/'+it.tot:''}</small>
    <b>${it.nm||'Okänt namn'}${it.tag?` <span class="vt">${it.tag}</span>`:''}</b>
    <div class="vars"><em class="${it.has?'hv':'nw'}">${it.has?'HAR REDAN':'NY'}</em>${it.wotc?`<button data-ed="${it.uid}" class="${it.ed?'on':''}">1st Ed</button>`:''}${it.sid==='base1'?`<button data-sl="${it.uid}" class="${it.sl?'on':''}">Shadowless</button>`:''}<button data-cond="${it.uid}">${CONDN[it.cond]}</button>${alts.map(a=>`<button data-swap="${it.uid}|${a.id}" class="alt">${a.set.replace('Legendary Collection','Legendary C.').replace('Base Set 2','Base 2')}${a.sid===it.sid?' '+a.n:''}${a.tag?' '+a.tag:''}</button>`).join('')}</div></div>
@@ -299,7 +299,7 @@ async function scPick(uid,topIn,f){
   const it=uid?itemByUid(uid):null;
   const top=(topIn||(it&&it.top)||[]).filter(t=>!it||t.id!==it.id);
   const p=document.getElementById('pick');p.dataset.uid=uid||'';p.dataset.f=f?SCAN.pack(f):(it&&it.f)||'';
-  const tiles=top.map(t=>{const c=scInfo(t.id);return `<button class="cand" data-choose="${c.id}"><span class="ci" data-cimg="${c.id}"></span><b>${c.nm||'?'}</b>${c.tag?`<span class="vt">${c.tag}</span>`:''}<small>${c.set} · ${c.yr}<br>${c.n}${c.tot?'/'+c.tot:''}</small>${c.r!=null?`<em>${c.r} kr</em>`:''}</button>`}).join('');
+  const tiles=top.map(t=>{const c=scInfo(t.id);return `<button class="cand" data-choose="${c.id}"><span class="ci" data-cimg="${c.id}"></span><span class="zb" data-zoomid="${c.id}">🔍</span><b>${c.nm||'?'}</b>${c.tag?`<span class="vt">${c.tag}</span>`:''}<small>${c.set} · ${c.yr}<br>${c.n}${c.tot?'/'+c.tot:''}</small>${c.r!=null?`<em>${c.r} kr</em>`:''}</button>`}).join('');
   p.innerHTML=`<div class="trayhd"><b>${uid?'Fel kort? Välj rätt':'Vilket kort är det?'}</b><button data-pclose aria-label="Stäng">×</button></div>
    <div class="carousel">${tiles}<div class="cand last"><b>Inget stämmer?</b><button class="lb" data-psearch>🔍 Sök</button><button class="lb" data-skip="${uid||''}">Hoppa över</button></div></div>
    <div class="psearch hide" id="psearch"><input id="pq" type="search" placeholder="Sök namn, t.ex. Charizard" autocomplete="off"><div id="pres"></div></div>`;
@@ -384,11 +384,14 @@ function bindScanUI(){
     unlockAudio();
     const q=s=>e.target.closest(s);let t;
     if(t=q('[data-rm]')){SC.tray=SC.tray.filter(x=>x.uid!==+t.dataset.rm);scTray();return}
-    if(t=q('[data-ed]')){const it=itemByUid(t.dataset.ed);it.ed=!it.ed;scShowHit(it);scTray();return}
+    if(t=q('[data-ed]')){const it=itemByUid(t.dataset.ed);it.ed=!it.ed;scImg(it.id,it.ed).then(u=>{it.img=u;scShowHit(it);scTray()});return}
+    if(t=q('[data-zoom]')){e.stopPropagation();zoom(t.dataset.zoom);return}
+    if(q('#zoom')){document.getElementById('zoom').remove();return}
     if(t=q('[data-sl]')){const it=itemByUid(t.dataset.sl);it.sl=!it.sl;scShowHit(it);scTray();return}
     if(t=q('[data-cond]')){const it=itemByUid(t.dataset.cond);it.cond=COND[(COND.indexOf(it.cond)+1)%4];scShowHit(it);scTray();return}
     if(t=q('[data-swap]')){const [u,to]=t.dataset.swap.split('|');const it=itemByUid(u);if(it){const from=it.id;learn(to,it.f);Object.assign(it,scInfo(to),{alts:[from,...(SC.grp[to]||[]).filter(a=>a!==from&&a!==to)]});scImg(to).then(x=>{it.img=x;scShowHit(it);scTray()})}return}
     if(e.target.id==='scsave'||q('#scsave2')){scSave();return}
+    if(t=q('[data-zoomid]')){const im=document.querySelector(`[data-cimg="${t.dataset.zoomid}"] img`);if(im)zoom(im.src);return}
     if(t=q('[data-choose]')){scChoose(t.dataset.choose);return}
     if(t=q('[data-wrong]')){scPick(t.dataset.wrong);return}
     if(q('[data-psearch]')){document.getElementById('psearch').classList.remove('hide');document.getElementById('pq').focus();return}
@@ -405,3 +408,5 @@ function bindScanUI(){
   };
   ['scfile','scfile2'].forEach(i=>{const el=document.getElementById(i);if(el)el.onchange=()=>scPhoto(el.files[0])});
 }
+
+function zoom(src){const z=document.createElement('div');z.id='zoom';z.innerHTML=`<img src="${src}" alt=""><span>Tryck för att stänga</span>`;document.getElementById('main').appendChild(z)}
