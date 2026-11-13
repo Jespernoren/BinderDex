@@ -55,7 +55,7 @@ function scBest(f){
   const same=new Set([b[1],...(SC.grp[b[1]]||[])]);
   const other=m.find(x=>!same.has(x[1]));
   const pref=['base1','base2','base3','base5'],grp=[...same];
-  const sc=i=>Math.min(...Object.keys(SC.idx).filter(k=>k===i||k.startsWith(i+'#')).map(k=>SCAN.score(f,SC.idx[k])));
+  const sc=i=>Math.min(SCAN.score(f,SC.idx[i]),...(LEARN[i]||[]).map((_,j)=>SC.idx[i+'#L'+j]?SCAN.score(f,SC.idx[i+'#L'+j]):99));
   const pg=grp.filter(i=>pref.includes(i.split('-')[0])).sort((a,c)=>sc(a)-sc(c));
   const pick=pg[0]||b[1];
   const top=[],seen=new Set();
@@ -154,13 +154,14 @@ async function scStart(){
     SC.track=SC.stream.getVideoTracks()[0];
     try{const c=SC.track.getCapabilities&&SC.track.getCapabilities();if(c&&c.torch)document.getElementById('torchbtn').classList.remove('hide')}catch(e){}
     scPill('Rikta mot ett eller flera kort');
-    SC.timer=setInterval(()=>SC.mode==='page'?pageTick():scTick(),SC.mode==='page'?550:260);
+    loop();
   }catch(e){
     document.getElementById('camoff').classList.remove('hide');scPill('','hide');
   }
 }
-function scStop(){if(SC.timer)clearInterval(SC.timer);SC.timer=null;if(SC.stream){SC.stream.getTracks().forEach(t=>t.stop());SC.stream=null}SC.torch=false}
-function restartLoop(){if(SC.timer){clearInterval(SC.timer);SC.timer=setInterval(()=>SC.mode==='page'?pageTick():scTick(),SC.mode==='page'?550:260)}}
+function scStop(){if(SC.timer)clearTimeout(SC.timer);SC.timer=null;if(SC.stream){SC.stream.getTracks().forEach(t=>t.stop());SC.stream=null}SC.torch=false}
+function loop(){SC.running=true;const t0=performance.now();try{SC.mode==='page'?pageTick():scTick()}catch(e){console.error(e)}SC.ms=performance.now()-t0;SC.timer=setTimeout(loop,Math.max(60,(SC.mode==='page'?450:180)-SC.ms))}
+function restartLoop(){}
 function setMode(m){
   SC.mode=m;SC.lock=null;SC.streak=0;SC.page=null;
   const cam=document.getElementById('cam');if(!cam)return;
@@ -177,29 +178,47 @@ function guideRect(v){
   const sc=Math.max(box.width/vw,box.height/vh),ox=(box.width-vw*sc)/2,oy=(box.height-vh*sc)/2;
   return [(g.left-box.left-ox)/sc,(g.top-box.top-oy)/sc,g.width/sc,g.height/sc];
 }
+function showBox(rr,state){
+  const cam=document.getElementById('cam'),v=document.getElementById('scv');if(!cam||!v)return;
+  let d=document.getElementById('cbox');if(!d){d=document.createElement('div');d.id='cbox';cam.appendChild(d)}
+  if(!rr){d.className='';return}
+  const box=v.getBoundingClientRect(),cb=cam.getBoundingClientRect(),vw=v.videoWidth,vh=v.videoHeight,sc=Math.max(box.width/vw,box.height/vh),ox=(box.width-vw*sc)/2,oy=(box.height-vh*sc)/2;
+  const [x,y,w,h]=rr;d.style.cssText=`left:${box.left-cb.left+ox+x*sc}px;top:${box.top-cb.top+oy+y*sc}px;width:${w*sc}px;height:${h*sc}px`;d.className='on '+(state||'');
+}
+const dcv=document.createElement('canvas');dcv.width=63;dcv.height=88;
+function debugShow(v,r,b){
+  if(!SC.debug)return;let d=document.getElementById('dbg');
+  if(!d){d=document.createElement('div');d.id='dbg';d.appendChild(dcv);d.appendChild(document.createElement('pre'));document.getElementById('cam').appendChild(d)}
+  dcv.getContext('2d').drawImage(v,...r,0,0,63,88);
+  d.querySelector('pre').textContent=`s ${b.s.toFixed(1)} gap ${b.gap.toFixed(1)}\n${b.id}\n${v.videoWidth}x${v.videoHeight} ${SC.ms?SC.ms.toFixed(0):'?'} ms`;
+}
 function scTick(){
   const v=document.getElementById('scv');if(!v||!v.videoWidth)return;
   const r=guideRect(v);if(!r)return;
-  // Ser kameran flera kort? Byt till flerläge av sig själv
-  SC.tick=(SC.tick||0)+1;
-  if(SC.tick%3===0&&!SC.lock&&!document.getElementById('pick').classList.contains('open')){
-    const [x,y,w,h]=r,k=1.12,pr=[x-w*(k-1)/2,y-h*(k-1)/2,w*k,h*k];
-    const n=pageScan(v,pr,v.videoWidth,v.videoHeight).filter(c=>c.ok).length;
-    if(n>=2){SC.auto=true;setMode('page');scPill('Flera kort – flerläge');return}
-  }
-  const b=bestAt(v,r,v.videoWidth,v.videoHeight);SC.lastF=b.f;
+  const W=v.videoWidth,H=v.videoHeight;
+  // 1) hitta kortet i bilden
+  const rr=refine(v,r,W,H);
+  // 2) matcha (kortets egna kanter först, annars ramen)
+  let b=scBest(SCAN.feat(v,...r));
+  if(rr){const b2=scBest(SCAN.feat(v,...rr));if(b2.s<b.s)b=b2}
+  SC.lastF=b.f;debugShow(v,rr||r,b);
   if(SC.lock){
     const d=Math.min(...[SC.lock,...(SC.grp[SC.lock]||[])].map(i=>SC.idx[i]?SCAN.score(b.f,SC.idx[i]):99));
-    if(d>34||b.s>34){SC.lock=null;scPill('Rikta mot ett eller flera kort')}
+    showBox(rr,'ok');
+    if(d>34||b.s>34){SC.lock=null;scPill('Håll kortet i ramen')}
     return;
   }
   if(document.getElementById('pick').classList.contains('open'))return;
-  if(b.back<12){scPill('Vänd på kortet 🙂');SC.streak=0;return}
-  if(b.s>30){scPill('Söker…');SC.streak=0;SC.last=null;SC.unsure=0;return}
+  const card=!!rr||b.s<34;
+  if(!card){showBox(null);scPill('Håll kortet i ramen','scan');SC.streak=0;SC.unsure=0;SC.last=null;return}
+  if(b.back<12){showBox(rr,'warn');scPill('Vänd på kortet 🙂');SC.streak=0;return}
+  showBox(rr,'seen');
   if(SC.last===b.id)SC.streak++;else{SC.last=b.id;SC.streak=1}
-  const sure=(b.s<16&&b.gap>4)||(b.s<26&&b.gap>3&&SC.streak>=2);
-  if(sure){SC.lock=b.id;SC.streak=0;SC.unsure=0;scFound(b)}
-  else{scPill('Nästan… håll still');SC.unsure=(SC.unsure||0)+1;if(SC.unsure===5){SC.lock=b.id;SC.unsure=0;scPill('Osäker – välj rätt kort');scEmpty('Vilket kort är det?');scPick(null,b.top,b.f)}}
+  const sure=(b.s<18&&b.gap>4)||(b.s<27&&b.gap>3&&SC.streak>=2)||(b.s<31&&b.gap>6&&SC.streak>=3);
+  if(sure){SC.lock=b.id;SC.streak=0;SC.unsure=0;showBox(rr,'ok');scFound(b);return}
+  scPill('Kort hittat – läser…','seen');
+  SC.unsure=(SC.unsure||0)+1;
+  if(SC.unsure>=5&&b.s<42){SC.lock=b.id;SC.unsure=0;scPill('Välj rätt kort');scEmpty('Vilket kort är det?');scPick(null,b.top,b.f)}
 }
 // ---------- Pärmsida 3x3 ----------
 function cells(r){const [x,y,w,h]=r,cw=w/3,ch=h/3,o=[];for(let i=0;i<3;i++)for(let j=0;j<3;j++)o.push([x+j*cw+cw*.04,y+i*ch+ch*.04,cw*.92,ch*.92]);return o}
@@ -400,6 +419,7 @@ function bindScanUI(){
     if(q('#traybtn')){document.getElementById('tray').classList.add('open');return}
     if(e.target.id==='trayclose'){document.getElementById('tray').classList.remove('open');return}
     if(q('#scai')){scAsk();return}
+    if(q('#scpill')){SC.debug=!SC.debug;const d=document.getElementById('dbg');if(d&&!SC.debug)d.remove();return}
     if(q('#modebtn')){SC.auto=false;setMode(SC.mode==='page'?'one':'page');return}
     if(q('#pageadd')){pageAdd();return}
     if(t=q('#gbox b')){const i=[...t.parentNode.children].indexOf(t),c=SC.page&&SC.page[i];if(c){scPick(null,c.b.top,c.b.f)}return}
