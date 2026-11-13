@@ -212,13 +212,18 @@ function scTick(){
   const card=!!rr||b.s<34;
   if(!card){showBox(null);scPill('Håll kortet i ramen','scan');SC.streak=0;SC.unsure=0;SC.last=null;return}
   if(b.back<12){showBox(rr,'warn');scPill('Vänd på kortet 🙂');SC.streak=0;return}
+  // vänta tills kortet hålls still en kort stund
+  const pr=SC.prevR;SC.prevR=rr||r;
+  const still=pr&&Math.abs(pr[0]-(rr||r)[0])<(rr||r)[2]*.04&&Math.abs(pr[1]-(rr||r)[1])<(rr||r)[3]*.04&&Math.abs(pr[2]-(rr||r)[2])<(rr||r)[2]*.05;
+  SC.still=still?(SC.still||0)+1:0;
   showBox(rr,'seen');
+  if(SC.still<2){scPill('Håll still…','seen');SC.streak=0;return}
   if(SC.last===b.id)SC.streak++;else{SC.last=b.id;SC.streak=1}
   const sure=(b.s<18&&b.gap>4)||(b.s<27&&b.gap>3&&SC.streak>=2)||(b.s<31&&b.gap>6&&SC.streak>=3);
   if(sure){SC.lock=b.id;SC.streak=0;SC.unsure=0;showBox(rr,'ok');scFound(b);return}
   scPill('Kort hittat – läser…','seen');
   SC.unsure=(SC.unsure||0)+1;
-  if(SC.unsure>=5&&b.s<42){SC.lock=b.id;SC.unsure=0;scPill('Välj rätt kort');scEmpty('Vilket kort är det?');scPick(null,b.top,b.f)}
+  if(SC.unsure>=7&&b.s<42){SC.unsure=0;SC.pickOpen=true;scPill('Välj rätt kort');scEmpty('Vilket kort är det?');scPick(null,b.top,b.f)}
 }
 // ---------- Pärmsida 3x3 ----------
 function cells(r){const [x,y,w,h]=r,cw=w/3,ch=h/3,o=[];for(let i=0;i<3;i++)for(let j=0;j<3;j++)o.push([x+j*cw+cw*.04,y+i*ch+ch*.04,cw*.92,ch*.92]);return o}
@@ -319,7 +324,7 @@ async function scPick(uid,topIn,f){
   const top=(topIn||(it&&it.top)||[]).filter(t=>!it||t.id!==it.id);
   const p=document.getElementById('pick');p.dataset.uid=uid||'';p.dataset.f=f?SCAN.pack(f):(it&&it.f)||'';
   const tiles=top.map(t=>{const c=scInfo(t.id);return `<button class="cand" data-choose="${c.id}"><span class="ci" data-cimg="${c.id}"></span><span class="zb" data-zoomid="${c.id}">🔍</span><b>${c.nm||'?'}</b>${c.tag?`<span class="vt">${c.tag}</span>`:''}<small>${c.set} · ${c.yr}<br>${c.n}${c.tot?'/'+c.tot:''}</small>${c.r!=null?`<em>${c.r} kr</em>`:''}</button>`}).join('');
-  p.innerHTML=`<div class="trayhd"><b>${uid?'Fel kort? Välj rätt':'Vilket kort är det?'}</b><button data-pclose aria-label="Stäng">×</button></div>
+  p.innerHTML=`<div class="trayhd"><b>${uid?'Fel kort? Välj rätt':'Vilket kort är det?'}</b><button data-pclose aria-label="Stäng">×</button></div><div class="pick-hint">Inget stämmer? Stäng eller tryck på kameran för att skanna igen</div>
    <div class="carousel">${tiles}<div class="cand last"><b>Inget stämmer?</b><button class="lb" data-psearch>🔍 Sök</button><button class="lb" data-skip="${uid||''}">Hoppa över</button></div></div>
    <div class="psearch hide" id="psearch"><input id="pq" type="search" placeholder="Sök namn, t.ex. Charizard" autocomplete="off"><div id="pres"></div></div>`;
   p.classList.add('open');
@@ -414,8 +419,9 @@ function bindScanUI(){
     if(t=q('[data-choose]')){scChoose(t.dataset.choose);return}
     if(t=q('[data-wrong]')){scPick(t.dataset.wrong);return}
     if(q('[data-psearch]')){document.getElementById('psearch').classList.remove('hide');document.getElementById('pq').focus();return}
-    if(t=q('[data-skip]')){if(t.dataset.skip)SC.tray=SC.tray.filter(x=>x.uid!==+t.dataset.skip);scTray();document.getElementById('pick').classList.remove('open');scEmpty('Hoppade över kortet');return}
-    if(q('[data-pclose]')){document.getElementById('pick').classList.remove('open');return}
+    if(t=q('[data-skip]')){if(t.dataset.skip)SC.tray=SC.tray.filter(x=>x.uid!==+t.dataset.skip);scTray();closePick();scEmpty('Hoppade över kortet');return}
+    if(document.getElementById('pick').classList.contains('open')&&q('#cam')&&!q('#pick')){closePick();return}
+    if(q('[data-pclose]')){closePick();return}
     if(q('#traybtn')){document.getElementById('tray').classList.add('open');return}
     if(e.target.id==='trayclose'){document.getElementById('tray').classList.remove('open');return}
     if(q('#scai')){scAsk();return}
@@ -430,3 +436,5 @@ function bindScanUI(){
 }
 
 function zoom(src){const z=document.createElement('div');z.id='zoom';z.innerHTML=`<img src="${src}" alt=""><span>Tryck för att stänga</span>`;document.getElementById('main').appendChild(z)}
+
+function closePick(){document.getElementById('pick').classList.remove('open');SC.lock=null;SC.streak=0;SC.unsure=0;SC.still=0;scPill('Håll kortet i ramen','scan')}
