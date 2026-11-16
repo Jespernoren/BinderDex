@@ -64,7 +64,7 @@ main{padding:8px 8px 60px}
 .cell.done .tc{opacity:.4}
 .pm .tc.m img,.pm .tc.f img{filter:none;opacity:1}
 .pm .tc.m,.pm .tc.f{outline:none}
-.pm .tc.m .rkv,.pm .tc.f .rkv{color:var(--ink)}
+.pm .tc.m .rkv,.pm .tc.f .rkv{color:#fff}
 .pm .cell.done .tc{opacity:.55}.pm .cell.done .tc img{filter:grayscale(1) brightness(.45)}
 .cell.none{color:var(--line);font-size:18px}
 .tc{position:relative;flex:1 1 0;max-width:58px;cursor:pointer;border-radius:5px}
@@ -72,9 +72,9 @@ main{padding:8px 8px 60px}
 .tc.m img,.tc.f img{filter:grayscale(1);opacity:.3}
 .tc.m,.tc.f{outline:1.5px dashed var(--sak);outline-offset:1px}
 .tc .nr{position:absolute;left:2px;top:2px;background:rgba(0,0,0,.72);color:#fff;font-size:9px;font-weight:700;padding:1px 3px;border-radius:3px}
-.tc .bd{position:absolute;right:2px;bottom:18px;font-size:8.5px;font-weight:800;color:#fff;padding:1px 3px;border-radius:3px}
+.tc .bd{position:absolute;right:2px;bottom:16px;font-size:8.5px;font-weight:800;color:#fff;padding:1px 3px;border-radius:3px}
 .tc.h .bd{background:var(--har)}.tc.e1 .bd{background:var(--har)}.tc.v .bd{background:var(--vag)}.tc.f .bd{background:var(--fra)}
-.tc .rkv{display:block;text-align:center;font-size:9.5px;font-weight:700;color:var(--ink);margin-top:2px;white-space:nowrap}.tc.m .rkv,.tc.f .rkv{color:var(--mute)}.tc .rk{position:absolute;left:0;right:0;bottom:-1px;text-align:center;font-size:9px;font-weight:700;color:var(--ink);text-shadow:0 0 3px var(--card)}
+.tc .rkv{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:9.5px;font-weight:800;color:#fff;padding:9px 0 2px;margin:0;white-space:nowrap;background:linear-gradient(transparent,rgba(0,0,0,.78));border-radius:0 0 4px 4px;pointer-events:none}.tc.m .rkv,.tc.f .rkv{color:#fff}.tc .rk{position:absolute;left:0;right:0;bottom:-1px;text-align:center;font-size:9px;font-weight:700;color:var(--ink);text-shadow:0 0 3px var(--card)}
 .tc.m .rk{bottom:30%;font-size:10px}
 .tc .pr{position:absolute;right:2px;top:2px;font-size:8.5px;font-weight:800;color:#fff;padding:1px 3px;border-radius:3px}
 .p1{background:#1f9d55}.p2{background:#2e8b57}.p3{background:#2f6fdf}.p4{background:#e07b00}.p5{background:#7a7a7a}
@@ -208,7 +208,7 @@ main{padding:10px 10px 20px}
 .lab .oth{margin:0 0 0 auto;font-size:10.5px;white-space:nowrap}
 .cell{min-height:0}
 .cell.none{min-height:40px;opacity:.6}
-.tc{max-width:54px}
+.tc{max-width:62px}
 
 /* Lugnare kort: nummer och pris bara där de behövs */
 .tc.h .nr,.tc.e1 .nr,.tc.v .nr{display:none}
@@ -243,11 +243,11 @@ main{padding:10px 10px 20px}
   .prog2 .sum{grid-column:1/-1;margin:0}
   main{max-width:1240px;padding:16px 24px 40px;box-sizing:border-box}
   .colhead{top:0}
-  .tc{max-width:58px}
+  .tc{max-width:67px}
   .dexgrid{display:block}
   .colhead,.row{grid-template-columns:200px repeat(var(--nc,4),1fr)}
   .colhead::before{content:"";}
-  .row{align-items:center;padding:6px 10px;margin-bottom:4px}
+  .row{align-items:center;padding:5px 10px;margin-bottom:4px}
   .lab{grid-column:auto;padding:0 0 0 6px;flex-wrap:wrap;row-gap:2px}
   .lab .oth{margin:0;flex-basis:100%;padding-left:14px}
   .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
@@ -591,7 +591,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 
 <script>
 // Automatisk uppdatering: hemskärmsgenvägen ska alltid köra senaste versionen
-const BUILD='20261116182856';
+const BUILD='20261116183015';
 async function chkUpd(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});const j=await r.json();
   if(!j.v||j.v===BUILD)return;
   const busy=window.SC&&SC.tray&&SC.tray.length;
