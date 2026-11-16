@@ -170,6 +170,10 @@ main{padding:10px 10px 20px}
 #colsw svg{fill:currentColor;stroke:none}
 .ib .x{display:none}.ib#hidesw.on .x{display:inline}
 .ib.on{background:var(--ink);color:var(--bg);box-shadow:none}
+.dexbar{display:flex;align-items:center;gap:10px;margin:0 0 14px;flex-wrap:wrap}.dexbar .genseg{margin:0!important;flex:none}.dexbar .genseg a{white-space:nowrap;padding:8px 12px}
+#dexslot{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}#dexslot::-webkit-scrollbar{display:none}
+#dexslot .frow{margin:0!important;padding:0!important;flex-wrap:nowrap!important;overflow:visible}#dexslot .ib{flex:none}
+@media (max-width:959px){.dexbar{gap:8px}#dexslot{flex-basis:100%}}
 .frow{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:0 14px}
 .frow::-webkit-scrollbar{display:none}
 .frow .filters{display:contents}
@@ -587,7 +591,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 
 <script>
 // Automatisk uppdatering: hemskärmsgenvägen ska alltid köra senaste versionen
-const BUILD='20261113101212';
+const BUILD='20261116182856';
 async function chkUpd(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});const j=await r.json();
   if(!j.v||j.v===BUILD)return;
   const busy=window.SC&&SC.tray&&SC.tray.length;
@@ -762,7 +766,13 @@ function pass(c){
 }
 
 let G2=null;const NEO=[['neo1','Genesis'],['neo2','Discovery'],['neo3','Revelation'],['neo4','Destiny']];
-const genSeg=g=>`<div class="seg genseg"><a href="#pokedex" class="${g===1?'on':''}">Gen 1 · 151</a><a href="#gen2" class="${g===2?'on':''}">Gen 2 · 100</a></div>`;
+const genSeg=g=>`<div class="dexbar"><div class="seg genseg"><a href="#pokedex" class="${g===1?'on':''}">Gen 1 · 151</a><a href="#gen2" class="${g===2?'on':''}">Gen 2 · 100</a></div><div id="dexslot"></div></div>`;
+// Filter och kolumnval bor bredvid Gen-väljaren i Pokédex
+const FHOME=[];
+function dockF(){const slot=document.getElementById('dexslot');if(!slot)return;
+  if(!FHOME.length)['colsw','hidesw'].map(i=>document.getElementById(i)).concat([document.querySelector('.frow')]).forEach(e=>{if(e)FHOME.push([e,e.parentNode,e.nextSibling])});
+  FHOME.forEach(([e])=>slot.appendChild(e))}
+function parkF(){FHOME.forEach(([e,p,n])=>{if(e.parentNode!==p)p.insertBefore(e,n&&n.parentNode===p?n:null)})}
 async function showGen2(m){
   m.innerHTML=genSeg(2)+'<div class="lnote">Laddar Gen 2…</div>';
   try{
@@ -786,10 +796,11 @@ async function showGen2(m){
   }
   const pc=x=>Math.round(x*100);
   m.style.setProperty('--nc',4);
-  m.innerHTML=genSeg(2)+`<div class="prog2" style="margin:0 0 14px"><div class="hero"><div><small>Gen 2 · arter</small><b>${have}<span>/100</span></b></div><div class="ring" style="--p:${have}"><span>${have}%</span></div></div>
+  parkF();m.innerHTML=genSeg(2)+`<div class="prog2" style="margin:0 0 14px"><div class="hero"><div><small>Gen 2 · arter</small><b>${have}<span>/100</span></b></div><div class="ring" style="--p:${have}"><span>${have}%</span></div></div>
    <div class="tiles">${NEO.map(([sid,l],i)=>`<a class="pt" href="#set-${sid}"><b>${l}</b><span class="pp">${per[i][1]?pc(per[i][0]/per[i][1]):0}%</span><span class="bar"><i style="width:${per[i][1]?per[i][0]/per[i][1]*100:0}%"></i></span><small>${per[i][0]}/${per[i][1]} kort</small></a>`).join('')}</div></div>
    <div class="dexgrid"><div class="colhead">${NEO.map(n=>`<div>${n[1]}</div>`).join('')}</div>${rows}</div>`;
   m.onclick=e=>{const t=e.target.closest('[data-g2]');if(t)openLib(t.dataset.g2)};
+  if(location.hash==='#gen2')dockF();
   for(const [sid] of NEO){SIMG[sid]=SIMG[sid]||await fetch('simg/'+sid+'.json').then(r=>r.json()).catch(()=>({}));
     m.querySelectorAll(`[data-g2img^="${sid}-"]`).forEach(i=>{const n=i.dataset.g2img.slice(sid.length+1);if(SIMG[sid][n])i.src=SIMG[sid][n]})}
 }
@@ -932,6 +943,7 @@ function openLib(k){
 }
 
 function render(){
+  parkF();
   const v=(location.hash||'#pokedex').slice(1);
   if(v!=='scan')scStop();
   document.body.classList.toggle('scanmode',v==='scan');
@@ -968,6 +980,7 @@ function render(){
   document.getElementById('infobtn').classList.toggle('hide',view==='lista');
   document.getElementById('main').classList.toggle('pm',(view==='pokedex'&&colmode==='prio')||view==='lista');
   document.getElementById('main').innerHTML=view==='pokedex'?renderDex():view==='lista'?renderList():renderSet(view);
+  if(view==='pokedex')dockF();
   document.getElementById('filters').classList.toggle('hide',view==='lista');
   stats();
   document.getElementById('prog').classList.toggle('hide',view!=='pokedex');document.querySelector('.legend').classList.toggle('hide',view==='lista');
