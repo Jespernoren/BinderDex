@@ -74,7 +74,7 @@ main{padding:8px 8px 60px}
 .tc .nr{position:absolute;left:2px;top:2px;background:rgba(0,0,0,.72);color:#fff;font-size:9px;font-weight:700;padding:1px 3px;border-radius:3px}
 .tc .bd{position:absolute;right:2px;bottom:16px;font-size:8.5px;font-weight:800;color:#fff;padding:1px 3px;border-radius:3px}
 .tc.h .bd{background:var(--har)}.tc.e1 .bd{background:var(--har)}.tc.v .bd{background:var(--vag)}.tc.f .bd{background:var(--fra)}
-.tc .rkv{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:9.5px;font-weight:800;color:#fff;padding:9px 0 2px;margin:0;white-space:nowrap;background:linear-gradient(transparent,rgba(0,0,0,.78));border-radius:0 0 4px 4px;pointer-events:none}.tc.m .rkv,.tc.f .rkv{color:#fff}.tc .rk{position:absolute;left:0;right:0;bottom:-1px;text-align:center;font-size:9px;font-weight:700;color:var(--ink);text-shadow:0 0 3px var(--card)}
+.tc .rkv{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:9.5px;font-weight:800;color:#fff;padding:9px 0 2px;margin:0;white-space:nowrap;background:linear-gradient(transparent,rgba(0,0,0,.4));text-shadow:0 1px 2px rgba(0,0,0,.6);border-radius:0 0 4px 4px;pointer-events:none}.tc.m .rkv,.tc.f .rkv{color:#fff}.tc .rk{position:absolute;left:0;right:0;bottom:-1px;text-align:center;font-size:9px;font-weight:700;color:var(--ink);text-shadow:0 0 3px var(--card)}
 .tc.m .rk{bottom:30%;font-size:10px}
 .tc .pr{position:absolute;right:2px;top:2px;font-size:8.5px;font-weight:800;color:#fff;padding:1px 3px;border-radius:3px}
 .p1{background:#1f9d55}.p2{background:#2e8b57}.p3{background:#2f6fdf}.p4{background:#e07b00}.p5{background:#7a7a7a}
@@ -591,7 +591,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 
 <script>
 // Automatisk uppdatering: hemskärmsgenvägen ska alltid köra senaste versionen
-const BUILD='20261116183015';
+const BUILD='20261116183201';
 async function chkUpd(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});const j=await r.json();
   if(!j.v||j.v===BUILD)return;
   const busy=window.SC&&SC.tray&&SC.tray.length;
