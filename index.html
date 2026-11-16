@@ -69,7 +69,7 @@ main{padding:8px 8px 60px}
 .cell.none{color:var(--line);font-size:18px}
 .tc{position:relative;flex:1 1 0;max-width:58px;cursor:pointer;border-radius:5px}
 .tc img{width:100%;display:block;border-radius:4px;aspect-ratio:200/279;object-fit:cover;background:var(--line)}
-.tc.m img,.tc.f img{filter:grayscale(1);opacity:.3}
+.tc.m img,.tc.f img{filter:grayscale(.55);opacity:.6}
 .tc.m,.tc.f{outline:1.5px dashed var(--sak);outline-offset:1px}
 .tc .nr{position:absolute;left:2px;top:2px;background:rgba(0,0,0,.72);color:#fff;font-size:9px;font-weight:700;padding:1px 3px;border-radius:3px}
 .tc .bd{position:absolute;right:2px;bottom:16px;font-size:8.5px;font-weight:800;color:#fff;padding:1px 3px;border-radius:3px}
@@ -117,7 +117,7 @@ h2{font-size:14px;margin:18px 4px 8px}
 .lc{position:relative;cursor:pointer}
 .lc .ph{aspect-ratio:200/279;border-radius:5px;background:var(--line);display:flex;align-items:center;justify-content:center;text-align:center;font-size:10.5px;color:var(--mute);padding:4px}
 .lc img{width:100%;border-radius:5px;display:block;aspect-ratio:200/279;object-fit:cover}
-.lc.no img{filter:grayscale(1);opacity:.3}
+.lc.no img{filter:grayscale(.55);opacity:.6}
 .lc .q{position:absolute;right:3px;top:3px;background:var(--har);color:#fff;font-size:9px;font-weight:800;padding:1px 4px;border-radius:3px}
 
 /* ===== Binderdex design 2 ===== */
@@ -504,7 +504,7 @@ body.scanmode{background:#000}
 .tc.h .bd{background:var(--har)}
 .sokq{width:100%;box-sizing:border-box;border:0;border-radius:14px;background:var(--card);box-shadow:var(--sh);padding:14px 16px;font:500 17px inherit;font-family:inherit;color:var(--ink);outline:none}
 .sokq:focus{box-shadow:0 0 0 2px var(--ink)}
-.gcard.sr{cursor:pointer}.gcard.miss .ci2 img{filter:grayscale(1);opacity:.45}
+.gcard.sr{cursor:pointer}.gcard.miss .ci2 img{filter:grayscale(.55);opacity:.6}
 .ci2{aspect-ratio:63/88;border-radius:6px;overflow:hidden;background:var(--line)}.ci2 img{width:100%;height:100%;object-fit:cover;display:block}
 .ci2.noimg img{display:none}.ci2.noimg::after{content:"Bild saknas";display:grid;place-items:center;height:100%;font-size:11px;color:var(--mute)}
 .gcard .st{margin-top:2px}.hv2{color:var(--har)}
@@ -591,7 +591,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 
 <script>
 // Automatisk uppdatering: hemskärmsgenvägen ska alltid köra senaste versionen
-const BUILD='20261116183201';
+const BUILD='20261116183420';
 async function chkUpd(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});const j=await r.json();
   if(!j.v||j.v===BUILD)return;
   const busy=window.SC&&SC.tray&&SC.tray.length;
