@@ -591,7 +591,7 @@ em.nw{background:var(--har);color:#fff}em.hv{background:var(--line);color:var(--
 
 <script>
 // Automatisk uppdatering: hemskärmsgenvägen ska alltid köra senaste versionen
-const BUILD='20261117173548';
+const BUILD='20261117184112';
 async function chkUpd(){try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});const j=await r.json();
   if(!j.v||j.v===BUILD)return;
   const busy=window.SC&&SC.tray&&SC.tray.length;
@@ -655,7 +655,7 @@ function prio(){
       if(ch.r<=TOO||!cheaperLater){t=ch;break}
     }
     if(!t)continue;
-    W[key(t)]=(!cs.some(owned)&&!d.o.length)?3:2;
+    W[key(t)]=3; // saknas i Base/Jungle/Fossil: Rocket räknas inte (målet är att ersätta Rocket)
   }
   for(const c of DATA.cards){
     if(owned(c))continue;
